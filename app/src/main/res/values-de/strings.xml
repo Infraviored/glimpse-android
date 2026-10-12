@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="login_intro">Durchsuche deine Fotos nach dem, was darauf zu sehen ist. Braucht die Glimpse-App in deiner Nextcloud.</string>
+    <string name="login_server_hint">Nextcloud-Adresse, z. B. cloud.example.com</string>
+    <string name="login_connect">Anmelden</string>
+    <string name="login_cancel">Abbrechen</string>
+    <string name="login_checking">Server wird geprüft …</string>
+    <string name="login_waiting">Melde dich im Browser an und erlaube den Zugriff. Komm dann hierher zurück.</string>
+    <string name="login_checking_glimpse">Angemeldet. Glimpse wird gesucht …</string>
+    <string name="login_done_return">Angemeldet. Komm zurück in die App, um weiterzumachen.</string>
+    <string name="logged_out">Abgemeldet.</string>
+    <string name="error_address">Das ist keine gültige Adresse.</string>
+    <string name="error_unreachable">Der Server ist nicht erreichbar. Prüfe die Adresse und deine Verbindung.</string>
+    <string name="error_ssl">Dem Zertifikat des Servers wird nicht vertraut.</string>
+    <string name="error_not_nextcloud">Unter dieser Adresse ist keine Nextcloud.</string>
+    <string name="error_maintenance">Die Nextcloud ist gerade im Wartungsmodus. Versuch es in einer Minute noch einmal.</string>
+    <string name="error_login_start">Die Nextcloud hat die Anmeldung nicht gestartet.</string>
+    <string name="error_login_timeout">Die Anmeldung hat zu lange gedauert. Bitte versuch es noch einmal.</string>
+    <string name="error_no_browser">Kein Browser gefunden, um die Anmeldeseite zu öffnen.</string>
+    <string name="error_no_glimpse">Glimpse ist in dieser Nextcloud nicht installiert oder für dich nicht freigegeben. Frag deine Administration.</string>
+    <string name="error_unexpected">Etwas ist schiefgelaufen: %1$s</string>
+    <string name="error_session">Deine Anmeldung gilt nicht mehr (das App-Passwort wurde entfernt). Bitte melde dich neu an.</string>
+    <string name="error_page">Die Seite konnte nicht geladen werden: %1$s</string>
+    <string name="retry">Erneut versuchen</string>
+    <string name="download_started">Download gestartet …</string>
+    <string name="download_done">In Downloads gespeichert: %1$s</string>
+    <string name="download_failed">Download fehlgeschlagen: %1$s</string>
+    <string name="download_unsupported">Dieser Download geht in der App nicht.</string>
+</resources>

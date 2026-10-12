@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">Glimpse</string>
+    <string name="login_intro">Search your photos by what is in them. Needs the Glimpse app on your Nextcloud.</string>
+    <string name="login_server_hint">Nextcloud address, e.g. cloud.example.com</string>
+    <string name="login_connect">Log in</string>
+    <string name="login_cancel">Cancel</string>
+    <string name="login_checking">Checking the server …</string>
+    <string name="login_waiting">Log in in the browser and allow access. Then come back here.</string>
+    <string name="login_checking_glimpse">Logged in. Checking for Glimpse …</string>
+    <string name="login_done_return">Logged in. Come back to the app to continue.</string>
+    <string name="logged_out">Logged out.</string>
+    <string name="error_address">That is not a valid address.</string>
+    <string name="error_unreachable">The server cannot be reached. Check the address and your connection.</string>
+    <string name="error_ssl">The server\'s certificate is not trusted.</string>
+    <string name="error_not_nextcloud">There is no Nextcloud at this address.</string>
+    <string name="error_maintenance">Nextcloud is in maintenance mode right now. Try again in a minute.</string>
+    <string name="error_login_start">Nextcloud did not start the login.</string>
+    <string name="error_login_timeout">The login took too long. Please try again.</string>
+    <string name="error_no_browser">No browser found to open the login page.</string>
+    <string name="error_no_glimpse">Glimpse is not installed on this Nextcloud, or not enabled for you. Ask your administrator.</string>
+    <string name="error_unexpected">Something went wrong: %1$s</string>
+    <string name="error_session">Your login is no longer valid (the app password was removed). Please log in again.</string>
+    <string name="error_page">The page could not be loaded: %1$s</string>
+    <string name="retry">Try again</string>
+    <string name="download_started">Download started …</string>
+    <string name="download_done">Saved to Downloads: %1$s</string>
+    <string name="download_failed">Download failed: %1$s</string>
+    <string name="download_unsupported">This download is not supported in the app.</string>
+</resources>
