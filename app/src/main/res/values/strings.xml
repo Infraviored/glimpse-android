@@ -253,4 +253,13 @@
         <item quantity="one">No longer private</item>
         <item quantity="other">%1$d no longer private</item>
     </plurals>
+
+    <!-- Map -->
+    <string name="tab_map">Map</string>
+    <string name="map_empty">No pictures with a location yet</string>
+    <string name="map_zoom_in">Zoom in</string>
+    <plurals name="map_here">
+        <item quantity="one">%1$s photo here</item>
+        <item quantity="other">%1$s photos here</item>
+    </plurals>
 </resources>

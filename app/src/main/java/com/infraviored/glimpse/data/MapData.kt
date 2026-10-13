@@ -21,6 +21,10 @@ data class Marker(
     val time: Long,
     val path: String,
 ) {
+    /** Position in Web Mercator world units (0..1), worked out once: panning reads them every frame. */
+    val wx: Double = com.infraviored.glimpse.ui.map.Mercator.x(lon)
+    val wy: Double = com.infraviored.glimpse.ui.map.Mercator.y(lat)
+
     /** As an item of the lists, without asking the server again. */
     fun toItem(): Item = Item(
         id = assetId,

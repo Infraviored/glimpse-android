@@ -80,7 +80,7 @@ fun Home() {
     var account by remember { mutableStateOf(false) }
     val navBar = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val dockHeight = navBar + 132.dp
-    val tabs = listOf(Tab(stringResource(R.string.tab_timeline)), Tab(stringResource(R.string.tab_people)), Tab(stringResource(R.string.tab_folders)))
+    val tabs = listOf(Tab(stringResource(R.string.tab_timeline)), Tab(stringResource(R.string.tab_people)), Tab(stringResource(R.string.tab_folders)), Tab(stringResource(R.string.tab_map)))
 
     val peopleVm: PeopleVm = androidx.lifecycle.viewmodel.compose.viewModel { PeopleVm(app.api) }
     val choosingPeople = tab == 1 && peopleVm.chosen.isNotEmpty()
@@ -95,7 +95,8 @@ fun Home() {
             when (t) {
                 0 -> TimelineScreen(selection, timelineGrid, dockHeight, onAccount = { account = true })
                 1 -> PeopleScreen(dockHeight)
-                else -> FolderScreen("/", asTab = true, bottomPadding = dockHeight)
+                2 -> FolderScreen("/", asTab = true, bottomPadding = dockHeight)
+                else -> com.infraviored.glimpse.ui.map.MapScreen(dockHeight)
             }
         }
         com.infraviored.glimpse.ui.components.StatusScrim()

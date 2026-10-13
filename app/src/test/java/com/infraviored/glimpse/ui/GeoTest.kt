@@ -48,7 +48,7 @@ class GeoTest {
 
     @Test
     fun nearbyPicturesClusterFarOnesDoNot() {
-        val list = listOf(m("a", 48.1371, 11.5754, 1), m("b", 48.1372, 11.5755, 5), m("c", 52.52, 13.40))
+        val list = listOf(m("a", 48.1371, 11.5754, 1), m("b", 48.1381, 11.5765, 5), m("c", 52.52, 13.40))
         val clusters = Clusters.of(list, 10)
         assertEquals(2, clusters.size)
         val munich = clusters.first { it.size == 2 }
@@ -78,6 +78,23 @@ class GeoTest {
             val x = v.toScreenX(Mercator.x(it.lon), 1000)
             val y = v.toScreenY(Mercator.y(it.lat), 1000)
             assertTrue(x in -0.5..1000.5 && y in -0.5..1000.5)
+        }
+    }
+}
+
+class ClusterSpacingTest {
+    @org.junit.Test
+    fun noTwoPinsCloserThanACell() {
+        val r = java.util.Random(7)
+        val list = (0 until 3000).map { Marker("m$it", it.toLong(), 47.0 + r.nextDouble() * 2, 10.0 + r.nextDouble() * 3, false, it.toLong(), "") }
+        for (zoom in listOf(6, 9, 12)) {
+            val clusters = Clusters.of(list, zoom, 160)
+            org.junit.Assert.assertEquals(3000, clusters.sumOf { it.size })
+            val d = 160 / Mercator.worldPx(zoom.toDouble())
+            for (i in clusters.indices) for (j in i + 1 until clusters.size) {
+                val a = clusters[i]; val b = clusters[j]
+                org.junit.Assert.assertTrue(kotlin.math.abs(a.x - b.x) >= d || kotlin.math.abs(a.y - b.y) >= d)
+            }
         }
     }
 }

@@ -81,8 +81,8 @@ data class Viewport(val cx: Double, val cy: Double, val zoom: Double) {
         /** The view that shows [markers]' box in a [w]×[h] view, at most at [maxZoom]. */
         fun fit(markers: List<Marker>, w: Int, h: Int, padPx: Int = 48, maxZoom: Double = 12.0): Viewport {
             if (markers.isEmpty()) return Viewport(Mercator.x(11.5), Mercator.y(48.1), 4.0)
-            val xs = markers.map { Mercator.x(it.lon) }
-            val ys = markers.map { Mercator.y(it.lat) }
+            val xs = markers.map { it.wx }
+            val ys = markers.map { it.wy }
             val minX = xs.min(); val maxX = xs.max(); val minY = ys.min(); val maxY = ys.max()
             val spanX = (maxX - minX).coerceAtLeast(1e-9)
             val spanY = (maxY - minY).coerceAtLeast(1e-9)
@@ -115,13 +115,28 @@ object Clusters {
         val cells = Mercator.worldPx(zoom.toDouble()) / cellPx
         val groups = HashMap<Long, MutableList<Marker>>()
         for (m in markers) {
-            val cx = floor(Mercator.x(m.lon) * cells).toLong()
-            val cy = floor(Mercator.y(m.lat) * cells).toLong()
+            val cx = floor(m.wx * cells).toLong()
+            val cy = floor(m.wy * cells).toLong()
             groups.getOrPut(cx * 1_000_003L + cy) { ArrayList() } += m
         }
-        return groups.values.map { list ->
-            Cluster(list.sumOf { Mercator.x(it.lon) } / list.size, list.sumOf { Mercator.y(it.lat) } / list.size, list)
+        val grid = groups.values.map { list ->
+            Cluster(list.sumOf { it.wx } / list.size, list.sumOf { it.wy } / list.size, list)
         }
+        // Neighbouring cells can put two pins on top of each other: the bigger one takes in
+        // whatever lies closer than a cell
+        val minDist = cellPx / Mercator.worldPx(zoom.toDouble())
+        val merged = ArrayList<MutableList<Marker>>()
+        val centres = ArrayList<DoubleArray>()
+        for (c in grid.sortedByDescending { it.size }) {
+            val near = centres.indexOfFirst { kotlin.math.abs(it[0] - c.x) < minDist && kotlin.math.abs(it[1] - c.y) < minDist }
+            if (near < 0) {
+                merged += c.markers.toMutableList()
+                centres += doubleArrayOf(c.x, c.y)
+            } else {
+                merged[near] += c.markers
+            }
+        }
+        return merged.mapIndexed { i, list -> Cluster(centres[i][0], centres[i][1], list) }
     }
 
     /**
@@ -141,8 +156,7 @@ object Clusters {
         val x0 = view.toWorldX(0.0, w); val x1 = view.toWorldX(w.toDouble(), w)
         val y0 = view.toWorldY(0.0, h); val y1 = view.toWorldY(h.toDouble(), h)
         return markers.filter {
-            val x = Mercator.x(it.lon); val y = Mercator.y(it.lat)
-            x in x0..x1 && y in y0..y1
+            it.wx in x0..x1 && it.wy in y0..y1
         }.sortedByDescending { it.time }
     }
 }

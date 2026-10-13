@@ -43,7 +43,7 @@ import com.infraviored.glimpse.ui.theme.Palette
 import com.infraviored.glimpse.ui.theme.glimpse
 
 /** The app's bottom sheet: rounded, in the night blue, opened all the way. */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, androidx.compose.animation.ExperimentalSharedTransitionApi::class)
 @Composable
 fun GlimpseSheet(onDismiss: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
     ModalBottomSheet(
@@ -52,7 +52,10 @@ fun GlimpseSheet(onDismiss: () -> Unit, content: @Composable ColumnScope.() -> U
         containerColor = glimpse.background,
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
     ) {
-        Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp), content = content)
+        // A sheet is its own window: a shared element in it cannot travel to the viewer
+        androidx.compose.runtime.CompositionLocalProvider(com.infraviored.glimpse.ui.LocalShared provides null) {
+            Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp), content = content)
+        }
     }
 }
 

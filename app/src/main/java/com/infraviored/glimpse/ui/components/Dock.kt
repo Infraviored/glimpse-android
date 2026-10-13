@@ -145,7 +145,7 @@ private fun TabLabel(label: String, active: Boolean, onClick: () -> Unit) {
             .clip(RoundedCornerShape(14.dp))
             .clickable(onClick = onClick)
             .semantics { selected = active; role = Role.Tab }
-            .padding(horizontal = 14.dp, vertical = 8.dp),
+            .padding(horizontal = 10.dp, vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(

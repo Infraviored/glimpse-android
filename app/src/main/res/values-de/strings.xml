@@ -248,4 +248,13 @@
         <item quantity="one">Nicht mehr privat</item>
         <item quantity="other">%1$d nicht mehr privat</item>
     </plurals>
+
+    <!-- Map -->
+    <string name="tab_map">Karte</string>
+    <string name="map_empty">Noch keine Bilder mit Ort</string>
+    <string name="map_zoom_in">Hinzoomen</string>
+    <plurals name="map_here">
+        <item quantity="one">%1$s Foto hier</item>
+        <item quantity="other">%1$s Fotos hier</item>
+    </plurals>
 </resources>

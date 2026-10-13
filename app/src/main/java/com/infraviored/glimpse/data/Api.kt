@@ -267,7 +267,10 @@ class Api(val account: Account) {
 
     // ---- map, duplicates ---------------------------------------------------------------------
 
-    suspend fun mapMarkers(): MapData = MapData.parse(json.parseToJsonElement(get(appUrl("/api/map"))))
+    suspend fun mapMarkers(): MapData {
+        val body = get(appUrl("/api/map"))
+        return withContext(Dispatchers.Default) { MapData.parse(json.parseToJsonElement(body)) }
+    }
 
     /** A map tile through Glimpse's proxy (the app never asks OpenStreetMap directly). */
     fun tileUrl(z: Int, x: Int, y: Int): String = appUrl("/api/tiles/$z/$x/$y")
