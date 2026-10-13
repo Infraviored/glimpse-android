@@ -175,6 +175,9 @@ fun ViewerScreen() {
                 listOf(
                     BarAction(Icons.Outlined.Share, stringResource(R.string.action_share)) { actions.share(listOf(current)) },
                     BarAction(Icons.Outlined.FavoriteBorder, stringResource(R.string.action_favorite)) { actions.favorite(listOf(current)) },
+                    BarAction(Icons.Outlined.AutoAwesomeMosaic, stringResource(R.string.action_similar_short), enabled = current.id != null) {
+                        current.id?.let { app.search(similar = it, label = current.taken?.let { t -> longDate(t) } ?: current.name) }
+                    },
                     BarAction(Icons.Outlined.Info, stringResource(R.string.action_info)) { info = true },
                     BarAction(Icons.Outlined.Delete, stringResource(R.string.action_delete)) { actions.confirmDelete = listOf(current) },
                 ),
@@ -246,7 +249,7 @@ private fun TopBar(item: Item, onBack: () -> Unit) {
     }
 }
 
-private class BarAction(val icon: ImageVector, val label: String, val onClick: () -> Unit)
+private class BarAction(val icon: ImageVector, val label: String, val enabled: Boolean = true, val onClick: () -> Unit)
 
 @Composable
 private fun BottomBar(actions: List<BarAction>) {
@@ -260,7 +263,8 @@ private fun BottomBar(actions: List<BarAction>) {
     ) {
         actions.forEach { a ->
             Column(
-                Modifier.clip(RoundedCornerShape(16.dp)).clickable(onClick = a.onClick).padding(horizontal = 14.dp, vertical = 6.dp),
+                Modifier.clip(RoundedCornerShape(16.dp)).clickable(enabled = a.enabled, onClick = a.onClick)
+                    .graphicsLayer { alpha = if (a.enabled) 1f else 0.4f }.padding(horizontal = 10.dp, vertical = 6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Icon(a.icon, null, tint = Color.White)

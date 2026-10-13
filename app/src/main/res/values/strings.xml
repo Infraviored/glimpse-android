@@ -277,4 +277,8 @@
         <item quantity="one">Delete %1$d</item>
         <item quantity="other">Delete %1$d</item>
     </plurals>
+
+    <!-- Similar -->
+    <string name="action_similar_short">Similar</string>
+    <string name="similar_one">Choose one picture</string>
 </resources>
