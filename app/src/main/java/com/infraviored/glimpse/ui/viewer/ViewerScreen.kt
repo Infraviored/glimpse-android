@@ -132,6 +132,7 @@ fun ViewerScreen() {
     ImmersiveBars(visible = chrome)
     BackHandler { app.back() }
     ActionSheets(actions) {}
+    DisposableEffect(Unit) { onDispose { app.viewer = null } }
 
     val fade = (1f - abs(dismiss.value) / (threshold * 2.5f)).coerceIn(0f, 1f)
     Box(
