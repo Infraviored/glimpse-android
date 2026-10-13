@@ -46,7 +46,7 @@
     <string name="timeline_empty">Noch keine Bilder gefunden. Fotos, die du in Nextcloud ablegst, erscheinen hier, sobald Glimpse sie erfasst hat.</string>
     <string name="search_further">Weiter zurück suchen</string>
     <string name="folder_empty">Keine Bilder in diesem Ordner.</string>
-    <string name="folder_private">Dieser Ordner ist privat. Entsperre den privaten Bereich in Glimpse im Browser, um ihn zu sehen.</string>
+    <string name="folder_private">Dieser Ordner ist privat. Entsperre den privaten Bereich (tipp oben in der Zeitleiste auf dein Bild), um ihn zu sehen.</string>
     <string name="folder_truncated">Es werden nur die ersten Bilder dieses Ordners gezeigt.</string>
 
     <string name="search_clear">Leeren</string>
@@ -216,5 +216,36 @@
     <plurals name="tagged">
         <item quantity="one">Verschlagwortet</item>
         <item quantity="other">%1$d verschlagwortet</item>
+    </plurals>
+
+    <!-- Private area -->
+    <string name="action_private">Als privat markieren</string>
+    <string name="action_not_private">Nicht mehr privat</string>
+    <string name="private_unlock_first">Erst den privaten Bereich entsperren</string>
+    <string name="private_unlock_area">Privaten Bereich entsperren</string>
+    <string name="private_lock">Privaten Bereich sperren</string>
+    <string name="private_unlocked_now">Entsperrt: private Bilder werden gezeigt</string>
+    <string name="private_locked_now">Gesperrt: private Bilder sind verborgen</string>
+    <string name="private_empty">Noch ist nichts privat</string>
+    <string name="private_unlock_title">Privaten Bereich entsperren</string>
+    <string name="private_unlock_text">Gib dein Nextcloud-Passwort ein.</string>
+    <string name="private_password">Passwort</string>
+    <string name="private_unlock">Entsperren</string>
+    <string name="private_unlock_hint">Er bleibt eine Weile entsperrt, bis du ihn sperrst oder die App schließt. Nach mehreren falschen Passwörtern bremst Nextcloud Anmeldungen aus diesem Netz.</string>
+    <string name="private_wrong_password">Das Passwort stimmt nicht.</string>
+    <string name="private_too_many">Zu viele Versuche. In ein paar Minuten noch einmal.</string>
+    <string name="duplicates_title">Duplikate</string>
+    <string name="duplicates_subtitle">Gleiche oder fast gleiche Bilder</string>
+    <plurals name="made_private">
+        <item quantity="one">Als privat markiert</item>
+        <item quantity="other">%1$d als privat markiert</item>
+    </plurals>
+    <plurals name="made_private_hidden">
+        <item quantity="one">Privat: verborgen bis zum Entsperren</item>
+        <item quantity="other">%1$d privat: verborgen bis zum Entsperren</item>
+    </plurals>
+    <plurals name="made_public">
+        <item quantity="one">Nicht mehr privat</item>
+        <item quantity="other">%1$d nicht mehr privat</item>
     </plurals>
 </resources>

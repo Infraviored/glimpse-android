@@ -47,6 +47,31 @@ class AppState(
         version++
     }
 
+    /** The private area as last heard from the server; null until asked. */
+    var privateArea by mutableStateOf<com.infraviored.glimpse.data.PrivateState?>(null)
+
+    /** Goes up when the private area is locked or unlocked: everything visible changes. */
+    var privateVersion by mutableIntStateOf(0)
+        private set
+
+    /** Pictures made private while locked: gone from view until unlocking. */
+    private var hiddenPrivate = emptySet<Long>()
+
+    fun hidePrivate(fileIds: Collection<Long>) {
+        hiddenPrivate = hiddenPrivate + fileIds
+        deleted = deleted + fileIds
+    }
+
+    fun privacyChanged(state: com.infraviored.glimpse.data.PrivateState) {
+        privateArea = state
+        if (state.unlocked) {
+            deleted = deleted - hiddenPrivate
+            hiddenPrivate = emptySet()
+        }
+        privateVersion++
+        version++
+    }
+
     /** Short messages at the bottom, with Undo where there is one. */
     val notices = Notices()
 

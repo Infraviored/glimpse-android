@@ -51,6 +51,9 @@ import coil3.compose.AsyncImage
 import com.infraviored.glimpse.R
 import androidx.compose.material.icons.automirrored.outlined.CallMerge
 import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.LockOpen
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
@@ -110,7 +113,10 @@ fun Home() {
         )
     }
 
-    if (account) AccountSheet(onDismiss = { account = false })
+    var unlock by remember { mutableStateOf(false) }
+    androidx.compose.runtime.LaunchedEffect(Unit) { app.loadPrivate() }
+    if (account) AccountSheet(onDismiss = { account = false }, onUnlock = { account = false; unlock = true })
+    if (unlock) UnlockSheet(onDismiss = { unlock = false })
 }
 
 /** What can be done with the chosen people: favorite, hide, merge. */
@@ -144,9 +150,12 @@ private fun currentTimelineItems(): List<com.infraviored.glimpse.data.Item> {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AccountSheet(onDismiss: () -> Unit) {
+private fun AccountSheet(onDismiss: () -> Unit, onUnlock: () -> Unit) {
     val app = LocalApp.current
     val uri = LocalUriHandler.current
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    val failed = stringResource(R.string.action_failed, "%s")
+    androidx.compose.runtime.LaunchedEffect(Unit) { app.loadPrivate() }
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
         Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 28.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -163,6 +172,20 @@ private fun AccountSheet(onDismiss: () -> Unit) {
                 }
             }
             Spacer(Modifier.height(20.dp))
+            app.privateArea?.let { p ->
+                val count = p.files + p.folderCount + p.peopleCount
+                AccountRow(
+                    if (p.unlocked) Icons.Outlined.LockOpen else Icons.Outlined.Lock,
+                    stringResource(if (p.unlocked) R.string.private_lock else R.string.private_unlock_area),
+                    if (p.unlocked) stringResource(R.string.private_unlocked_now) else if (count == 0) stringResource(R.string.private_empty) else stringResource(R.string.private_locked_now),
+                ) {
+                    if (!p.unlocked && p.askPassword) onUnlock() else app.togglePrivate(scope) { app.notices.show(failed.replace("%s", it)) }
+                }
+            }
+            AccountRow(Icons.Outlined.ContentCopy, stringResource(R.string.duplicates_title), stringResource(R.string.duplicates_subtitle)) {
+                onDismiss()
+                app.duplicates()
+            }
             AccountRow(Icons.AutoMirrored.Outlined.OpenInNew, stringResource(R.string.account_open_web)) {
                 uri.openUri(app.api.account.glimpseUrl)
             }
@@ -175,13 +198,16 @@ private fun AccountSheet(onDismiss: () -> Unit) {
 }
 
 @Composable
-private fun AccountRow(icon: ImageVector, label: String, onClick: () -> Unit) {
+private fun AccountRow(icon: ImageVector, label: String, subtitle: String? = null, onClick: () -> Unit) {
     Row(
         Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).clickable(onClick = onClick).padding(vertical = 14.dp, horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(icon, null, tint = glimpse.text)
         Spacer(Modifier.width(16.dp))
-        Text(label, style = MaterialTheme.typography.titleMedium)
+        Column {
+            Text(label, style = MaterialTheme.typography.titleMedium)
+            subtitle?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = glimpse.muted) }
+        }
     }
 }

@@ -27,6 +27,8 @@ import com.infraviored.glimpse.data.Item
 import androidx.compose.material.icons.automirrored.outlined.DriveFileMove
 import androidx.compose.material.icons.outlined.FileCopy
 import androidx.compose.material.icons.outlined.HeartBroken
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.LockOpen
 import androidx.compose.material.icons.outlined.PhotoAlbum
 import androidx.compose.material.icons.outlined.Sell
 import com.infraviored.glimpse.ui.ActionSheets
@@ -37,6 +39,7 @@ import com.infraviored.glimpse.ui.rememberPhotoActions
 @Composable
 fun selectionActions(actions: PhotoActions, selection: Selection, items: List<Item>): List<DockAction> {
     fun chosen() = items.filter { it.fileId in selection.ids }
+    val unlocked = com.infraviored.glimpse.ui.LocalApp.current.privateArea?.unlocked == true
     return listOf(
         DockAction(Icons.Outlined.Share, stringResource(R.string.action_share)) { actions.share(chosen()) },
         DockAction(Icons.Outlined.FavoriteBorder, stringResource(R.string.action_favorite)) { actions.favorite(chosen()); selection.clear() },
@@ -49,12 +52,20 @@ fun selectionActions(actions: PhotoActions, selection: Selection, items: List<It
 @Composable
 fun selectionMore(actions: PhotoActions, selection: Selection, items: List<Item>): List<DockAction> {
     fun chosen() = items.filter { it.fileId in selection.ids }
+    val unlocked = com.infraviored.glimpse.ui.LocalApp.current.privateArea?.unlocked == true
     return listOf(
         DockAction(Icons.AutoMirrored.Outlined.DriveFileMove, stringResource(R.string.action_move)) { actions.pickFolder(chosen(), copy = false) },
         DockAction(Icons.Outlined.FileCopy, stringResource(R.string.action_copy)) { actions.pickFolder(chosen(), copy = true) },
         DockAction(Icons.Outlined.PhotoAlbum, stringResource(R.string.action_album)) { actions.albumFor = chosen() },
         DockAction(Icons.Outlined.Sell, stringResource(R.string.action_tag)) { actions.tagFor = chosen() },
         DockAction(Icons.Outlined.HeartBroken, stringResource(R.string.action_unfavorite)) { actions.favorite(chosen(), on = false); selection.clear() },
+        DockAction(Icons.Outlined.Lock, stringResource(R.string.action_private)) { actions.setPrivate(chosen(), on = true) { selection.clear() } },
+        DockAction(
+            Icons.Outlined.LockOpen,
+            stringResource(R.string.action_not_private),
+            subtitle = if (unlocked) null else stringResource(R.string.private_unlock_first),
+            enabled = unlocked,
+        ) { actions.setPrivate(chosen(), on = false) { selection.clear() } },
     )
 }
 

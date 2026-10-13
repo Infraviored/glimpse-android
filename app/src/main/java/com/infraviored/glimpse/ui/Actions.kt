@@ -104,6 +104,29 @@ class PhotoActions(
         }
     }
 
+    /** Private or not; private pictures vanish while the area is locked. */
+    fun setPrivate(items: List<Item>, on: Boolean, onDone: () -> Unit = {}) {
+        if (items.isEmpty()) return
+        scope.launch {
+            try {
+                api.setPrivate(items.map { it.fileId }, on)
+                onDone()
+                val locked = app.privateArea?.unlocked != true
+                if (on && locked) app.hidePrivate(items.map { it.fileId })
+                app.notices.show(
+                    context.resources.getQuantityString(
+                        if (!on) R.plurals.made_public else if (locked) R.plurals.made_private_hidden else R.plurals.made_private,
+                        items.size, items.size,
+                    ),
+                )
+            } catch (e: com.infraviored.glimpse.data.ApiException) {
+                app.notices.show(if (e.code == 403) context.getString(R.string.private_unlock_first) else context.getString(R.string.action_failed, e.message))
+            } catch (e: Exception) {
+                app.notices.show(context.getString(R.string.action_failed, e.message ?: e.javaClass.simpleName))
+            }
+        }
+    }
+
     fun addToAlbum(items: List<Item>, album: String, create: Boolean, onDone: () -> Unit = {}) {
         if (items.isEmpty() || busy) return
         busy = true

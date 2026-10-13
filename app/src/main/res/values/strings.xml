@@ -50,7 +50,7 @@
     <string name="timeline_empty">No pictures found yet. Photos you put in Nextcloud show up here once Glimpse has indexed them.</string>
     <string name="search_further">Look further back</string>
     <string name="folder_empty">No pictures in this folder.</string>
-    <string name="folder_private">This folder is private. Unlock the private area in Glimpse on the web to see it.</string>
+    <string name="folder_private">This folder is private. Unlock the private area (tap your picture at the top of the timeline) to see it.</string>
     <string name="folder_truncated">Only the first pictures of this folder are shown.</string>
 
     <string name="search_clear">Clear</string>
@@ -221,5 +221,36 @@
     <plurals name="tagged">
         <item quantity="one">Tagged</item>
         <item quantity="other">%1$d tagged</item>
+    </plurals>
+
+    <!-- Private area -->
+    <string name="action_private">Mark as private</string>
+    <string name="action_not_private">No longer private</string>
+    <string name="private_unlock_first">Unlock the private area first</string>
+    <string name="private_unlock_area">Unlock the private area</string>
+    <string name="private_lock">Lock the private area</string>
+    <string name="private_unlocked_now">Unlocked: private pictures are shown</string>
+    <string name="private_locked_now">Locked: private pictures are hidden</string>
+    <string name="private_empty">Nothing is private yet</string>
+    <string name="private_unlock_title">Unlock the private area</string>
+    <string name="private_unlock_text">Enter your Nextcloud password.</string>
+    <string name="private_password">Password</string>
+    <string name="private_unlock">Unlock</string>
+    <string name="private_unlock_hint">It stays unlocked for a while, until you lock it or close the app. After several wrong passwords Nextcloud slows down logins from this network.</string>
+    <string name="private_wrong_password">That password is not right.</string>
+    <string name="private_too_many">Too many attempts. Try again in a few minutes.</string>
+    <string name="duplicates_title">Duplicates</string>
+    <string name="duplicates_subtitle">Identical or nearly identical pictures</string>
+    <plurals name="made_private">
+        <item quantity="one">Marked as private</item>
+        <item quantity="other">%1$d marked as private</item>
+    </plurals>
+    <plurals name="made_private_hidden">
+        <item quantity="one">Private: hidden until you unlock</item>
+        <item quantity="other">%1$d private: hidden until you unlock</item>
+    </plurals>
+    <plurals name="made_public">
+        <item quantity="one">No longer private</item>
+        <item quantity="other">%1$d no longer private</item>
     </plurals>
 </resources>

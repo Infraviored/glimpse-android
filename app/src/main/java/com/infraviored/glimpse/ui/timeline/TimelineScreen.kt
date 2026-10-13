@@ -130,6 +130,9 @@ fun TimelineScreen(
     val items = all.filterNot { it.fileId in app.deleted }
     val sections = remember(items) { byMonth(items, unknown) }
     LaunchedEffect(paged.lastPage) { vm.rememberYears() }
+    // Locked or unlocked: other pictures are visible now
+    val privateVersion = app.privateVersion
+    LaunchedEffect(privateVersion) { if (privateVersion > 0) vm.jump(vm.jumpedTo) }
 
     // The year of the pictures at the top of the screen, for the scrubber's resting label
     val visibleYear by remember(sections) {
