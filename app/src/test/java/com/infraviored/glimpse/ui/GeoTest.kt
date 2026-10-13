@@ -71,6 +71,13 @@ class GeoTest {
     }
 
     @Test
+    fun inViewPresortedList() {
+        val list = listOf(m("b", 48.11, 11.51, 9), m("a", 48.1, 11.5, 1))
+        val v = Viewport(Mercator.x(11.5), Mercator.y(48.1), 12.0)
+        assertEquals(listOf("b", "a"), Clusters.inView(list, v, 1000, 1000).map { it.assetId })
+    }
+
+    @Test
     fun fitShowsAllMarkers() {
         val list = listOf(m("a", 48.0, 11.0), m("b", 49.0, 12.0))
         val v = Viewport.fit(list, 1000, 1000, padPx = 0, maxZoom = 19.0)

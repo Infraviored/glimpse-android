@@ -31,12 +31,27 @@ class ModelsTest {
         assertEquals(2026, first.taken?.year)
         val video = data.markers[1].toItem()
         assertEquals(true, video.isVideo)
+        assertEquals("a2", video.name)
         assertNull(video.date)
     }
 
     @Test
     fun emptyMap() {
         assertEquals(0, MapData.parse(json.parseToJsonElement("""{"updated":null,"markers":[]}""")).markers.size)
+    }
+
+    @Test
+    fun mapMarkersSortedByTimeDescending() {
+        val data = MapData.parse(
+            json.parseToJsonElement(
+                """{"markers":[
+                ["older",1,48.0,10.0,0,100,"\/older.jpg"],
+                ["newer",2,48.0,10.0,0,200,"\/newer.jpg"]
+                ]}""",
+            ),
+        )
+        assertEquals("newer", data.markers[0].assetId)
+        assertEquals("older", data.markers[1].assetId)
     }
 
     @Test
