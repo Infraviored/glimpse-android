@@ -1,5 +1,7 @@
 package com.infraviored.glimpse.ui.components
 
+import kotlinx.coroutines.flow.first
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -109,6 +111,25 @@ fun PhotoGrid(
     header: LazyGridScope.() -> Unit = {},
 ) {
     var columns by rememberSaveable(columnsKey) { mutableIntStateOf(4) }
+
+    // Back from the viewer: the picture last shown there is in view, wherever swiping led
+    val app = LocalApp.current
+    val latestSections by rememberUpdatedState(sections)
+    LaunchedEffect(Unit) {
+        val id = app.lastViewed ?: return@LaunchedEffect
+        app.lastViewed = null
+        val total = snapshotFlow { state.layoutInfo.totalItemsCount }.first { it > 0 }
+        val info = state.layoutInfo
+        val shown = info.visibleItemsInfo.firstOrNull { it.key == id }
+        if (shown != null && shown.offset.y >= info.viewportStartOffset && shown.offset.y + shown.size.height <= info.viewportEndOffset) return@LaunchedEffect
+        val keys = gridKeys(latestSections)
+        val index = keys.indexOf(id)
+        if (index < 0) return@LaunchedEffect
+        // Items before the sections (screen headers) and the one footer after them
+        val headerItems = (total - keys.size - 1).coerceAtLeast(0)
+        state.scrollToItem(headerItems + index)
+        state.scrollBy(-info.viewportSize.height / 3f)
+    }
     val haptics = LocalHapticFeedback.current
     val all = remember(sections) { sections.flatMap { it.items } }
     val latestAll by rememberUpdatedState(all)

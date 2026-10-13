@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -67,6 +68,18 @@ class TimelineVm(private val api: Api, val person: String? = null) : ViewModel()
     var shownNewer by mutableStateOf<List<Item>>(emptyList())
         private set
 
+    /**
+     * Counts jumps; [jumpShown] is the one whose start the list has scrolled to. Kept here, not
+     * in the screen: coming back from the viewer the screen is composed anew, and scrolling to
+     * the jump's start again threw the list back to the newest pictures loaded.
+     */
+    var jumpId by mutableIntStateOf(0)
+        private set
+    var jumpShown = -1
+
+    /** Whether a newer page may load (see TimelineGrid); survives a visit to the viewer. */
+    var newerArmed by mutableStateOf(true)
+
     var years by mutableStateOf<List<Int>>(emptyList())
         private set
     var memories by mutableStateOf<List<Memory>>(emptyList())
@@ -98,6 +111,8 @@ class TimelineVm(private val api: Api, val person: String? = null) : ViewModel()
         before = jumpedTo?.let(::yearEnd)
         newer.reset()
         shownNewer = emptyList()
+        newerArmed = true
+        jumpId++
         paged.reload()
     }
 

@@ -33,6 +33,9 @@ class AppState(
 ) {
     var viewer by mutableStateOf<ViewerRequest?>(null)
 
+    /** The picture the viewer showed last; the grid it was opened from scrolls to it on return. */
+    var lastViewed: Long? = null
+
     /** Pictures deleted anywhere (or hidden by the locked private area), so every list can drop them. */
     var deleted by mutableStateOf<Set<Long>>(emptySet())
 

@@ -122,6 +122,8 @@ fun ViewerScreen() {
     val density = LocalDensity.current
     val threshold = with(density) { 140.dp.toPx() }
 
+    LaunchedEffect(current.fileId) { app.lastViewed = current.fileId }
+
     // Page further than what is loaded
     LaunchedEffect(pager.currentPage, items.size) {
         if (source != null && source.hasMore && pager.currentPage >= items.size - 4) source.loadMore()

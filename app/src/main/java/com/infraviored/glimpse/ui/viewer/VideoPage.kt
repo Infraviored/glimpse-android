@@ -41,6 +41,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.okhttp.OkHttpDataSource
+import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.ui.compose.PlayerSurface
@@ -68,6 +69,7 @@ fun VideoPage(item: Item, active: Boolean, onTap: () -> Unit) {
     val player = remember(item.fileId, item.at, started) {
         if (!started) null else ExoPlayer.Builder(context)
             .setMediaSourceFactory(DefaultMediaSourceFactory(OkHttpDataSource.Factory(api.http)))
+            .setLoadControl(smallBuffer())
             .build()
             .apply {
                 setMediaItem(MediaItem.fromUri(api.fileUrl(item)))
@@ -156,3 +158,15 @@ private fun Controls(player: Player, modifier: Modifier) {
 }
 
 private fun clock(ms: Long): String = com.infraviored.glimpse.ui.clock(ms / 1000)
+
+/**
+ * ExoPlayer buffers up to 128 MB of video by default, in the app's own heap (256 MB on most
+ * phones): a few 4K videos from a phone camera, opened one after another, ran it out of memory.
+ * 20 s ahead, at most 24 MB, is plenty for files streamed from one's own Nextcloud.
+ */
+@OptIn(UnstableApi::class)
+private fun smallBuffer() = DefaultLoadControl.Builder()
+    .setBufferDurationsMs(5_000, 20_000, 1_000, 2_000)
+    .setTargetBufferBytes(24 * 1024 * 1024)
+    .setPrioritizeTimeOverSizeThresholds(false)
+    .build()
