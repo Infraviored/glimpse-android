@@ -69,6 +69,7 @@ import com.infraviored.glimpse.ui.loadInto
 import com.infraviored.glimpse.ui.search.Chip
 import com.infraviored.glimpse.ui.theme.Palette
 import com.infraviored.glimpse.ui.theme.glimpse
+import kotlinx.coroutines.launch
 import java.text.Collator
 
 class PeopleVm(private val api: Api) : ViewModel() {
@@ -114,16 +115,33 @@ class PeopleVm(private val api: Api) : ViewModel() {
 
     fun merge(target: String, others: List<String>, name: String, onDone: () -> Unit, onError: (String) -> Unit) {
         busy = true
-        viewModelScope.loadInto({ busy = false; onError(it) }, {
-            api.mergePeople(target, others)
-            val old = people.orEmpty().firstOrNull { it.id == target }?.name.orEmpty()
-            if (name.trim().isNotEmpty() && name.trim() != old) api.updatePerson(target, name = name.trim())
-        }) {
+        viewModelScope.launch {
+            try {
+                api.mergePeople(target, others)
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                busy = false
+                onError(e.message ?: e.javaClass.simpleName)
+                return@launch
+            }
             busy = false
             merging = false
             chosen = emptySet()
             onDone()
             load()
+            val old = people.orEmpty().firstOrNull { it.id == target }?.name.orEmpty()
+            val newName = name.trim()
+            if (newName.isNotEmpty() && newName != old) {
+                try {
+                    api.updatePerson(target, name = newName)
+                    load()
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    onError(e.message ?: e.javaClass.simpleName)
+                }
+            }
         }
     }
 }
