@@ -71,6 +71,8 @@ fun VideoPage(item: Item, active: Boolean, onTap: () -> Unit) {
             .build()
             .apply {
                 setMediaItem(MediaItem.fromUri(api.fileUrl(item)))
+                // Found by a search at a moment: start there
+                item.at?.let { seekTo((it * 1000).toLong()) }
                 prepare()
                 playWhenReady = true
             }
@@ -153,7 +155,4 @@ private fun Controls(player: Player, modifier: Modifier) {
     }
 }
 
-private fun clock(ms: Long): String {
-    val s = ms / 1000
-    return if (s >= 3600) "%d:%02d:%02d".format(s / 3600, s / 60 % 60, s % 60) else "%d:%02d".format(s / 60, s % 60)
-}
+private fun clock(ms: Long): String = com.infraviored.glimpse.ui.clock(ms / 1000)

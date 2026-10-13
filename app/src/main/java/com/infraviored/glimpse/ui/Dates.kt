@@ -48,4 +48,10 @@ fun shortTime(dt: LocalDateTime, locale: Locale = Locale.getDefault()): String =
     dt.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale))
 
 /** "5.569" / "5,569": counts with the locale's grouping. */
+/** "1:23" or "1:02:03": a place in a video. */
+fun clock(seconds: Long): String {
+    val s = seconds.coerceAtLeast(0)
+    return if (s >= 3600) "%d:%02d:%02d".format(s / 3600, s / 60 % 60, s % 60) else "%d:%02d".format(s / 60, s % 60)
+}
+
 fun count(n: Int): String = java.text.NumberFormat.getIntegerInstance().format(n)
