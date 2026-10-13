@@ -23,6 +23,8 @@ data class Section(
 fun byMonth(items: List<Item>, unknown: String, locale: Locale = Locale.getDefault(), thisYear: Int = YearMonth.now().year): List<Section> {
     val out = mutableListOf<Section>()
     var prevYear: Int = thisYear
+    // Keyed by month, not position: pictures put in front of the list keep the keys below
+    val seen = mutableMapOf<String, Int>()
     var i = 0
     while (i < items.size) {
         val ym = items[i].taken?.let(YearMonth::from)
@@ -31,7 +33,8 @@ fun byMonth(items: List<Item>, unknown: String, locale: Locale = Locale.getDefau
         val title = ym?.month?.getDisplayName(TextStyle.FULL_STANDALONE, locale)
             ?.replaceFirstChar { it.titlecase(locale) } ?: unknown
         val band = ym?.year?.takeIf { it != prevYear }
-        out += Section("$ym-$i", title, items.subList(i, j).toList(), band)
+        val n = seen.merge("$ym", 1, Int::plus)!!
+        out += Section(if (n == 1) "$ym" else "$ym#$n", title, items.subList(i, j).toList(), band)
         if (ym != null) prevYear = ym.year
         i = j
     }

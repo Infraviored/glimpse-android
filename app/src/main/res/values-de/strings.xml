@@ -37,7 +37,6 @@
     <string name="load_failed">Laden fehlgeschlagen: %1$s</string>
     <string name="unknown_date">Datum unbekannt</string>
     <string name="unnamed">Ohne Namen</string>
-    <string name="timeline_from_year">Ab %1$d rückwärts</string>
     <string name="timeline_back_to_now">Zurück zu heute</string>
 
     <string name="people_filter">Person finden</string>

@@ -64,13 +64,19 @@ class Paged(
     }
 
     fun reload() {
+        reset()
+        loadMore()
+    }
+
+    /** Empty again, nothing asked yet. */
+    fun reset() {
         job?.cancel()
         job = null
         items = emptyList()
         next = 1
         loaded = false
         loading = false
-        loadMore()
+        error = null
     }
 
     /** Pictures that left this list (deleted). */

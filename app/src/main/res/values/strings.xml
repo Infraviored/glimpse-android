@@ -41,7 +41,6 @@
     <string name="load_failed">Could not load: %1$s</string>
     <string name="unknown_date">Unknown date</string>
     <string name="unnamed">Unnamed</string>
-    <string name="timeline_from_year">Showing %1$d and earlier</string>
     <string name="timeline_back_to_now">Back to today</string>
 
     <string name="people_filter">Find a person</string>

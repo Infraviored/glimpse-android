@@ -236,6 +236,15 @@ fun PhotoGrid(
     }
 }
 
+/** The keys of the grid's items after the header, in the order [PhotoGrid] lays them out. */
+fun gridKeys(sections: List<Section>): List<Any> = buildList {
+    sections.forEach { section ->
+        section.year?.let { add("year-${section.key}") }
+        add("head-${section.key}")
+        section.items.forEach { add(it.fileId) }
+    }
+}
+
 /** The year, set big: scrolling past one is a step further back in time. */
 @Composable
 fun YearBand(year: Int) {

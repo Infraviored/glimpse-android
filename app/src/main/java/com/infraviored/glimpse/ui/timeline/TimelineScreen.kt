@@ -31,6 +31,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import com.infraviored.glimpse.data.Item
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -66,6 +69,7 @@ import com.infraviored.glimpse.ui.LocalApp
 import com.infraviored.glimpse.ui.Paged
 import com.infraviored.glimpse.ui.byMonth
 import com.infraviored.glimpse.ui.components.PhotoGrid
+import com.infraviored.glimpse.ui.components.gridKeys
 import com.infraviored.glimpse.ui.components.Selection
 import com.infraviored.glimpse.ui.loadInto
 import com.infraviored.glimpse.ui.theme.glimpse
@@ -80,6 +84,9 @@ class TimelineVm(private val api: Api) : ViewModel() {
     var jumpedTo by mutableStateOf<Int?>(null)
         private set
     val paged = Paged(viewModelScope) { page -> api.timeline(page, before) }
+    /** After a jump: the pictures from the jump point forward to today, loaded as one scrolls up. */
+    val newer = Paged(viewModelScope) { page -> api.timeline(page, before = null, after = before) }
+
     var years by mutableStateOf<List<Int>>(emptyList())
         private set
     var memories by mutableStateOf<List<Memory>>(emptyList())
@@ -98,6 +105,7 @@ class TimelineVm(private val api: Api) : ViewModel() {
         val now = LocalDate.now().year
         jumpedTo = year?.takeIf { it < now }
         before = jumpedTo?.let { "${it + 1}-01-01T00:00:00.000Z" }
+        newer.reset()
         paged.reload()
     }
 }
@@ -114,7 +122,12 @@ fun TimelineScreen(
     val paged = vm.paged
     val scope = rememberCoroutineScope()
     val unknown = stringResource(R.string.unknown_date)
-    val items = paged.items.filterNot { it.fileId in app.deleted }
+    val newer = vm.newer
+    // The newer pictures on screen: they join the list in the same frame that keeps the
+    // pictures in view in place (the grid's own anchoring loses them after many inserts)
+    var shownNewer by remember { mutableStateOf<List<Item>>(emptyList()) }
+    val all = if (vm.jumpedTo == null) paged.items else shownNewer.asReversed() + paged.items
+    val items = all.filterNot { it.fileId in app.deleted }
     val sections = remember(items) { byMonth(items, unknown) }
     LaunchedEffect(paged.lastPage) { vm.rememberYears() }
 
@@ -124,6 +137,27 @@ fun TimelineScreen(
             val key = gridState.layoutInfo.visibleItemsInfo.firstOrNull { it.contentType == "photo" }?.key as? Long
             items.firstOrNull { it.fileId == key }?.taken?.year
         }
+    }
+
+    // After a jump the list opens at that year, just below the header, so that what loads
+    // above it (scrolling up towards today) slides in without moving the pictures in view
+    LaunchedEffect(vm.jumpedTo, paged.loaded) {
+        if (vm.jumpedTo != null && paged.loaded && items.isNotEmpty()) gridState.scrollToItem(1)
+    }
+    LaunchedEffect(newer.items) {
+        val added = newer.items
+        val first = gridState.layoutInfo.visibleItemsInfo.firstOrNull()
+        if (added.size > shownNewer.size && first != null && first.index > 0) {
+            val after = byMonth((added.asReversed() + paged.items).filterNot { it.fileId in app.deleted }, unknown)
+            val index = gridKeys(after).indexOf(first.key)
+            if (index >= 0) gridState.requestScrollToItem(index + 1, gridState.firstVisibleItemScrollOffset)
+        }
+        shownNewer = added
+    }
+    LaunchedEffect(vm.jumpedTo) {
+        if (vm.jumpedTo == null) return@LaunchedEffect
+        snapshotFlow { paged.loaded && !newer.loading && newer.hasMore && newer.error == null && gridState.firstVisibleItemIndex < 40 }
+            .collect { if (it) newer.loadMore() }
     }
 
     Box(Modifier.fillMaxSize()) {
@@ -147,19 +181,35 @@ fun TimelineScreen(
                     if (vm.jumpedTo == null && vm.memories.isNotEmpty()) {
                         OnThisDay(vm.memories) { memory -> app.open(memory.items, memory.items.first()) }
                     }
-                    vm.jumpedTo?.let { year ->
-                        Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Text(stringResource(R.string.timeline_from_year, year), color = glimpse.muted, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
-                            Text(
-                                stringResource(R.string.timeline_back_to_now),
-                                color = glimpse.accentText,
-                                style = MaterialTheme.typography.labelLarge,
-                                modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable { vm.jump(null) }.padding(8.dp),
-                            )
+                    if (vm.jumpedTo != null && newer.loading) {
+                        Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 2.5.dp, color = glimpse.muted)
                         }
                     }
                 }
             }
+        }
+
+        // Far from today after a jump: one tap back to the newest pictures
+        AnimatedVisibility(
+            visible = vm.jumpedTo != null && newer.hasMore && gridState.firstVisibleItemIndex > 0,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier = Modifier.align(Alignment.TopEnd).statusBarsPadding().padding(top = 12.dp, end = 16.dp),
+        ) {
+            Text(
+                stringResource(R.string.timeline_back_to_now),
+                color = glimpse.text,
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(glimpse.raised)
+                    .clickable {
+                        vm.jump(null)
+                        scope.launch { gridState.scrollToItem(0) }
+                    }
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+            )
         }
 
         // The scrubber shows while scrolling and a moment after, like a scroll bar
