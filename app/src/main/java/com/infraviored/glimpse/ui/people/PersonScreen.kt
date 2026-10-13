@@ -36,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -138,8 +139,12 @@ fun PersonScreen(id: String) {
     val timeline: TimelineVm = viewModel(key = "person-timeline-$id") { TimelineVm(app.api, person = id) }
     val version = app.version
     val privateVersion = app.privateVersion
+    var lastVersion by remember { mutableIntStateOf(version) }
+    var lastPrivateVersion by remember { mutableIntStateOf(privateVersion) }
     LaunchedEffect(version, privateVersion) {
-        if (version > 0 || privateVersion > 0) {
+        if (version != lastVersion || privateVersion != lastPrivateVersion) {
+            lastVersion = version
+            lastPrivateVersion = privateVersion
             vm.loadPerson()
             timeline.reload()
         }
