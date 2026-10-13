@@ -40,24 +40,9 @@ import com.infraviored.glimpse.ui.rememberPhotoActions
 @Composable
 fun selectionActions(actions: PhotoActions, selection: Selection, items: List<Item>): List<DockAction> {
     fun chosen() = items.filter { it.fileId in selection.ids }
-    val app = com.infraviored.glimpse.ui.LocalApp.current
-    val unlocked = app.privateArea?.unlocked == true
-    val single = items.singleOrNull { it.fileId in selection.ids }?.takeIf { selection.ids.size == 1 && it.id != null }
     return listOf(
-        DockAction(
-            Icons.Outlined.AutoAwesomeMosaic,
-            stringResource(R.string.action_similar),
-            subtitle = if (single == null) stringResource(R.string.similar_one) else null,
-            enabled = single != null,
-        ) {
-            single?.let { item ->
-                selection.clear()
-                app.search(similar = item.id!!, label = item.taken?.let { com.infraviored.glimpse.ui.longDate(it) } ?: item.name)
-            }
-        },
         DockAction(Icons.Outlined.Share, stringResource(R.string.action_share)) { actions.share(chosen()) },
         DockAction(Icons.Outlined.FavoriteBorder, stringResource(R.string.action_favorite)) { actions.favorite(chosen()); selection.clear() },
-        DockAction(Icons.Outlined.Download, stringResource(R.string.action_download)) { actions.download(chosen()); selection.clear() },
         DockAction(Icons.Outlined.Delete, stringResource(R.string.action_delete)) { actions.confirmDelete = chosen() },
     )
 }
@@ -81,6 +66,7 @@ fun selectionMore(actions: PhotoActions, selection: Selection, items: List<Item>
                 app.search(similar = item.id!!, label = item.taken?.let { com.infraviored.glimpse.ui.longDate(it) } ?: item.name)
             }
         },
+        DockAction(Icons.Outlined.Download, stringResource(R.string.action_download)) { actions.download(chosen()); selection.clear() },
         DockAction(Icons.AutoMirrored.Outlined.DriveFileMove, stringResource(R.string.action_move)) { actions.pickFolder(chosen(), copy = false) },
         DockAction(Icons.Outlined.FileCopy, stringResource(R.string.action_copy)) { actions.pickFolder(chosen(), copy = true) },
         DockAction(Icons.Outlined.PhotoAlbum, stringResource(R.string.action_album)) { actions.albumFor = chosen() },

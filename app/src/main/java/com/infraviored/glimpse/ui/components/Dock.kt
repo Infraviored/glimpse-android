@@ -20,7 +20,9 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
@@ -177,6 +179,8 @@ private fun SelectionDock(count: Int, actions: List<DockAction>, more: List<Dock
             pluralStringResource(R.plurals.selected_count, count, count),
             style = MaterialTheme.typography.titleMedium,
             color = glimpse.text,
+            maxLines = 1,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
         actions.forEach { a ->
@@ -189,10 +193,12 @@ private fun SelectionDock(count: Int, actions: List<DockAction>, more: List<Dock
     if (moreOpen) {
         GlimpseSheet(onDismiss = { moreOpen = false }) {
             SheetTitle(pluralStringResource(R.plurals.selected_count, count, count))
-            more.forEach { a ->
-                SheetRow(a.icon, a.label, a.subtitle, enabled = a.enabled) {
-                    moreOpen = false
-                    a.onClick()
+            Column(Modifier.verticalScroll(rememberScrollState())) {
+                more.forEach { a ->
+                    SheetRow(a.icon, a.label, a.subtitle, enabled = a.enabled) {
+                        moreOpen = false
+                        a.onClick()
+                    }
                 }
             }
         }
