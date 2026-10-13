@@ -64,15 +64,15 @@ import kotlinx.coroutines.delay
 fun VideoPage(item: Item, active: Boolean, onTap: () -> Unit) {
     val api = LocalApp.current.api
     val context = LocalContext.current
-    var started by remember(item.fileId) { mutableStateOf(false) }
-    val player = remember(item.fileId, started) {
+    var started by remember(item.fileId, item.at) { mutableStateOf(false) }
+    val player = remember(item.fileId, item.at, started) {
         if (!started) null else ExoPlayer.Builder(context)
             .setMediaSourceFactory(DefaultMediaSourceFactory(OkHttpDataSource.Factory(api.http)))
             .build()
             .apply {
                 setMediaItem(MediaItem.fromUri(api.fileUrl(item)))
                 // Found by a search at a moment: start there
-                item.at?.let { seekTo((it * 1000).toLong()) }
+                item.at?.let { seekTo((it * 1000).toLong().coerceAtLeast(0L)) }
                 prepare()
                 playWhenReady = true
             }
