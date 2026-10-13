@@ -262,4 +262,19 @@
         <item quantity="one">%1$s photo here</item>
         <item quantity="other">%1$s photos here</item>
     </plurals>
+
+    <!-- Duplicates -->
+    <string name="duplicates_none">No duplicates found.</string>
+    <string name="duplicates_how">Marked pictures are kept, the others go to the trash bin. Tap a picture to look at it.</string>
+    <string name="duplicates_keep">Keep</string>
+    <string name="duplicates_dismiss">Not duplicates</string>
+    <string name="duplicates_more">Show more</string>
+    <plurals name="duplicates_intro">
+        <item quantity="one">%1$d group of identical or nearly identical pictures.</item>
+        <item quantity="other">%1$d groups of identical or nearly identical pictures.</item>
+    </plurals>
+    <plurals name="duplicates_delete">
+        <item quantity="one">Delete %1$d</item>
+        <item quantity="other">Delete %1$d</item>
+    </plurals>
 </resources>
