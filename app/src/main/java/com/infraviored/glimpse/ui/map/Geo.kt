@@ -155,9 +155,15 @@ object Clusters {
     fun inView(markers: List<Marker>, view: Viewport, w: Int, h: Int): List<Marker> {
         val x0 = view.toWorldX(0.0, w); val x1 = view.toWorldX(w.toDouble(), w)
         val y0 = view.toWorldY(0.0, h); val y1 = view.toWorldY(h.toDouble(), h)
-        return markers.filter {
+        val filtered = markers.filter {
             it.wx in x0..x1 && it.wy in y0..y1
-        }.sortedByDescending { it.time }
+        }
+        for (i in 0 until filtered.size - 1) {
+            if (filtered[i].time < filtered[i + 1].time) {
+                return filtered.sortedByDescending { it.time }
+            }
+        }
+        return filtered
     }
 }
 

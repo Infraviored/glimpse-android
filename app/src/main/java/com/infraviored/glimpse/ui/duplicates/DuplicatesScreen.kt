@@ -135,7 +135,11 @@ fun DuplicatesScreen() {
     val vm: DuplicatesVm = viewModel { DuplicatesVm(app.api) }
     var limit by rememberSaveable { mutableIntStateOf(PAGE) }
     var confirm by rememberSaveable { mutableStateOf<String?>(null) }
-    val groups = vm.groups
+    var confirmDismiss by rememberSaveable { mutableStateOf<String?>(null) }
+    val rawGroups = vm.groups
+    val groups = rawGroups?.map { g ->
+        g.copy(items = g.items.filterNot { it.fileId in app.deleted })
+    }?.filter { it.items.size >= 2 }
     val failed = stringResource(R.string.action_failed, "%s")
 
     Box(Modifier.fillMaxSize()) {
@@ -184,7 +188,7 @@ fun DuplicatesScreen() {
                         app.open(list, list.first { it.fileId == item.fileId })
                     },
                     onDelete = { confirm = group.id },
-                    onDismiss = { vm.dismiss(group) { app.notices.show(failed.replace("%s", it)) } },
+                    onDismiss = { confirmDismiss = group.id },
                 )
             }
             if (groups != null && groups.size > limit) {
@@ -211,11 +215,31 @@ fun DuplicatesScreen() {
                     confirm = null
                     vm.resolve(group, onDone = { deleted, done, bad ->
                         app.deleted = app.deleted + deleted
+                        app.changed()
                         app.notices.show(
                             if (bad > 0) context.resources.getQuantityString(R.plurals.transfer_failed, bad, bad, done)
                             else context.resources.getQuantityString(R.plurals.deleted, done, done),
                         )
                     }, onError = { app.notices.show(failed.replace("%s", it)) })
+                },
+            )
+        }
+    }
+
+    val dismissGroup = groups?.firstOrNull { it.id == confirmDismiss }
+    if (dismissGroup != null) {
+        GlimpseSheet(onDismiss = { confirmDismiss = null }) {
+            SheetTitle(
+                stringResource(R.string.duplicates_dismiss),
+                stringResource(R.string.duplicates_dismiss_text),
+            )
+            SheetButtons(
+                cancel = stringResource(R.string.cancel),
+                confirm = stringResource(R.string.duplicates_dismiss),
+                onCancel = { confirmDismiss = null },
+                onConfirm = {
+                    confirmDismiss = null
+                    vm.dismiss(dismissGroup) { app.notices.show(failed.replace("%s", it)) }
                 },
             )
         }

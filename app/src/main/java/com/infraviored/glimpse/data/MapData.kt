@@ -31,7 +31,7 @@ data class Marker(
         fileId = fileId,
         type = if (video) "VIDEO" else "IMAGE",
         date = if (time > 0) Instant.ofEpochSecond(time).toString() else null,
-        name = path.substringAfterLast('/'),
+        name = path.substringAfterLast('/').ifEmpty { assetId },
         path = path,
     )
 }
@@ -59,7 +59,7 @@ data class MapData(val updated: Long?, val markers: List<Marker>) {
                     path = p(6)?.contentOrNull.orEmpty(),
                 )
             }
-            return MapData(updated, markers)
+            return MapData(updated, markers.sortedByDescending { it.time })
         }
     }
 }

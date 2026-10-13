@@ -36,6 +36,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -104,7 +105,6 @@ fun MapScreen(bottomPadding: Dp) {
     val vm: MapVm = viewModel { MapVm(app.api) }
     val density = LocalDensity.current
     var shown by remember { mutableStateOf<List<Marker>?>(null) }
-    var viewSize by remember { mutableStateOf(IntSize.Zero) }
     val privateVersion = app.privateVersion
     LaunchedEffect(privateVersion) { if (privateVersion > 0) vm.reload() }
     val markers = vm.markers.orEmpty().filterNot { it.fileId in app.deleted }
@@ -113,7 +113,6 @@ fun MapScreen(bottomPadding: Dp) {
     BoxWithConstraints(Modifier.fillMaxSize().background(if (glimpse.isDark) Palette.Night else Palette.Paper)) {
         val w = constraints.maxWidth
         val h = constraints.maxHeight
-        viewSize = IntSize(w, h)
         LaunchedEffect(vm.markers, w, h) {
             if (vm.view == null && vm.markers != null && w > 0) {
                 vm.view = Viewport.fit(Clusters.home(vm.markers!!), w, h, padPx = with(density) { 48.dp.roundToPx() })
@@ -180,17 +179,17 @@ fun MapScreen(bottomPadding: Dp) {
             color = glimpse.muted,
             modifier = Modifier.align(Alignment.BottomEnd).padding(end = 10.dp, bottom = bottomPadding + 2.dp),
         )
-    }
 
-    shown?.let { list ->
-        PlaceSheet(
-            markers = list,
-            onZoom = {
-                vm.view = Viewport.fit(list, viewSize.width, viewSize.height, padPx = with(density) { 72.dp.roundToPx() }, maxZoom = 18.0)
-                shown = null
-            },
-            onDismiss = { shown = null },
-        )
+        shown?.let { list ->
+            PlaceSheet(
+                markers = list,
+                onZoom = {
+                    vm.view = Viewport.fit(list, w, h, padPx = with(density) { 72.dp.roundToPx() }, maxZoom = 18.0)
+                    shown = null
+                },
+                onDismiss = { shown = null },
+            )
+        }
     }
 }
 
@@ -206,17 +205,19 @@ private fun Tiles(view: Viewport, w: Int, h: Int, tint: ColorFilter) {
     val sizePx = Mercator.worldPx(view.zoom) / n
     val sizeDp = with(density) { (sizePx + 1).toFloat().toDp() }
     tiles.forEach { t ->
-        val x = view.toScreenX(t.x.toDouble() / n, w)
-        val y = view.toScreenY(t.y.toDouble() / n, h)
-        AsyncImage(
-            model = api.tileUrl(t.z, t.x, t.y),
-            contentDescription = null,
-            contentScale = ContentScale.FillBounds,
-            colorFilter = tint,
-            modifier = Modifier
-                .absoluteOffset { IntOffset(x.roundToInt(), y.roundToInt()) }
-                .requiredSize(sizeDp),
-        )
+        key(t.z, t.x, t.y) {
+            val x = view.toScreenX(t.x.toDouble() / n, w)
+            val y = view.toScreenY(t.y.toDouble() / n, h)
+            AsyncImage(
+                model = api.tileUrl(t.z, t.x, t.y),
+                contentDescription = null,
+                contentScale = ContentScale.FillBounds,
+                colorFilter = tint,
+                modifier = Modifier
+                    .absoluteOffset { IntOffset(x.roundToInt(), y.roundToInt()) }
+                    .requiredSize(sizeDp),
+            )
+        }
     }
 }
 
@@ -237,36 +238,38 @@ private fun Pins(markers: List<Marker>, view: Viewport, w: Int, h: Int, bottomPa
         val x = view.toScreenX(c.x, w).roundToInt()
         val y = view.toScreenY(c.y, h).roundToInt()
         if (x < -half || x > w + half || y < -half || y > bottom + half) return@forEach
-        Box(
-            Modifier
-                .absoluteOffset { IntOffset(x - half, y - half) }
-                .size(pin),
-        ) {
-            AsyncImage(
-                model = api.thumbnailUrl(c.cover.toItem()),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(glimpse.raised)
-                    .border(2.dp, Palette.Fog, RoundedCornerShape(16.dp))
-                    .clickable { onTap(c) }
-                    .photoBlur(),
-            )
-            if (c.size > 1) {
-                Text(
-                    if (c.size > 999) "999+" else c.size.toString(),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = glimpse.text,
+        key(c.key) {
+            Box(
+                Modifier
+                    .absoluteOffset { IntOffset(x - half, y - half) }
+                    .size(pin),
+            ) {
+                AsyncImage(
+                    model = api.thumbnailUrl(c.cover.toItem()),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .absoluteOffset(x = 8.dp, y = (-8).dp)
-                        .clip(RoundedCornerShape(10.dp))
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(16.dp))
                         .background(glimpse.raised)
-                        .border(1.dp, glimpse.line, RoundedCornerShape(10.dp))
-                        .padding(horizontal = 6.dp, vertical = 1.dp),
+                        .border(2.dp, Palette.Fog, RoundedCornerShape(16.dp))
+                        .clickable { onTap(c) }
+                        .photoBlur(),
                 )
+                if (c.size > 1) {
+                    Text(
+                        if (c.size > 999) "999+" else c.size.toString(),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = glimpse.text,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .absoluteOffset(x = 8.dp, y = (-8).dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(glimpse.raised)
+                            .border(1.dp, glimpse.line, RoundedCornerShape(10.dp))
+                            .padding(horizontal = 6.dp, vertical = 1.dp),
+                    )
+                }
             }
         }
     }

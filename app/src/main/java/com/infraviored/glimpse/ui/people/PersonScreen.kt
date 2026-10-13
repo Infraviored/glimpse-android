@@ -121,8 +121,12 @@ class PersonVm(private val api: Api, val id: String) : ViewModel() {
             busy = false
             val moved = result.moved.toSet()
             paged.remove(items.filter { it.id in moved }.map { it.fileId }.toSet())
-            onDone(moved.size)
-            loadPerson()
+            if (moved.isEmpty()) {
+                onError(if (result.failed.isNotEmpty()) "Failed" else "No faces moved")
+            } else {
+                onDone(moved.size)
+                loadPerson()
+            }
         }
     }
 }
@@ -134,6 +138,14 @@ fun PersonScreen(id: String) {
     val context = LocalContext.current
     val vm: PersonVm = viewModel(key = "person-$id") { PersonVm(app.api, id) }
     val paged = vm.paged
+    val version = app.version
+    val privateVersion = app.privateVersion
+    LaunchedEffect(version, privateVersion) {
+        if (version > 0 || privateVersion > 0) {
+            vm.loadPerson()
+            paged.reload()
+        }
+    }
     val unknown = stringResource(R.string.unknown_date)
     val items = paged.items.filterNot { it.fileId in app.deleted }
     val sections = remember(items) { byMonth(items, unknown) }
@@ -192,7 +204,7 @@ fun PersonScreen(id: String) {
                     selection.clear()
                     app.notices.show(context.resources.getQuantityString(R.plurals.not_person_done, n, n))
                     app.changed()
-                }, onError = { app.notices.show(it) })
+                }, onError = { app.notices.show(context.getString(R.string.action_failed, it)) })
             },
         )
     }
