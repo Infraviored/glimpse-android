@@ -96,7 +96,12 @@ class PhotoActions(
         scope.launch {
             try {
                 val result = api.undoMove(moves)
-                app.notices.show(context.resources.getQuantityString(R.plurals.moved_back, result.done, result.done))
+                val text = if (result.failed.isNotEmpty()) {
+                    context.resources.getQuantityString(R.plurals.transfer_failed, result.failed.size, result.failed.size, result.done)
+                } else {
+                    context.resources.getQuantityString(R.plurals.moved_back, result.done, result.done)
+                }
+                app.notices.show(text)
                 app.changed()
             } catch (e: Exception) {
                 app.notices.show(context.getString(R.string.action_failed, e.message ?: e.javaClass.simpleName))
@@ -110,6 +115,8 @@ class PhotoActions(
         scope.launch {
             try {
                 api.setPrivate(items.map { it.fileId }, on)
+                app.loadPrivate()
+                app.changed()
                 onDone()
                 val locked = app.privateArea?.unlocked != true
                 if (on && locked) app.hidePrivate(items.map { it.fileId })

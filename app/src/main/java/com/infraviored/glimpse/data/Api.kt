@@ -116,8 +116,12 @@ class Api(val account: Account) {
     fun pathOf(item: Item): String = movedTo[item.fileId] ?: item.path
 
     /** The original file. */
-    fun fileUrl(item: Item): String =
-        "${account.server}/remote.php/dav/files/${enc(userId)}" + pathOf(item).split('/').joinToString("/") { enc(it) }
+    fun fileUrl(item: Item): String {
+        val path = pathOf(item)
+        if (path.isEmpty() || path == "/") throw ApiException(404, "No file path")
+        val normalized = if (path.startsWith("/")) path else "/$path"
+        return "${account.server}/remote.php/dav/files/${enc(userId)}" + normalized.split('/').joinToString("/") { enc(it) }
+    }
 
     private fun enc(s: String) = Uri.encode(s)
 
@@ -193,7 +197,10 @@ class Api(val account: Account) {
     /** Moves back to where [Transfer.moved] says they came from. */
     suspend fun undoMove(moves: List<Moved>): Done {
         val result: Done = decode(post(appUrl("/api/files/undo"), Requests.undo(moves)))
-        moves.forEach { m -> movedTo[m.fileId] = Paths.join(m.from, m.fromName ?: movedTo[m.fileId]?.substringAfterLast('/').orEmpty()) }
+        val failedIds = result.failed.map { it.fileId }.toSet()
+        moves.filter { it.fileId !in failedIds }.forEach { m ->
+            movedTo[m.fileId] = Paths.join(m.from, m.fromName ?: movedTo[m.fileId]?.substringAfterLast('/').orEmpty())
+        }
         return result
     }
 
@@ -227,10 +234,18 @@ class Api(val account: Account) {
                 .header("Destination", albumsUrl() + enc(name) + "/" + enc(pathOf(item).substringAfterLast('/')))
                 .header("Overwrite", "F")
                 .build()
-            try {
-                http.newCall(request).execute().use { if (it.isSuccessful) added++ }
-            } catch (e: IOException) {
-                if (e is ApiException) throw e
+            http.newCall(request).execute().use { response ->
+                if (response.isSuccessful) {
+                    added++
+                } else if (response.code != 412) {
+                    val body = response.body?.string().orEmpty()
+                    val message = try {
+                        json.parseToJsonElement(body).jsonObject["error"]?.jsonPrimitive?.content
+                    } catch (e: Exception) {
+                        null
+                    }
+                    throw ApiException(response.code, message ?: "HTTP ${response.code}")
+                }
             }
         }
         added
