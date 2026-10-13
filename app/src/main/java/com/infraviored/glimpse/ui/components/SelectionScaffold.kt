@@ -40,12 +40,24 @@ fun selectionActions(actions: PhotoActions, selection: Selection, items: List<It
     )
 }
 
+/** The further actions, behind the dock's "more" button. */
+@Composable
+fun selectionMore(actions: PhotoActions, selection: Selection, items: List<Item>): List<DockAction> {
+    fun chosen() = items.filter { it.fileId in selection.ids }
+    return emptyList()
+}
+
 /**
  * A screen with a grid of pictures that are not one of the tabs (a person, a folder,
  * results): the selection dock rises only while pictures are chosen.
  */
 @Composable
-fun SelectionScaffold(selection: Selection, items: List<Item>, content: @Composable (bottomPadding: Dp) -> Unit) {
+fun SelectionScaffold(
+    selection: Selection,
+    items: List<Item>,
+    extra: List<DockAction> = emptyList(),
+    content: @Composable (bottomPadding: Dp) -> Unit,
+) {
     val actions = rememberPhotoActions()
     BackHandler(enabled = selection.active) { selection.clear() }
     DeleteDialog(actions) { selection.clear() }
@@ -67,6 +79,7 @@ fun SelectionScaffold(selection: Selection, items: List<Item>, content: @Composa
                 selectedCount = selection.ids.size.coerceAtLeast(1),
                 actions = selectionActions(actions, selection, items),
                 onClearSelection = selection::clear,
+                more = selectionMore(actions, selection, items) + extra,
             )
         }
     }

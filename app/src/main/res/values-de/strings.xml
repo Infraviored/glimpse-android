@@ -119,4 +119,43 @@
         <item quantity="one">Dieses Foto löschen?</item>
         <item quantity="other">%1$d Fotos löschen?</item>
     </plurals>
+
+    <!-- People management -->
+    <string name="action_more">Mehr</string>
+    <string name="save">Speichern</string>
+    <string name="person_name">Name</string>
+    <string name="person_rename">Umbenennen</string>
+    <string name="person_add_name">Namen eintragen</string>
+    <string name="person_favorite">Favorit</string>
+    <string name="person_favorite_on">Favorit</string>
+    <string name="person_hide">Ausblenden</string>
+    <string name="person_show">Einblenden</string>
+    <string name="person_hidden">Ausgeblendet</string>
+    <string name="person_hidden_notice">Aus der Personenliste ausgeblendet. Unter „Ausgeblendet“ wiederzufinden.</string>
+    <string name="merge_title">Personen zusammenführen</string>
+    <string name="merge_text">Wer bleibt? Die anderen gehen mit allen Bildern in dieser Person auf. Das lässt sich nicht rückgängig machen.</string>
+    <string name="merge_action">Zusammenführen</string>
+    <string name="not_person_action">Nicht %1$s …</string>
+    <string name="not_person_action_hint">Gesichtserkennung korrigieren</string>
+    <string name="not_person_title">Nicht %1$s</string>
+    <string name="not_person_other">Jemand anderes</string>
+    <string name="not_person_who">Wer ist es? Auswählen oder neuen Namen eingeben</string>
+    <string name="not_person_new">Neue Person „%1$s“</string>
+    <string name="not_person_unnamed">Jemand, den ich jetzt nicht benennen will</string>
+    <string name="not_person_unnamed_hint">Die Gesichter gehen an eine neue Person ohne Namen.</string>
+    <string name="not_person_noface">Gar kein Gesicht</string>
+    <string name="not_person_noface_hint">Die Gesichter werden aus der Gesichtserkennung entfernt (ein Muster, ein Plakat, eine Statue).</string>
+    <string name="not_person_apply">Korrigieren</string>
+    <plurals name="people_hidden_count">
+        <item quantity="one">%1$d ausgeblendet</item>
+        <item quantity="other">%1$d ausgeblendet</item>
+    </plurals>
+    <plurals name="not_person_text">
+        <item quantity="one">In %1$d Bild ist das als %2$s erkannte Gesicht:</item>
+        <item quantity="other">In %1$d Bildern ist das als %2$s erkannte Gesicht:</item>
+    </plurals>
+    <plurals name="not_person_done">
+        <item quantity="one">In %1$d Bild korrigiert</item>
+        <item quantity="other">In %1$d Bildern korrigiert</item>
+    </plurals>
 </resources>

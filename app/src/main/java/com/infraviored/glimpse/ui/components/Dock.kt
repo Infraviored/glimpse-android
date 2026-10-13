@@ -24,11 +24,16 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,7 +57,7 @@ import com.infraviored.glimpse.ui.theme.glimpse
 
 data class Tab(val label: String)
 
-class DockAction(val icon: ImageVector, val label: String, val onClick: () -> Unit)
+class DockAction(val icon: ImageVector, val label: String, val subtitle: String? = null, val enabled: Boolean = true, val onClick: () -> Unit)
 
 /**
  * The bottom of every main screen, where the thumb is: the lens (search) above the tabs.
@@ -68,6 +73,7 @@ fun Dock(
     actions: List<DockAction>,
     onClearSelection: () -> Unit,
     modifier: Modifier = Modifier,
+    more: List<DockAction> = emptyList(),
 ) {
     Box(
         modifier
@@ -84,7 +90,7 @@ fun Dock(
             label = "dock",
         ) { selecting ->
             if (selecting) {
-                SelectionDock(selectedCount, actions, onClearSelection)
+                SelectionDock(selectedCount, actions, more, onClearSelection)
             } else {
                 Column {
                     Lens(onLens, Modifier.padding(horizontal = 16.dp))
@@ -154,7 +160,8 @@ private fun TabLabel(label: String, active: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-private fun SelectionDock(count: Int, actions: List<DockAction>, onClear: () -> Unit) {
+private fun SelectionDock(count: Int, actions: List<DockAction>, more: List<DockAction>, onClear: () -> Unit) {
+    var moreOpen by remember { mutableStateOf(false) }
     Row(
         Modifier
             .fillMaxWidth()
@@ -173,7 +180,21 @@ private fun SelectionDock(count: Int, actions: List<DockAction>, onClear: () -> 
             modifier = Modifier.weight(1f),
         )
         actions.forEach { a ->
-            IconButton(onClick = a.onClick) { Icon(a.icon, a.label, tint = glimpse.text) }
+            IconButton(onClick = a.onClick, enabled = a.enabled) { Icon(a.icon, a.label, tint = if (a.enabled) glimpse.text else glimpse.muted) }
+        }
+        if (more.isNotEmpty()) {
+            IconButton(onClick = { moreOpen = true }) { Icon(Icons.Outlined.MoreVert, stringResource(R.string.action_more), tint = glimpse.text) }
+        }
+    }
+    if (moreOpen) {
+        GlimpseSheet(onDismiss = { moreOpen = false }) {
+            SheetTitle(pluralStringResource(R.plurals.selected_count, count, count))
+            more.forEach { a ->
+                SheetRow(a.icon, a.label, a.subtitle, enabled = a.enabled) {
+                    moreOpen = false
+                    a.onClick()
+                }
+            }
         }
     }
 }

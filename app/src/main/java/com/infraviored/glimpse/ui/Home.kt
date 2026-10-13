@@ -49,7 +49,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.infraviored.glimpse.R
+import androidx.compose.material.icons.automirrored.outlined.CallMerge
+import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.outlined.StarBorder
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
 import com.infraviored.glimpse.ui.components.Dock
+import com.infraviored.glimpse.ui.components.DockAction
+import com.infraviored.glimpse.ui.components.selectionMore
+import com.infraviored.glimpse.ui.people.PeopleVm
 import com.infraviored.glimpse.ui.components.Selection
 import com.infraviored.glimpse.ui.components.Tab
 import com.infraviored.glimpse.ui.components.selectionActions
@@ -71,8 +79,12 @@ fun Home() {
     val dockHeight = navBar + 132.dp
     val tabs = listOf(Tab(stringResource(R.string.tab_timeline)), Tab(stringResource(R.string.tab_people)), Tab(stringResource(R.string.tab_folders)))
 
+    val peopleVm: PeopleVm = androidx.lifecycle.viewmodel.compose.viewModel { PeopleVm(app.api) }
+    val choosingPeople = tab == 1 && peopleVm.chosen.isNotEmpty()
+
     BackHandler(enabled = selection.active) { selection.clear() }
-    BackHandler(enabled = !selection.active && tab != 0) { tab = 0 }
+    BackHandler(enabled = choosingPeople) { peopleVm.chosen = emptySet() }
+    BackHandler(enabled = !selection.active && !choosingPeople && tab != 0) { tab = 0 }
     DeleteDialog(actions) { selection.clear() }
 
     Box(Modifier.fillMaxSize().background(glimpse.background)) {
@@ -88,16 +100,38 @@ fun Home() {
         Dock(
             tabs = tabs,
             current = tab,
-            onTab = { if (it == tab && it == 0) { /* top */ } else { selection.clear(); tab = it } },
+            onTab = { if (it == tab && it == 0) { /* top */ } else { selection.clear(); peopleVm.chosen = emptySet(); tab = it } },
             onLens = { app.search() },
-            selectedCount = selection.ids.size,
-            actions = selectionActions(actions, selection, timelineItems),
-            onClearSelection = selection::clear,
+            selectedCount = if (tab == 1) peopleVm.chosen.size else selection.ids.size,
+            actions = if (tab == 1) peopleActions(peopleVm) else selectionActions(actions, selection, timelineItems),
+            onClearSelection = { selection.clear(); peopleVm.chosen = emptySet() },
             modifier = Modifier.align(Alignment.BottomCenter),
+            more = if (tab == 1) emptyList() else selectionMore(actions, selection, timelineItems),
         )
     }
 
     if (account) AccountSheet(onDismiss = { account = false })
+}
+
+/** What can be done with the chosen people: favorite, hide, merge. */
+@Composable
+private fun peopleActions(vm: PeopleVm): List<DockAction> {
+    val app = LocalApp.current
+    val chosen = vm.chosenPeople()
+    val allFavorite = chosen.isNotEmpty() && chosen.all { it.favorite }
+    val allHidden = chosen.isNotEmpty() && chosen.all { it.hidden }
+    val onError: (String) -> Unit = { app.notices.show(it) }
+    return listOf(
+        DockAction(
+            if (allFavorite) Icons.Outlined.Star else Icons.Outlined.StarBorder,
+            stringResource(if (allFavorite) R.string.person_favorite_on else R.string.person_favorite),
+        ) { vm.update(vm.chosen, favorite = !allFavorite, onError = onError); vm.chosen = emptySet() },
+        DockAction(
+            if (allHidden) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff,
+            stringResource(if (allHidden) R.string.person_show else R.string.person_hide),
+        ) { vm.update(vm.chosen, hidden = !allHidden, onError = onError); vm.chosen = emptySet() },
+        DockAction(Icons.AutoMirrored.Outlined.CallMerge, stringResource(R.string.merge_action), enabled = chosen.size >= 2) { vm.merging = true },
+    )
 }
 
 /** The timeline's loaded pictures, for the selection's actions. */

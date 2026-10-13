@@ -124,4 +124,43 @@
         <item quantity="one">Delete this photo?</item>
         <item quantity="other">Delete %1$d photos?</item>
     </plurals>
+
+    <!-- People management -->
+    <string name="action_more">More</string>
+    <string name="save">Save</string>
+    <string name="person_name">Name</string>
+    <string name="person_rename">Rename</string>
+    <string name="person_add_name">Add a name</string>
+    <string name="person_favorite">Favorite</string>
+    <string name="person_favorite_on">Favorite</string>
+    <string name="person_hide">Hide</string>
+    <string name="person_show">Show</string>
+    <string name="person_hidden">Hidden</string>
+    <string name="person_hidden_notice">Hidden from the people list. Find them again under “Hidden”.</string>
+    <string name="merge_title">Merge people</string>
+    <string name="merge_text">Which one stays? The others are merged into it, with all their pictures. This cannot be undone.</string>
+    <string name="merge_action">Merge</string>
+    <string name="not_person_action">Not %1$s …</string>
+    <string name="not_person_action_hint">Correct the face recognition</string>
+    <string name="not_person_title">Not %1$s</string>
+    <string name="not_person_other">Someone else</string>
+    <string name="not_person_who">Who is it? Pick or type a new name</string>
+    <string name="not_person_new">New person “%1$s”</string>
+    <string name="not_person_unnamed">Someone I do not want to name now</string>
+    <string name="not_person_unnamed_hint">The faces go to one new person without a name.</string>
+    <string name="not_person_noface">Not a face at all</string>
+    <string name="not_person_noface_hint">The faces are removed from the face recognition (a pattern, a poster, a statue).</string>
+    <string name="not_person_apply">Correct</string>
+    <plurals name="people_hidden_count">
+        <item quantity="one">%1$d hidden</item>
+        <item quantity="other">%1$d hidden</item>
+    </plurals>
+    <plurals name="not_person_text">
+        <item quantity="one">In %1$d picture, the face recognized as %2$s is:</item>
+        <item quantity="other">In %1$d pictures, the face recognized as %2$s is:</item>
+    </plurals>
+    <plurals name="not_person_done">
+        <item quantity="one">Corrected in %1$d picture</item>
+        <item quantity="other">Corrected in %1$d pictures</item>
+    </plurals>
 </resources>

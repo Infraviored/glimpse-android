@@ -150,12 +150,117 @@ class Api(val account: Account) {
         post(appUrl("/api/files/favorite"), buildJsonObject { putJsonArray("fileIds") { fileIds.forEach { add(kotlinx.serialization.json.JsonPrimitive(it)) } }; put("on", on) })
     }
 
-    suspend fun delete(fileIds: List<Long>) {
-        post(appUrl("/api/files/delete"), buildJsonObject { putJsonArray("fileIds") { fileIds.forEach { add(kotlinx.serialization.json.JsonPrimitive(it)) } } })
-    }
+    suspend fun delete(fileIds: List<Long>): Done =
+        decode(post(appUrl("/api/files/delete"), buildJsonObject { putJsonArray("fileIds") { fileIds.forEach { add(kotlinx.serialization.json.JsonPrimitive(it)) } } }))
 
     suspend fun renamePerson(id: String, name: String) {
         send("PUT", appUrl("/api/people/${enc(id)}"), buildJsonObject { put("name", name) })
+    }
+
+    // ---- people --------------------------------------------------------------------------
+
+    /** Name, hidden and favorite of a person; only what is not null changes. */
+    suspend fun updatePerson(id: String, name: String? = null, hidden: Boolean? = null, favorite: Boolean? = null): PersonUpdate =
+        decode(send("PUT", appUrl("/api/people/${enc(id)}"), Requests.updatePerson(name, hidden, favorite)))
+
+    /** [others] become [target], with all their pictures. Cannot be undone. */
+    suspend fun mergePeople(target: String, others: List<String>) {
+        post(appUrl("/api/people/${enc(target)}/merge"), Requests.merge(others))
+    }
+
+    /** "Not this person": the faces of [personId] in [assetIds] go to [target]. */
+    suspend fun moveFaces(personId: String, assetIds: List<String>, target: FaceTarget): MovedFaces =
+        decode(post(appUrl("/api/people/${enc(personId)}/move-faces"), Requests.moveFaces(assetIds, target)))
+
+    // ---- files -------------------------------------------------------------------------------
+
+    /** Move or copy into [target] (a folder path in the user's files). */
+    suspend fun transfer(fileIds: List<Long>, target: String, copy: Boolean): Transfer =
+        decode(post(appUrl("/api/files/transfer"), Requests.transfer(fileIds, target, copy)))
+
+    /** Moves back to where [Transfer.moved] says they came from. */
+    suspend fun undoMove(moves: List<Moved>): Done = decode(post(appUrl("/api/files/undo"), Requests.undo(moves)))
+
+    /** Tags the user may assign (not every tag they can see). */
+    suspend fun assignableTags(): List<Tag> = decode(get(appUrl("/api/tags")))
+
+    suspend fun tag(fileIds: List<Long>, tagIds: List<Long>, newTags: List<String>): Done =
+        decode(post(appUrl("/api/files/tag"), Requests.tag(fileIds, tagIds, newTags)))
+
+    // ---- albums (Nextcloud Photos, over WebDAV) ---------------------------------------------
+
+    private fun albumsUrl() = "${account.server}/remote.php/dav/photos/${enc(userId)}/albums/"
+
+    suspend fun albums(): List<String> {
+        val body = call(
+            Request.Builder().url(albumsUrl()).header("Depth", "1")
+                .method("PROPFIND", Dav.PROPFIND_NAME.toRequestBody("application/xml".toMediaType())).build(),
+        )
+        return Dav.albumNames(body)
+    }
+
+    suspend fun createAlbum(name: String) {
+        call(Request.Builder().url(albumsUrl() + enc(name)).method("MKCOL", null).build())
+    }
+
+    /** How many were added; ones already in the album are skipped. */
+    suspend fun addToAlbum(name: String, items: List<Item>): Int = withContext(Dispatchers.IO) {
+        var added = 0
+        for (item in items) {
+            val request = Request.Builder().url(fileUrl(item)).method("COPY", null)
+                .header("Destination", albumsUrl() + enc(name) + "/" + enc(item.name))
+                .header("Overwrite", "F")
+                .build()
+            try {
+                http.newCall(request).execute().use { if (it.isSuccessful) added++ }
+            } catch (e: IOException) {
+                if (e is ApiException) throw e
+            }
+        }
+        added
+    }
+
+    // ---- private area ----------------------------------------------------------------------
+
+    suspend fun privateState(): PrivateState = decode(get(appUrl("/api/private")))
+
+    /**
+     * Unlock for this session. With [password], Nextcloud's own password confirmation comes
+     * first (the session then counts as confirmed for half an hour).
+     */
+    suspend fun unlockPrivate(password: String?) {
+        if (password != null) {
+            call(
+                Request.Builder().url("${account.server}/index.php/login/confirm").header("Accept", "application/json")
+                    .post(buildJsonObject { put("password", password) }.toString().toRequestBody("application/json".toMediaType())).build(),
+            )
+            post(appUrl("/api/private/unlock-password"), buildJsonObject { })
+        } else {
+            post(appUrl("/api/private/unlock"), buildJsonObject { })
+        }
+    }
+
+    suspend fun lockPrivate() {
+        post(appUrl("/api/private/lock"), buildJsonObject { })
+    }
+
+    /** Marking private works while locked; taking it back needs the area unlocked (403 "locked"). */
+    suspend fun setPrivate(fileIds: List<Long>, on: Boolean) {
+        post(appUrl("/api/private/files"), Requests.privateFiles(fileIds, on))
+    }
+
+    // ---- map, duplicates ---------------------------------------------------------------------
+
+    suspend fun mapMarkers(): MapData = MapData.parse(json.parseToJsonElement(get(appUrl("/api/map"))))
+
+    /** A map tile through Glimpse's proxy (the app never asks OpenStreetMap directly). */
+    fun tileUrl(z: Int, x: Int, y: Int): String = appUrl("/api/tiles/$z/$x/$y")
+
+    suspend fun duplicates(): List<DuplicateGroup> = decode(get(appUrl("/api/duplicates")))
+
+    /** "Not duplicates": the group is gone for everyone. */
+    suspend fun dismissDuplicate(id: String) {
+        call(Request.Builder().url(appUrl("/api/duplicates/${enc(id)}")).header("Accept", "application/json").delete().build())
     }
 
     // ---- plumbing ----------------------------------------------------------------------------
