@@ -43,10 +43,10 @@ internal fun fallbackAnchor(shownNewer: List<Item>, older: List<Item>, deleted: 
     (shownNewer.lastOrNull { it.fileId !in deleted } ?: older.firstOrNull { it.fileId !in deleted })?.fileId
 
 /**
- * Where the picture [anchorKey] sits in the grid once [newer] has joined the list, counting
+ * Where the item [anchorKey] sits in the grid once [newer] has joined the list, counting
  * the header item; -1 if it is not in there.
  */
-internal fun anchorIndex(newer: List<Item>, older: List<Item>, deleted: Set<Long>, anchorKey: Long, unknown: String): Int {
+internal fun anchorIndex(newer: List<Item>, older: List<Item>, deleted: Set<Long>, anchorKey: Any, unknown: String): Int {
     val sections = byMonth(timelineItems(true, newer, older, deleted), unknown)
     val index = gridKeys(sections).indexOf(anchorKey)
     return if (index < 0) -1 else index + HEADER_ITEMS

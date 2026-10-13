@@ -76,5 +76,11 @@ class TimelineLogicTest {
         assertEquals(-1, anchorIndex(newer, older, emptySet(), 99L, "?"))
         // A deleted picture is not in the grid, so the ones below move up
         assertEquals(6, anchorIndex(newer, older, setOf(3L), 1L, "?"))
+        // String keys for year bands and month heads can also anchor
+        assertEquals(1, anchorIndex(newer, older, emptySet(), "year-2020-03", "?"))
+        assertEquals(2, anchorIndex(newer, older, emptySet(), "head-2020-03", "?"))
+        assertEquals(4, anchorIndex(newer, older, emptySet(), "head-2020-01", "?"))
+        assertEquals(6, anchorIndex(newer, older, emptySet(), "year-2019-12", "?"))
+        assertEquals(7, anchorIndex(newer, older, emptySet(), "head-2019-12", "?"))
     }
 }

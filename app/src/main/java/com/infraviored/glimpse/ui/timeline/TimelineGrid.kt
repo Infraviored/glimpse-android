@@ -94,21 +94,33 @@ fun TimelineGrid(
     LaunchedEffect(vm.jumpedTo, paged.loaded) {
         if (vm.jumpedTo != null && paged.loaded && items.isNotEmpty()) gridState.scrollToItem(HEADER_ITEMS)
     }
-    // The newer pictures join the list in the same frame that keeps the pictures in view in
-    // place (the grid's own anchoring loses them after many inserts); only photos anchor
+    // The newer pictures join the list in the same frame that keeps the items in view in
+    // place (the grid's own anchoring loses them after many inserts)
     LaunchedEffect(newer.items) {
         val added = newer.items
         if (added.size > vm.shownNewer.size) {
-            val visiblePhoto = gridState.layoutInfo.visibleItemsInfo.firstOrNull { it.contentType == "photo" && it.key is Long }
-            val anchorKey = (visiblePhoto?.key as? Long) ?: fallbackAnchor(vm.shownNewer, paged.items, app.deleted)
-            if (anchorKey != null) {
-                val index = anchorIndex(added, paged.items, app.deleted, anchorKey, unknown)
-                val offset = if (visiblePhoto != null && visiblePhoto.index == gridState.firstVisibleItemIndex) {
-                    gridState.firstVisibleItemScrollOffset
+            val firstVisible = gridState.layoutInfo.visibleItemsInfo.firstOrNull()
+            if (firstVisible != null && firstVisible.index == 0) {
+                gridState.requestScrollToItem(0, gridState.firstVisibleItemScrollOffset)
+            } else {
+                val anchorKey = firstVisible?.key ?: (gridState.layoutInfo.visibleItemsInfo.firstOrNull { it.contentType == "photo" && it.key is Long }?.key as? Long)
+                    ?: fallbackAnchor(vm.shownNewer, paged.items, app.deleted)
+                val targetIndex = if (anchorKey != null) anchorIndex(added, paged.items, app.deleted, anchorKey, unknown) else -1
+                if (targetIndex >= 0) {
+                    val offset = if (firstVisible != null && firstVisible.key == anchorKey) {
+                        gridState.firstVisibleItemScrollOffset
+                    } else {
+                        0
+                    }
+                    gridState.requestScrollToItem(targetIndex, offset)
                 } else {
-                    0
+                    val visiblePhoto = gridState.layoutInfo.visibleItemsInfo.firstOrNull { it.contentType == "photo" && it.key is Long }
+                    val fallbackKey = (visiblePhoto?.key as? Long) ?: fallbackAnchor(vm.shownNewer, paged.items, app.deleted)
+                    if (fallbackKey != null) {
+                        val index = anchorIndex(added, paged.items, app.deleted, fallbackKey, unknown)
+                        if (index >= 0) gridState.requestScrollToItem(index, 0)
+                    }
                 }
-                if (index >= 0) gridState.requestScrollToItem(index, offset)
             }
         }
         vm.showNewer(added)
