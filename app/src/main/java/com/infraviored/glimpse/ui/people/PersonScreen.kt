@@ -6,16 +6,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -68,10 +66,7 @@ import com.infraviored.glimpse.data.FaceTarget
 import com.infraviored.glimpse.data.Item
 import com.infraviored.glimpse.data.Person
 import com.infraviored.glimpse.ui.LocalApp
-import com.infraviored.glimpse.ui.Paged
-import com.infraviored.glimpse.ui.byMonth
 import com.infraviored.glimpse.ui.components.DockAction
-import com.infraviored.glimpse.ui.components.PhotoGrid
 import com.infraviored.glimpse.ui.components.Selection
 import com.infraviored.glimpse.ui.components.SelectionScaffold
 import com.infraviored.glimpse.ui.count
@@ -79,9 +74,10 @@ import com.infraviored.glimpse.ui.loadInto
 import com.infraviored.glimpse.ui.photoBlur
 import com.infraviored.glimpse.ui.theme.Palette
 import com.infraviored.glimpse.ui.theme.glimpse
+import com.infraviored.glimpse.ui.timeline.TimelineGrid
+import com.infraviored.glimpse.ui.timeline.TimelineVm
 
 class PersonVm(private val api: Api, val id: String) : ViewModel() {
-    val paged = Paged(viewModelScope) { page -> api.search(person = id, page = page) }
     var person by mutableStateOf<Person?>(null)
         private set
 
@@ -94,7 +90,6 @@ class PersonVm(private val api: Api, val id: String) : ViewModel() {
         private set
 
     init {
-        paged.loadMore()
         loadPerson()
     }
 
@@ -113,14 +108,15 @@ class PersonVm(private val api: Api, val id: String) : ViewModel() {
         viewModelScope.loadInto({ person = before; onError(it) }, { api.updatePerson(id, name, hidden, favorite) }) { onDone() }
     }
 
-    fun notThisPerson(items: List<Item>, target: FaceTarget, onDone: (Int) -> Unit, onError: (String) -> Unit) {
+    /** Moves the faces away; [onRemoved] gets the pictures that left this person. */
+    fun notThisPerson(items: List<Item>, target: FaceTarget, onRemoved: (Set<Long>) -> Unit, onDone: (Int) -> Unit, onError: (String) -> Unit) {
         val assets = items.mapNotNull { it.id }
         if (assets.isEmpty()) return
         busy = true
         viewModelScope.loadInto({ busy = false; onError(it) }, { api.moveFaces(id, assets, target) }) { result ->
             busy = false
             val moved = result.moved.toSet()
-            paged.remove(items.filter { it.id in moved }.map { it.fileId }.toSet())
+            onRemoved(items.filter { it.id in moved }.map { it.fileId }.toSet())
             if (moved.isEmpty()) {
                 onError(if (result.failed.isNotEmpty()) "Failed" else "No faces moved")
             } else {
@@ -131,24 +127,29 @@ class PersonVm(private val api: Api, val id: String) : ViewModel() {
     }
 }
 
-/** One person: their face, name and every picture they are in, newest first. */
+/**
+ * One person: their face, name and every picture they are in, as a timeline of their own:
+ * newest first, with the year scrubber to jump to any year they appear in.
+ */
 @Composable
 fun PersonScreen(id: String) {
     val app = LocalApp.current
     val context = LocalContext.current
     val vm: PersonVm = viewModel(key = "person-$id") { PersonVm(app.api, id) }
-    val paged = vm.paged
+    val timeline: TimelineVm = viewModel(key = "person-timeline-$id") { TimelineVm(app.api, person = id) }
     val version = app.version
     val privateVersion = app.privateVersion
+    var lastVersion by remember { mutableIntStateOf(version) }
+    var lastPrivateVersion by remember { mutableIntStateOf(privateVersion) }
     LaunchedEffect(version, privateVersion) {
-        if (version > 0 || privateVersion > 0) {
+        if (version != lastVersion || privateVersion != lastPrivateVersion) {
+            lastVersion = version
+            lastPrivateVersion = privateVersion
             vm.loadPerson()
-            paged.reload()
+            timeline.reload()
         }
     }
-    val unknown = stringResource(R.string.unknown_date)
-    val items = paged.items.filterNot { it.fileId in app.deleted }
-    val sections = remember(items) { byMonth(items, unknown) }
+    val items = timeline.items(app.deleted)
     val selection = remember { Selection() }
     val gridState = rememberLazyGridState()
     var notPerson by remember { mutableStateOf<List<Item>?>(null) }
@@ -158,7 +159,12 @@ fun PersonScreen(id: String) {
     val extra = if (vm.canManage && person != null) {
         listOf(
             DockAction(Icons.Outlined.PersonRemove, stringResource(R.string.not_person_action, name), stringResource(R.string.not_person_action_hint)) {
-                notPerson = items.filter { it.fileId in selection.ids && it.id != null }
+                val movable = items.filter { it.fileId in selection.ids && it.id != null }
+                if (movable.isNotEmpty()) {
+                    notPerson = movable
+                } else {
+                    app.notices.show(context.getString(R.string.action_failed, context.getString(R.string.not_person_noface)))
+                }
             },
         )
     } else {
@@ -166,32 +172,22 @@ fun PersonScreen(id: String) {
     }
 
     SelectionScaffold(selection, items, extra) { bottom ->
-        PhotoGrid(
-            sections = sections,
+        TimelineGrid(
+            vm = timeline,
             selection = selection,
-            onOpen = { app.open(items, it, paged) },
-            state = gridState,
-            loading = paged.loading,
-            error = paged.error,
-            onRetry = { paged.loadMore() },
-            hasMore = paged.hasMore,
-            onLoadMore = { paged.loadMore() },
-            contentPadding = PaddingValues(bottom = bottom),
+            gridState = gridState,
+            bottomPadding = bottom,
             columnsKey = "person",
         ) {
-            item(key = "head", span = { GridItemSpan(maxLineSpan) }, contentType = "top") {
-                Column(Modifier.statusBarsPadding()) {
-                    IconButton(onClick = app.back, modifier = Modifier.padding(4.dp)) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, stringResource(R.string.back), tint = glimpse.text)
-                    }
-                    PersonHeader(vm)
-                }
+            IconButton(onClick = app.back, modifier = Modifier.padding(4.dp)) {
+                Icon(Icons.AutoMirrored.Outlined.ArrowBack, stringResource(R.string.back), tint = glimpse.text)
             }
+            PersonHeader(vm)
         }
     }
 
     val chosen = notPerson
-    if (chosen != null && person != null) {
+    if (!chosen.isNullOrEmpty() && person != null) {
         NotPersonSheet(
             person = person,
             count = chosen.size,
@@ -199,7 +195,7 @@ fun PersonScreen(id: String) {
             busy = vm.busy,
             onDismiss = { notPerson = null },
             onApply = { target ->
-                vm.notThisPerson(chosen, target, onDone = { n ->
+                vm.notThisPerson(chosen, target, onRemoved = { timeline.remove(it) }, onDone = { n ->
                     notPerson = null
                     selection.clear()
                     app.notices.show(context.resources.getQuantityString(R.plurals.not_person_done, n, n))

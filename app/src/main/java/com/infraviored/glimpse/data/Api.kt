@@ -133,9 +133,12 @@ class Api(val account: Account) {
             ?.jsonPrimitive?.content?.let { userId = it }
     }
 
-    /** Back in time from [before] (newest first), or forward from [after] to today (oldest first). */
-    suspend fun timeline(page: Int, before: String?, after: String? = null): Page =
-        decode(get(appUrl("/api/timeline") + query("page" to page, "before" to before, "after" to after)))
+    /**
+     * Back in time from [before] (newest first), or forward from [after] to today (oldest first).
+     * With [person]: only the pictures that person is in; page 1 then lists that person's years.
+     */
+    suspend fun timeline(page: Int, before: String?, after: String? = null, person: String? = null): Page =
+        decode(get(appUrl("/api/timeline") + query("page" to page, "before" to before, "after" to after, "person" to person)))
 
     suspend fun memories(date: String): List<Memory> = decode(get(appUrl("/api/memories") + query("date" to date)))
 
