@@ -290,14 +290,16 @@ fun Thumbnail(
             // Found inside the video: the mark says where
             Row(
                 Modifier
-                    .align(Alignment.TopEnd)
+                    .align(Alignment.BottomEnd)
+                    .scale(inset)
                     .padding(6.dp)
                     .background(Color.Black.copy(alpha = 0.55f), RoundedCornerShape(12.dp))
                     .padding(start = 3.dp, end = 8.dp, top = 2.dp, bottom = 2.dp),
                 verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 Icon(Icons.Filled.PlayArrow, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
-                Text(clock(item.at.toLong()), color = Color.White, style = MaterialTheme.typography.labelSmall)
+                Text(clock(item.at.toLong()), color = Color.White, style = MaterialTheme.typography.labelSmall, maxLines = 1, softWrap = false)
             }
         } else if (item.isVideo) {
             Icon(
@@ -306,6 +308,7 @@ fun Thumbnail(
                 tint = Color.White,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
+                    .scale(inset)
                     .padding(6.dp)
                     .size(20.dp)
                     .background(Color.Black.copy(alpha = 0.35f), CircleShape)
