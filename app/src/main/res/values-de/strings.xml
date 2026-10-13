@@ -263,6 +263,7 @@
     <string name="duplicates_how">Markierte Bilder bleiben, die anderen kommen in den Papierkorb. Tipp auf ein Bild, um es anzusehen.</string>
     <string name="duplicates_keep">Behalten</string>
     <string name="duplicates_dismiss">Keine Duplikate</string>
+    <string name="duplicates_dismiss_text">Immich vergisst diese Gruppe. Beide Bilder bleiben in der Galerie.</string>
     <string name="duplicates_more">Mehr zeigen</string>
     <plurals name="duplicates_intro">
         <item quantity="one">%1$d Gruppe gleicher oder fast gleicher Bilder.</item>
