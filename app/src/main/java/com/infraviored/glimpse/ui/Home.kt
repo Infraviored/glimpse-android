@@ -85,7 +85,7 @@ fun Home() {
     BackHandler(enabled = selection.active) { selection.clear() }
     BackHandler(enabled = choosingPeople) { peopleVm.chosen = emptySet() }
     BackHandler(enabled = !selection.active && !choosingPeople && tab != 0) { tab = 0 }
-    DeleteDialog(actions) { selection.clear() }
+    ActionSheets(actions) { selection.clear() }
 
     Box(Modifier.fillMaxSize().background(glimpse.background)) {
         Crossfade(tab, label = "tab") { t ->

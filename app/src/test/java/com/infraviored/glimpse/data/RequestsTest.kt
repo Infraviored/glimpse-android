@@ -60,3 +60,21 @@ class RequestsTest {
         assertEquals("""{"fileIds":[5,6],"on":false}""", Requests.privateFiles(listOf(5, 6), false).toString())
     }
 }
+
+class PathsTest {
+    @Test
+    fun joinAndParent() {
+        assertEquals("/a.jpg", Paths.join("/", "a.jpg"))
+        assertEquals("/Photos/2024/a.jpg", Paths.join("/Photos/2024/", "a.jpg"))
+        assertEquals("/Photos", Paths.parent("/Photos/2024"))
+        assertEquals("/", Paths.parent("/Photos"))
+        assertEquals("/", Paths.parent("/"))
+        assertEquals("2024", Paths.name("/Photos/2024/"))
+    }
+
+    @Test
+    fun recentFoldersNewestFirst() {
+        assertEquals(listOf("/b", "/a"), Paths.recent(listOf("/a", "/b/"), "/b"))
+        assertEquals(listOf("/n", "/1", "/2"), Paths.recent(listOf("/1", "/2", "/3"), "/n", max = 3))
+    }
+}

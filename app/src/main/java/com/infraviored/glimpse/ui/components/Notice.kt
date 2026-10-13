@@ -28,7 +28,7 @@ import com.infraviored.glimpse.ui.theme.glimpse
 import kotlinx.coroutines.delay
 
 /** A short message at the bottom, maybe with one action (Undo). */
-class Notice(val text: String, val action: String? = null, val onAction: (() -> Unit)? = null, val millis: Long = if (action != null) 8000 else 3500) {
+class Notice(val text: String, val action: String? = null, val onAction: (() -> Unit)? = null, val millis: Long = if (action != null) 10000 else 3500) {
     val id = System.nanoTime()
 }
 

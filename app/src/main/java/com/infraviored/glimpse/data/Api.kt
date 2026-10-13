@@ -107,9 +107,17 @@ class Api(val account: Account) {
 
     fun faceUrl(personId: String): String = appUrl("/api/people/${enc(personId)}/face")
 
+    /**
+     * Where files moved in this session went: lists loaded before still have the old path,
+     * and downloading, sharing or adding them to an album needs the current one.
+     */
+    private val movedTo = java.util.concurrent.ConcurrentHashMap<Long, String>()
+
+    fun pathOf(item: Item): String = movedTo[item.fileId] ?: item.path
+
     /** The original file. */
     fun fileUrl(item: Item): String =
-        "${account.server}/remote.php/dav/files/${enc(userId)}" + item.path.split('/').joinToString("/") { enc(it) }
+        "${account.server}/remote.php/dav/files/${enc(userId)}" + pathOf(item).split('/').joinToString("/") { enc(it) }
 
     private fun enc(s: String) = Uri.encode(s)
 
@@ -175,11 +183,19 @@ class Api(val account: Account) {
     // ---- files -------------------------------------------------------------------------------
 
     /** Move or copy into [target] (a folder path in the user's files). */
-    suspend fun transfer(fileIds: List<Long>, target: String, copy: Boolean): Transfer =
-        decode(post(appUrl("/api/files/transfer"), Requests.transfer(fileIds, target, copy)))
+    suspend fun transfer(items: List<Item>, target: String, copy: Boolean): Transfer {
+        val result: Transfer = decode(post(appUrl("/api/files/transfer"), Requests.transfer(items.map { it.fileId }, target, copy)))
+        val byId = items.associateBy { it.fileId }
+        result.moved.forEach { m -> byId[m.fileId]?.let { movedTo[m.fileId] = Paths.join(target, pathOf(it).substringAfterLast('/')) } }
+        return result
+    }
 
     /** Moves back to where [Transfer.moved] says they came from. */
-    suspend fun undoMove(moves: List<Moved>): Done = decode(post(appUrl("/api/files/undo"), Requests.undo(moves)))
+    suspend fun undoMove(moves: List<Moved>): Done {
+        val result: Done = decode(post(appUrl("/api/files/undo"), Requests.undo(moves)))
+        moves.forEach { m -> movedTo[m.fileId] = Paths.join(m.from, m.fromName ?: movedTo[m.fileId]?.substringAfterLast('/').orEmpty()) }
+        return result
+    }
 
     /** Tags the user may assign (not every tag they can see). */
     suspend fun assignableTags(): List<Tag> = decode(get(appUrl("/api/tags")))
@@ -208,7 +224,7 @@ class Api(val account: Account) {
         var added = 0
         for (item in items) {
             val request = Request.Builder().url(fileUrl(item)).method("COPY", null)
-                .header("Destination", albumsUrl() + enc(name) + "/" + enc(item.name))
+                .header("Destination", albumsUrl() + enc(name) + "/" + enc(pathOf(item).substringAfterLast('/')))
                 .header("Overwrite", "F")
                 .build()
             try {

@@ -24,7 +24,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.infraviored.glimpse.R
 import com.infraviored.glimpse.data.Item
-import com.infraviored.glimpse.ui.DeleteDialog
+import androidx.compose.material.icons.automirrored.outlined.DriveFileMove
+import androidx.compose.material.icons.outlined.FileCopy
+import androidx.compose.material.icons.outlined.HeartBroken
+import androidx.compose.material.icons.outlined.PhotoAlbum
+import androidx.compose.material.icons.outlined.Sell
+import com.infraviored.glimpse.ui.ActionSheets
 import com.infraviored.glimpse.ui.PhotoActions
 import com.infraviored.glimpse.ui.rememberPhotoActions
 
@@ -44,7 +49,13 @@ fun selectionActions(actions: PhotoActions, selection: Selection, items: List<It
 @Composable
 fun selectionMore(actions: PhotoActions, selection: Selection, items: List<Item>): List<DockAction> {
     fun chosen() = items.filter { it.fileId in selection.ids }
-    return emptyList()
+    return listOf(
+        DockAction(Icons.AutoMirrored.Outlined.DriveFileMove, stringResource(R.string.action_move)) { actions.pickFolder(chosen(), copy = false) },
+        DockAction(Icons.Outlined.FileCopy, stringResource(R.string.action_copy)) { actions.pickFolder(chosen(), copy = true) },
+        DockAction(Icons.Outlined.PhotoAlbum, stringResource(R.string.action_album)) { actions.albumFor = chosen() },
+        DockAction(Icons.Outlined.Sell, stringResource(R.string.action_tag)) { actions.tagFor = chosen() },
+        DockAction(Icons.Outlined.HeartBroken, stringResource(R.string.action_unfavorite)) { actions.favorite(chosen(), on = false); selection.clear() },
+    )
 }
 
 /**
@@ -60,7 +71,7 @@ fun SelectionScaffold(
 ) {
     val actions = rememberPhotoActions()
     BackHandler(enabled = selection.active) { selection.clear() }
-    DeleteDialog(actions) { selection.clear() }
+    ActionSheets(actions) { selection.clear() }
     val navBar = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     Box(Modifier.fillMaxSize()) {
         content(navBar + if (selection.active) 96.dp else 16.dp)

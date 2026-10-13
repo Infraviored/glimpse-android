@@ -158,4 +158,63 @@
         <item quantity="one">In %1$d Bild korrigiert</item>
         <item quantity="other">In %1$d Bildern korrigiert</item>
     </plurals>
+
+    <!-- Move, copy, albums, tags -->
+    <string name="action_move">In Ordner verschieben …</string>
+    <string name="action_copy">In Ordner kopieren …</string>
+    <string name="action_album">Zu Album hinzufügen …</string>
+    <string name="action_tag">Verschlagworten …</string>
+    <string name="action_unfavorite">Aus Favoriten entfernen</string>
+    <string name="undo">Rückgängig</string>
+    <string name="folder_root">Alle Dateien</string>
+    <string name="folder_no_subfolders">Keine Ordner hier drin.</string>
+    <string name="move_here">Hierher verschieben</string>
+    <string name="copy_here">Hierher kopieren</string>
+    <string name="album_new">Neues Album</string>
+    <string name="album_create">Anlegen</string>
+    <string name="album_none">Noch keine Alben. Unten ein neues benennen.</string>
+    <string name="album_unavailable">Alben sind nicht verfügbar (ist Nextcloud Fotos installiert?): %1$s</string>
+    <string name="tag_new">Neues Schlagwort</string>
+    <string name="tag_apply">Verschlagworten</string>
+    <string name="tag_none">Noch keine Schlagwörter. Unten ein neues eintippen.</string>
+    <plurals name="move_title">
+        <item quantity="one">%1$d Foto verschieben</item>
+        <item quantity="other">%1$d Fotos verschieben</item>
+    </plurals>
+    <plurals name="copy_title">
+        <item quantity="one">%1$d Foto kopieren</item>
+        <item quantity="other">%1$d Fotos kopieren</item>
+    </plurals>
+    <plurals name="album_title">
+        <item quantity="one">%1$d Foto zu einem Album</item>
+        <item quantity="other">%1$d Fotos zu einem Album</item>
+    </plurals>
+    <plurals name="tag_title">
+        <item quantity="one">%1$d Foto verschlagworten</item>
+        <item quantity="other">%1$d Fotos verschlagworten</item>
+    </plurals>
+    <plurals name="moved_to">
+        <item quantity="one">Nach %2$s verschoben</item>
+        <item quantity="other">%1$d nach %2$s verschoben</item>
+    </plurals>
+    <plurals name="copied_to">
+        <item quantity="one">Nach %2$s kopiert</item>
+        <item quantity="other">%1$d nach %2$s kopiert</item>
+    </plurals>
+    <plurals name="moved_back">
+        <item quantity="one">Zurückverschoben</item>
+        <item quantity="other">%1$d zurückverschoben</item>
+    </plurals>
+    <plurals name="transfer_failed">
+        <item quantity="one">%1$d nicht erlaubt, %2$d erledigt</item>
+        <item quantity="other">%1$d nicht erlaubt, %2$d erledigt</item>
+    </plurals>
+    <plurals name="added_to_album">
+        <item quantity="one">%1$d zu %2$s hinzugefügt</item>
+        <item quantity="other">%1$d zu %2$s hinzugefügt</item>
+    </plurals>
+    <plurals name="tagged">
+        <item quantity="one">Verschlagwortet</item>
+        <item quantity="other">%1$d verschlagwortet</item>
+    </plurals>
 </resources>
