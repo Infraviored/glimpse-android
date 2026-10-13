@@ -161,6 +161,7 @@ fun TimelineGrid(
                     .clip(RoundedCornerShape(20.dp))
                     .background(glimpse.raised)
                     .clickable {
+                        selection.clear()
                         vm.jump(null)
                         scope.launch { gridState.scrollToItem(0) }
                     }
@@ -181,6 +182,7 @@ fun TimelineGrid(
                 years = vm.years,
                 restingYear = visibleYear,
                 onPick = { year ->
+                    selection.clear()
                     vm.jump(year)
                     scope.launch { gridState.scrollToItem(0) }
                 },
