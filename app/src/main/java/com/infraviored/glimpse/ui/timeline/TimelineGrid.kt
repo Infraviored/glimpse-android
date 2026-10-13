@@ -94,41 +94,43 @@ fun TimelineGrid(
     LaunchedEffect(vm.jumpedTo, paged.loaded) {
         if (vm.jumpedTo != null && paged.loaded && items.isNotEmpty()) gridState.scrollToItem(HEADER_ITEMS)
     }
-    // The newer pictures join the list in the same frame that keeps the items in view in
-    // place (the grid's own anchoring loses them after many inserts)
+    // The newer pictures join the list in the same frame that keeps the pictures in view in
+    // place (the grid's own anchoring loses them after many inserts). The anchor is always a
+    // picture: its key stays the same when pages are added, headings and year bands do not,
+    // and the header (index 0) would leave the new pictures in view, so their top would load
+    // the next page at once – the list ran up year after year.
     LaunchedEffect(newer.items) {
         val added = newer.items
         if (added.size > vm.shownNewer.size) {
-            val firstVisible = gridState.layoutInfo.visibleItemsInfo.firstOrNull()
-            if (firstVisible != null && firstVisible.index == 0) {
-                gridState.requestScrollToItem(0, gridState.firstVisibleItemScrollOffset)
-            } else {
-                val anchorKey = firstVisible?.key ?: (gridState.layoutInfo.visibleItemsInfo.firstOrNull { it.contentType == "photo" && it.key is Long }?.key as? Long)
-                    ?: fallbackAnchor(vm.shownNewer, paged.items, app.deleted)
-                val targetIndex = if (anchorKey != null) anchorIndex(added, paged.items, app.deleted, anchorKey, unknown) else -1
-                if (targetIndex >= 0) {
-                    val offset = if (firstVisible != null && firstVisible.key == anchorKey) {
-                        gridState.firstVisibleItemScrollOffset
-                    } else {
-                        0
-                    }
-                    gridState.requestScrollToItem(targetIndex, offset)
-                } else {
-                    val visiblePhoto = gridState.layoutInfo.visibleItemsInfo.firstOrNull { it.contentType == "photo" && it.key is Long }
-                    val fallbackKey = (visiblePhoto?.key as? Long) ?: fallbackAnchor(vm.shownNewer, paged.items, app.deleted)
-                    if (fallbackKey != null) {
-                        val index = anchorIndex(added, paged.items, app.deleted, fallbackKey, unknown)
-                        if (index >= 0) gridState.requestScrollToItem(index, 0)
-                    }
-                }
+            val visible = gridState.layoutInfo.visibleItemsInfo
+            val photo = visible.firstOrNull { it.contentType == "photo" && it.key is Long }
+            val anchorKey = (photo?.key as? Long) ?: fallbackAnchor(vm.shownNewer, paged.items, app.deleted)
+            val index = if (anchorKey != null) anchorIndex(added, paged.items, app.deleted, anchorKey, unknown) else -1
+            if (index >= 0) {
+                val offset = if (photo != null && photo.index == gridState.firstVisibleItemIndex) gridState.firstVisibleItemScrollOffset else 0
+                gridState.requestScrollToItem(index, offset)
             }
         }
         vm.showNewer(added)
     }
+    // Newer pages load while the top of the list is near, but after the first one only once
+    // the user has scrolled up since: a year with few pictures fits on the screen, its top
+    // stays in view whatever is added above, and every page would load the next one.
+    var newerArmed by remember(vm.jumpedTo) { mutableStateOf(true) }
+    LaunchedEffect(vm.jumpedTo) {
+        // every step of the user's scrolling up counts, also within one long fling
+        snapshotFlow { Triple(gridState.isScrollInProgress && gridState.lastScrolledBackward, gridState.firstVisibleItemIndex, gridState.firstVisibleItemScrollOffset) }
+            .collect { (up) -> if (up) newerArmed = true }
+    }
     LaunchedEffect(vm.jumpedTo) {
         if (vm.jumpedTo == null) return@LaunchedEffect
-        snapshotFlow { paged.loaded && !newer.loading && newer.hasMore && newer.error == null && gridState.firstVisibleItemIndex < 40 }
-            .collect { if (it) newer.loadMore() }
+        snapshotFlow { newerArmed && paged.loaded && !newer.loading && newer.hasMore && newer.error == null && gridState.firstVisibleItemIndex < 40 }
+            .collect {
+                if (it) {
+                    newerArmed = false
+                    newer.loadMore()
+                }
+            }
     }
 
     Box(Modifier.fillMaxSize()) {
