@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.Glimpse" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:colorPrimary">@color/glimpse_blue</item>
-        <item name="android:colorAccent">@color/glimpse_blue</item>
         <item name="android:windowBackground">@color/window</item>
-    </style>
-
-    <style name="Widget.Glimpse.Button" parent="android:Widget.Material.Button.Colored">
-        <item name="android:minHeight">48dp</item>
     </style>
 </resources>

@@ -1,1 +1,3 @@
-# Nothing to keep: the page talks to the app through a web message listener, not reflection.
+# The API models are read by kotlinx.serialization; its own rules cover them, this is insurance
+# against a missing field name in a release build only.
+-keep class com.infraviored.glimpse.data.** { *; }
