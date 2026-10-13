@@ -146,15 +146,20 @@ fun TimelineScreen(
     }
     LaunchedEffect(newer.items) {
         val added = newer.items
-        // The first picture or heading in view, never the header: scrolled up fast to the very
-        // top, the header was the first item, nothing was anchored, the new pictures appeared
-        // in view, and their own top loaded the next page – the list ran up year after year.
-        val anchor = gridState.layoutInfo.visibleItemsInfo.firstOrNull { it.index > 0 }
-        if (added.size > shownNewer.size && anchor != null) {
-            val after = byMonth((added.asReversed() + paged.items).filterNot { it.fileId in app.deleted }, unknown)
-            val index = gridKeys(after).indexOf(anchor.key)
-            val offset = if (anchor.index == gridState.firstVisibleItemIndex) gridState.firstVisibleItemScrollOffset else 0
-            if (index >= 0) gridState.requestScrollToItem(index + 1, offset)
+        if (added.size > shownNewer.size) {
+            val visiblePhoto = gridState.layoutInfo.visibleItemsInfo.firstOrNull { it.contentType == "photo" && it.key is Long }
+            val anchorKey = (visiblePhoto?.key as? Long)
+                ?: (shownNewer.lastOrNull { it.fileId !in app.deleted } ?: paged.items.firstOrNull { it.fileId !in app.deleted })?.fileId
+            if (anchorKey != null) {
+                val after = byMonth((added.asReversed() + paged.items).filterNot { it.fileId in app.deleted }, unknown)
+                val index = gridKeys(after).indexOf(anchorKey)
+                val offset = if (visiblePhoto != null && visiblePhoto.index == gridState.firstVisibleItemIndex) {
+                    gridState.firstVisibleItemScrollOffset
+                } else {
+                    0
+                }
+                if (index >= 0) gridState.requestScrollToItem(index + 1, offset)
+            }
         }
         shownNewer = added
     }
