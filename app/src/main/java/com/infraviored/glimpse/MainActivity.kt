@@ -20,6 +20,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.lifecycleScope
@@ -35,6 +36,7 @@ import com.infraviored.glimpse.ui.LocalAnimated
 import com.infraviored.glimpse.ui.LocalApp
 import com.infraviored.glimpse.ui.LocalShared
 import com.infraviored.glimpse.ui.Routes
+import com.infraviored.glimpse.ui.components.NoticeHost
 import com.infraviored.glimpse.ui.folders.FolderScreen
 import com.infraviored.glimpse.ui.people.PersonScreen
 import com.infraviored.glimpse.ui.search.SearchScreen
@@ -100,46 +102,54 @@ private fun App(api: Api, onLogout: (String?) -> Unit) {
     CompositionLocalProvider(LocalApp provides app) {
         SharedTransitionLayout(Modifier.fillMaxSize().background(glimpse.background)) {
             CompositionLocalProvider(LocalShared provides this) {
-                NavHost(
-                    navController = nav,
-                    startDestination = Routes.HOME,
-                    enterTransition = { fadeIn() + slideInHorizontally { it / 6 } },
-                    exitTransition = { fadeOut() },
-                    popEnterTransition = { fadeIn() },
-                    popExitTransition = { fadeOut() + slideOutHorizontally { it / 6 } },
-                ) {
-                    composable(Routes.HOME) {
-                        CompositionLocalProvider(LocalAnimated provides this) { Home() }
-                    }
-                    composable(
-                        Routes.VIEWER,
-                        enterTransition = { fadeIn() },
+                Box(Modifier.fillMaxSize()) {
+                    NavHost(
+                        navController = nav,
+                        startDestination = Routes.HOME,
+                        enterTransition = { fadeIn() + slideInHorizontally { it / 6 } },
                         exitTransition = { fadeOut() },
-                        popExitTransition = { fadeOut() },
+                        popEnterTransition = { fadeIn() },
+                        popExitTransition = { fadeOut() + slideOutHorizontally { it / 6 } },
                     ) {
-                        CompositionLocalProvider(LocalAnimated provides this) { ViewerScreen() }
-                    }
-                    composable(
-                        Routes.SEARCH,
-                        arguments = listOf("q", "person", "similar", "label").map { navArgument(it) { type = NavType.StringType; defaultValue = "" } },
-                    ) { entry ->
-                        val a = entry.arguments
-                        CompositionLocalProvider(LocalAnimated provides this) {
-                            Box(Modifier.fillMaxSize().background(glimpse.background)) {
-                                SearchScreen(a?.getString("q").orEmpty(), a?.getString("person").orEmpty(), a?.getString("similar").orEmpty(), a?.getString("label").orEmpty())
+                        composable(Routes.HOME) {
+                            CompositionLocalProvider(LocalAnimated provides this) { Home() }
+                        }
+                        composable(
+                            Routes.VIEWER,
+                            enterTransition = { fadeIn() },
+                            exitTransition = { fadeOut() },
+                            popExitTransition = { fadeOut() },
+                        ) {
+                            CompositionLocalProvider(LocalAnimated provides this) { ViewerScreen() }
+                        }
+                        composable(
+                            Routes.SEARCH,
+                            arguments = listOf("q", "person", "similar", "label").map { navArgument(it) { type = NavType.StringType; defaultValue = "" } },
+                        ) { entry ->
+                            val a = entry.arguments
+                            CompositionLocalProvider(LocalAnimated provides this) {
+                                Box(Modifier.fillMaxSize().background(glimpse.background)) {
+                                    SearchScreen(a?.getString("q").orEmpty(), a?.getString("person").orEmpty(), a?.getString("similar").orEmpty(), a?.getString("label").orEmpty())
+                                }
+                            }
+                        }
+                        composable(Routes.PERSON, arguments = listOf(navArgument("id") { type = NavType.StringType })) { entry ->
+                            CompositionLocalProvider(LocalAnimated provides this) {
+                                Box(Modifier.fillMaxSize().background(glimpse.background)) { PersonScreen(entry.arguments?.getString("id").orEmpty()) }
+                            }
+                        }
+                        composable(Routes.DUPLICATES) {
+                            CompositionLocalProvider(LocalAnimated provides this) {
+                                Box(Modifier.fillMaxSize().background(glimpse.background)) { com.infraviored.glimpse.ui.duplicates.DuplicatesScreen() }
+                            }
+                        }
+                        composable(Routes.FOLDER, arguments = listOf(navArgument("path") { type = NavType.StringType; defaultValue = "/" })) { entry ->
+                            CompositionLocalProvider(LocalAnimated provides this) {
+                                Box(Modifier.fillMaxSize().background(glimpse.background)) { FolderScreen(entry.arguments?.getString("path") ?: "/") }
                             }
                         }
                     }
-                    composable(Routes.PERSON, arguments = listOf(navArgument("id") { type = NavType.StringType })) { entry ->
-                        CompositionLocalProvider(LocalAnimated provides this) {
-                            Box(Modifier.fillMaxSize().background(glimpse.background)) { PersonScreen(entry.arguments?.getString("id").orEmpty()) }
-                        }
-                    }
-                    composable(Routes.FOLDER, arguments = listOf(navArgument("path") { type = NavType.StringType; defaultValue = "/" })) { entry ->
-                        CompositionLocalProvider(LocalAnimated provides this) {
-                            Box(Modifier.fillMaxSize().background(glimpse.background)) { FolderScreen(entry.arguments?.getString("path") ?: "/") }
-                        }
-                    }
+                    NoticeHost(app.notices, Modifier.align(Alignment.BottomCenter))
                 }
             }
         }

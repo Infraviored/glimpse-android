@@ -77,6 +77,9 @@ fun FolderScreen(path: String, asTab: Boolean = false, bottomPadding: Dp = 0.dp)
     val sections = remember(items) { if (items.isEmpty()) emptyList() else listOf(Section("all", "", items)) }
     val selection = remember { Selection() }
     val gridState = rememberLazyGridState()
+    // Files moved in or out, the private area locked or unlocked: load again
+    val version = app.version
+    androidx.compose.runtime.LaunchedEffect(version) { if (version > 0) vm.load() }
     val title = if (path == "/" || path.isEmpty()) stringResource(R.string.tab_folders) else path.substringAfterLast('/')
 
     val body: @Composable (Dp) -> Unit = { bottom ->

@@ -50,7 +50,7 @@
     <string name="timeline_empty">No pictures found yet. Photos you put in Nextcloud show up here once Glimpse has indexed them.</string>
     <string name="search_further">Look further back</string>
     <string name="folder_empty">No pictures in this folder.</string>
-    <string name="folder_private">This folder is private. Unlock the private area in Glimpse on the web to see it.</string>
+    <string name="folder_private">This folder is private. Unlock the private area (tap your picture at the top of the timeline) to see it.</string>
     <string name="folder_truncated">Only the first pictures of this folder are shown.</string>
 
     <string name="search_clear">Clear</string>
@@ -124,4 +124,162 @@
         <item quantity="one">Delete this photo?</item>
         <item quantity="other">Delete %1$d photos?</item>
     </plurals>
+
+    <!-- People management -->
+    <string name="action_more">More</string>
+    <string name="save">Save</string>
+    <string name="person_name">Name</string>
+    <string name="person_rename">Rename</string>
+    <string name="person_add_name">Add a name</string>
+    <string name="person_favorite">Favorite</string>
+    <string name="person_favorite_on">Favorite</string>
+    <string name="person_hide">Hide</string>
+    <string name="person_show">Show</string>
+    <string name="person_hidden">Hidden</string>
+    <string name="person_hidden_notice">Hidden from the people list. Find them again under “Hidden”.</string>
+    <string name="merge_title">Merge people</string>
+    <string name="merge_text">Which one stays? The others are merged into it, with all their pictures. This cannot be undone.</string>
+    <string name="merge_action">Merge</string>
+    <string name="not_person_action">Not %1$s …</string>
+    <string name="not_person_action_hint">Correct the face recognition</string>
+    <string name="not_person_title">Not %1$s</string>
+    <string name="not_person_other">Someone else</string>
+    <string name="not_person_who">Who is it? Pick or type a new name</string>
+    <string name="not_person_new">New person “%1$s”</string>
+    <string name="not_person_unnamed">Someone I do not want to name now</string>
+    <string name="not_person_unnamed_hint">The faces go to one new person without a name.</string>
+    <string name="not_person_noface">Not a face at all</string>
+    <string name="not_person_noface_hint">The faces are removed from the face recognition (a pattern, a poster, a statue).</string>
+    <string name="not_person_apply">Correct</string>
+    <plurals name="people_hidden_count">
+        <item quantity="one">%1$d hidden</item>
+        <item quantity="other">%1$d hidden</item>
+    </plurals>
+    <plurals name="not_person_text">
+        <item quantity="one">In %1$d picture, the face recognized as %2$s is:</item>
+        <item quantity="other">In %1$d pictures, the face recognized as %2$s is:</item>
+    </plurals>
+    <plurals name="not_person_done">
+        <item quantity="one">Corrected in %1$d picture</item>
+        <item quantity="other">Corrected in %1$d pictures</item>
+    </plurals>
+
+    <!-- Move, copy, albums, tags -->
+    <string name="action_move">Move to folder …</string>
+    <string name="action_copy">Copy to folder …</string>
+    <string name="action_album">Add to album …</string>
+    <string name="action_tag">Tag …</string>
+    <string name="action_unfavorite">Remove from favorites</string>
+    <string name="undo">Undo</string>
+    <string name="folder_root">All files</string>
+    <string name="folder_no_subfolders">No folders in here.</string>
+    <string name="move_here">Move here</string>
+    <string name="copy_here">Copy here</string>
+    <string name="album_new">New album</string>
+    <string name="album_create">Create</string>
+    <string name="album_none">No albums yet. Name a new one below.</string>
+    <string name="album_unavailable">Albums are not available (is Nextcloud Photos installed?): %1$s</string>
+    <string name="tag_new">New tag</string>
+    <string name="tag_apply">Tag</string>
+    <string name="tag_none">No tags yet. Type a new one below.</string>
+    <plurals name="move_title">
+        <item quantity="one">Move %1$d photo</item>
+        <item quantity="other">Move %1$d photos</item>
+    </plurals>
+    <plurals name="copy_title">
+        <item quantity="one">Copy %1$d photo</item>
+        <item quantity="other">Copy %1$d photos</item>
+    </plurals>
+    <plurals name="album_title">
+        <item quantity="one">Add %1$d photo to an album</item>
+        <item quantity="other">Add %1$d photos to an album</item>
+    </plurals>
+    <plurals name="tag_title">
+        <item quantity="one">Tag %1$d photo</item>
+        <item quantity="other">Tag %1$d photos</item>
+    </plurals>
+    <plurals name="moved_to">
+        <item quantity="one">Moved to %2$s</item>
+        <item quantity="other">%1$d moved to %2$s</item>
+    </plurals>
+    <plurals name="copied_to">
+        <item quantity="one">Copied to %2$s</item>
+        <item quantity="other">%1$d copied to %2$s</item>
+    </plurals>
+    <plurals name="moved_back">
+        <item quantity="one">Moved back</item>
+        <item quantity="other">%1$d moved back</item>
+    </plurals>
+    <plurals name="transfer_failed">
+        <item quantity="one">%1$d not allowed, %2$d done</item>
+        <item quantity="other">%1$d not allowed, %2$d done</item>
+    </plurals>
+    <plurals name="added_to_album">
+        <item quantity="one">Added %1$d to %2$s</item>
+        <item quantity="other">Added %1$d to %2$s</item>
+    </plurals>
+    <plurals name="tagged">
+        <item quantity="one">Tagged</item>
+        <item quantity="other">%1$d tagged</item>
+    </plurals>
+
+    <!-- Private area -->
+    <string name="action_private">Mark as private</string>
+    <string name="action_not_private">No longer private</string>
+    <string name="private_unlock_first">Unlock the private area first</string>
+    <string name="private_unlock_area">Unlock the private area</string>
+    <string name="private_lock">Lock the private area</string>
+    <string name="private_unlocked_now">Unlocked: private pictures are shown</string>
+    <string name="private_locked_now">Locked: private pictures are hidden</string>
+    <string name="private_empty">Nothing is private yet</string>
+    <string name="private_unlock_title">Unlock the private area</string>
+    <string name="private_unlock_text">Enter your Nextcloud password.</string>
+    <string name="private_password">Password</string>
+    <string name="private_unlock">Unlock</string>
+    <string name="private_unlock_hint">It stays unlocked for a while, until you lock it or close the app. After several wrong passwords Nextcloud slows down logins from this network.</string>
+    <string name="private_wrong_password">That password is not right.</string>
+    <string name="private_too_many">Too many attempts. Try again in a few minutes.</string>
+    <string name="duplicates_title">Duplicates</string>
+    <string name="duplicates_subtitle">Identical or nearly identical pictures</string>
+    <plurals name="made_private">
+        <item quantity="one">Marked as private</item>
+        <item quantity="other">%1$d marked as private</item>
+    </plurals>
+    <plurals name="made_private_hidden">
+        <item quantity="one">Private: hidden until you unlock</item>
+        <item quantity="other">%1$d private: hidden until you unlock</item>
+    </plurals>
+    <plurals name="made_public">
+        <item quantity="one">No longer private</item>
+        <item quantity="other">%1$d no longer private</item>
+    </plurals>
+
+    <!-- Map -->
+    <string name="tab_map">Map</string>
+    <string name="map_empty">No pictures with a location yet</string>
+    <string name="map_zoom_in">Zoom in</string>
+    <plurals name="map_here">
+        <item quantity="one">%1$s photo here</item>
+        <item quantity="other">%1$s photos here</item>
+    </plurals>
+
+    <!-- Duplicates -->
+    <string name="duplicates_none">No duplicates found.</string>
+    <string name="duplicates_how">Marked pictures are kept, the others go to the trash bin. Tap a picture to look at it.</string>
+    <string name="duplicates_keep">Keep</string>
+    <string name="duplicates_dismiss">Not duplicates</string>
+    <string name="duplicates_dismiss_text">Immich will forget this group. Both pictures stay in your library.</string>
+    <string name="duplicates_more">Show more</string>
+    <plurals name="duplicates_intro">
+        <item quantity="one">%1$d group of identical or nearly identical pictures.</item>
+        <item quantity="other">%1$d groups of identical or nearly identical pictures.</item>
+    </plurals>
+    <plurals name="duplicates_delete">
+        <item quantity="one">Delete %1$d</item>
+        <item quantity="other">Delete %1$d</item>
+    </plurals>
+
+    <!-- Similar -->
+    <string name="action_similar_short">Similar</string>
+    <string name="similar_one">Choose one picture</string>
 </resources>

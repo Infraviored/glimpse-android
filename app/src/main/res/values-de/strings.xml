@@ -46,7 +46,7 @@
     <string name="timeline_empty">Noch keine Bilder gefunden. Fotos, die du in Nextcloud ablegst, erscheinen hier, sobald Glimpse sie erfasst hat.</string>
     <string name="search_further">Weiter zurück suchen</string>
     <string name="folder_empty">Keine Bilder in diesem Ordner.</string>
-    <string name="folder_private">Dieser Ordner ist privat. Entsperre den privaten Bereich in Glimpse im Browser, um ihn zu sehen.</string>
+    <string name="folder_private">Dieser Ordner ist privat. Entsperre den privaten Bereich (tipp oben in der Zeitleiste auf dein Bild), um ihn zu sehen.</string>
     <string name="folder_truncated">Es werden nur die ersten Bilder dieses Ordners gezeigt.</string>
 
     <string name="search_clear">Leeren</string>
@@ -119,4 +119,162 @@
         <item quantity="one">Dieses Foto löschen?</item>
         <item quantity="other">%1$d Fotos löschen?</item>
     </plurals>
+
+    <!-- People management -->
+    <string name="action_more">Mehr</string>
+    <string name="save">Speichern</string>
+    <string name="person_name">Name</string>
+    <string name="person_rename">Umbenennen</string>
+    <string name="person_add_name">Namen eintragen</string>
+    <string name="person_favorite">Favorit</string>
+    <string name="person_favorite_on">Favorit</string>
+    <string name="person_hide">Ausblenden</string>
+    <string name="person_show">Einblenden</string>
+    <string name="person_hidden">Ausgeblendet</string>
+    <string name="person_hidden_notice">Aus der Personenliste ausgeblendet. Unter „Ausgeblendet“ wiederzufinden.</string>
+    <string name="merge_title">Personen zusammenführen</string>
+    <string name="merge_text">Wer bleibt? Die anderen gehen mit allen Bildern in dieser Person auf. Das lässt sich nicht rückgängig machen.</string>
+    <string name="merge_action">Zusammenführen</string>
+    <string name="not_person_action">Nicht %1$s …</string>
+    <string name="not_person_action_hint">Gesichtserkennung korrigieren</string>
+    <string name="not_person_title">Nicht %1$s</string>
+    <string name="not_person_other">Jemand anderes</string>
+    <string name="not_person_who">Wer ist es? Auswählen oder neuen Namen eingeben</string>
+    <string name="not_person_new">Neue Person „%1$s“</string>
+    <string name="not_person_unnamed">Jemand, den ich jetzt nicht benennen will</string>
+    <string name="not_person_unnamed_hint">Die Gesichter gehen an eine neue Person ohne Namen.</string>
+    <string name="not_person_noface">Gar kein Gesicht</string>
+    <string name="not_person_noface_hint">Die Gesichter werden aus der Gesichtserkennung entfernt (ein Muster, ein Plakat, eine Statue).</string>
+    <string name="not_person_apply">Korrigieren</string>
+    <plurals name="people_hidden_count">
+        <item quantity="one">%1$d ausgeblendet</item>
+        <item quantity="other">%1$d ausgeblendet</item>
+    </plurals>
+    <plurals name="not_person_text">
+        <item quantity="one">In %1$d Bild ist das als %2$s erkannte Gesicht:</item>
+        <item quantity="other">In %1$d Bildern ist das als %2$s erkannte Gesicht:</item>
+    </plurals>
+    <plurals name="not_person_done">
+        <item quantity="one">In %1$d Bild korrigiert</item>
+        <item quantity="other">In %1$d Bildern korrigiert</item>
+    </plurals>
+
+    <!-- Move, copy, albums, tags -->
+    <string name="action_move">In Ordner verschieben …</string>
+    <string name="action_copy">In Ordner kopieren …</string>
+    <string name="action_album">Zu Album hinzufügen …</string>
+    <string name="action_tag">Verschlagworten …</string>
+    <string name="action_unfavorite">Aus Favoriten entfernen</string>
+    <string name="undo">Rückgängig</string>
+    <string name="folder_root">Alle Dateien</string>
+    <string name="folder_no_subfolders">Keine Ordner hier drin.</string>
+    <string name="move_here">Hierher verschieben</string>
+    <string name="copy_here">Hierher kopieren</string>
+    <string name="album_new">Neues Album</string>
+    <string name="album_create">Anlegen</string>
+    <string name="album_none">Noch keine Alben. Unten ein neues benennen.</string>
+    <string name="album_unavailable">Alben sind nicht verfügbar (ist Nextcloud Fotos installiert?): %1$s</string>
+    <string name="tag_new">Neues Schlagwort</string>
+    <string name="tag_apply">Verschlagworten</string>
+    <string name="tag_none">Noch keine Schlagwörter. Unten ein neues eintippen.</string>
+    <plurals name="move_title">
+        <item quantity="one">%1$d Foto verschieben</item>
+        <item quantity="other">%1$d Fotos verschieben</item>
+    </plurals>
+    <plurals name="copy_title">
+        <item quantity="one">%1$d Foto kopieren</item>
+        <item quantity="other">%1$d Fotos kopieren</item>
+    </plurals>
+    <plurals name="album_title">
+        <item quantity="one">%1$d Foto zu einem Album</item>
+        <item quantity="other">%1$d Fotos zu einem Album</item>
+    </plurals>
+    <plurals name="tag_title">
+        <item quantity="one">%1$d Foto verschlagworten</item>
+        <item quantity="other">%1$d Fotos verschlagworten</item>
+    </plurals>
+    <plurals name="moved_to">
+        <item quantity="one">Nach %2$s verschoben</item>
+        <item quantity="other">%1$d nach %2$s verschoben</item>
+    </plurals>
+    <plurals name="copied_to">
+        <item quantity="one">Nach %2$s kopiert</item>
+        <item quantity="other">%1$d nach %2$s kopiert</item>
+    </plurals>
+    <plurals name="moved_back">
+        <item quantity="one">Zurückverschoben</item>
+        <item quantity="other">%1$d zurückverschoben</item>
+    </plurals>
+    <plurals name="transfer_failed">
+        <item quantity="one">%1$d nicht erlaubt, %2$d erledigt</item>
+        <item quantity="other">%1$d nicht erlaubt, %2$d erledigt</item>
+    </plurals>
+    <plurals name="added_to_album">
+        <item quantity="one">%1$d zu %2$s hinzugefügt</item>
+        <item quantity="other">%1$d zu %2$s hinzugefügt</item>
+    </plurals>
+    <plurals name="tagged">
+        <item quantity="one">Verschlagwortet</item>
+        <item quantity="other">%1$d verschlagwortet</item>
+    </plurals>
+
+    <!-- Private area -->
+    <string name="action_private">Als privat markieren</string>
+    <string name="action_not_private">Nicht mehr privat</string>
+    <string name="private_unlock_first">Erst den privaten Bereich entsperren</string>
+    <string name="private_unlock_area">Privaten Bereich entsperren</string>
+    <string name="private_lock">Privaten Bereich sperren</string>
+    <string name="private_unlocked_now">Entsperrt: private Bilder werden gezeigt</string>
+    <string name="private_locked_now">Gesperrt: private Bilder sind verborgen</string>
+    <string name="private_empty">Noch ist nichts privat</string>
+    <string name="private_unlock_title">Privaten Bereich entsperren</string>
+    <string name="private_unlock_text">Gib dein Nextcloud-Passwort ein.</string>
+    <string name="private_password">Passwort</string>
+    <string name="private_unlock">Entsperren</string>
+    <string name="private_unlock_hint">Er bleibt eine Weile entsperrt, bis du ihn sperrst oder die App schließt. Nach mehreren falschen Passwörtern bremst Nextcloud Anmeldungen aus diesem Netz.</string>
+    <string name="private_wrong_password">Das Passwort stimmt nicht.</string>
+    <string name="private_too_many">Zu viele Versuche. In ein paar Minuten noch einmal.</string>
+    <string name="duplicates_title">Duplikate</string>
+    <string name="duplicates_subtitle">Gleiche oder fast gleiche Bilder</string>
+    <plurals name="made_private">
+        <item quantity="one">Als privat markiert</item>
+        <item quantity="other">%1$d als privat markiert</item>
+    </plurals>
+    <plurals name="made_private_hidden">
+        <item quantity="one">Privat: verborgen bis zum Entsperren</item>
+        <item quantity="other">%1$d privat: verborgen bis zum Entsperren</item>
+    </plurals>
+    <plurals name="made_public">
+        <item quantity="one">Nicht mehr privat</item>
+        <item quantity="other">%1$d nicht mehr privat</item>
+    </plurals>
+
+    <!-- Map -->
+    <string name="tab_map">Karte</string>
+    <string name="map_empty">Noch keine Bilder mit Ort</string>
+    <string name="map_zoom_in">Hinzoomen</string>
+    <plurals name="map_here">
+        <item quantity="one">%1$s Foto hier</item>
+        <item quantity="other">%1$s Fotos hier</item>
+    </plurals>
+
+    <!-- Duplicates -->
+    <string name="duplicates_none">Keine Duplikate gefunden.</string>
+    <string name="duplicates_how">Markierte Bilder bleiben, die anderen kommen in den Papierkorb. Tipp auf ein Bild, um es anzusehen.</string>
+    <string name="duplicates_keep">Behalten</string>
+    <string name="duplicates_dismiss">Keine Duplikate</string>
+    <string name="duplicates_dismiss_text">Immich vergisst diese Gruppe. Beide Bilder bleiben in der Galerie.</string>
+    <string name="duplicates_more">Mehr zeigen</string>
+    <plurals name="duplicates_intro">
+        <item quantity="one">%1$d Gruppe gleicher oder fast gleicher Bilder.</item>
+        <item quantity="other">%1$d Gruppen gleicher oder fast gleicher Bilder.</item>
+    </plurals>
+    <plurals name="duplicates_delete">
+        <item quantity="one">%1$d löschen</item>
+        <item quantity="other">%1$d löschen</item>
+    </plurals>
+
+    <!-- Similar -->
+    <string name="action_similar_short">Ähnliche</string>
+    <string name="similar_one">Ein Bild auswählen</string>
 </resources>

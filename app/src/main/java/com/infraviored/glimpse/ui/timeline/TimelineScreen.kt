@@ -94,6 +94,10 @@ class TimelineVm(private val api: Api) : ViewModel() {
 
     init {
         paged.loadMore()
+        reloadMemories()
+    }
+
+    fun reloadMemories() {
         viewModelScope.loadInto({}, { api.memories(LocalDate.now().toString()) }) { memories = it.filter { m -> m.items.isNotEmpty() } }
     }
 
@@ -130,6 +134,14 @@ fun TimelineScreen(
     val items = all.filterNot { it.fileId in app.deleted }
     val sections = remember(items) { byMonth(items, unknown) }
     LaunchedEffect(paged.lastPage) { vm.rememberYears() }
+    // Locked or unlocked: other pictures are visible now
+    val privateVersion = app.privateVersion
+    LaunchedEffect(privateVersion) {
+        if (privateVersion > 0) {
+            vm.jump(vm.jumpedTo)
+            vm.reloadMemories()
+        }
+    }
 
     // The year of the pictures at the top of the screen, for the scrubber's resting label
     val visibleYear by remember(sections) {

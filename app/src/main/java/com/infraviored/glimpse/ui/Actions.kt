@@ -41,6 +41,133 @@ class PhotoActions(
 ) {
     /** Pictures waiting for the user to confirm deleting them. */
     var confirmDelete by mutableStateOf<List<Item>?>(null)
+
+    /** Pictures for which a folder is being picked, and whether they are copied there. */
+    var transferFor by mutableStateOf<List<Item>?>(null)
+    var transferCopy by mutableStateOf(false)
+    var albumFor by mutableStateOf<List<Item>?>(null)
+    var tagFor by mutableStateOf<List<Item>?>(null)
+
+    fun pickFolder(items: List<Item>, copy: Boolean) {
+        if (items.isEmpty()) return
+        transferCopy = copy
+        transferFor = items
+    }
+
+    fun recentFolders(): List<String> =
+        context.getSharedPreferences("actions", Context.MODE_PRIVATE).getString("folders", "").orEmpty().split('\n').filter { it.isNotBlank() }
+
+    private fun rememberFolder(path: String) {
+        context.getSharedPreferences("actions", Context.MODE_PRIVATE).edit()
+            .putString("folders", com.infraviored.glimpse.data.Paths.recent(recentFolders(), path).joinToString("\n")).apply()
+    }
+
+    /** Move or copy into [target]; a move can be undone from the notice. */
+    fun transfer(items: List<Item>, target: String, copy: Boolean, onDone: () -> Unit = {}) {
+        if (items.isEmpty() || busy) return
+        busy = true
+        scope.launch {
+            try {
+                val result = api.transfer(items, target, copy)
+                rememberFolder(target)
+                transferFor = null
+                onDone()
+                val folder = com.infraviored.glimpse.data.Paths.name(target).ifEmpty { context.getString(R.string.folder_root) }
+                val text = when {
+                    result.failed.isNotEmpty() -> context.resources.getQuantityString(R.plurals.transfer_failed, result.failed.size, result.failed.size, result.done)
+                    copy -> context.resources.getQuantityString(R.plurals.copied_to, result.done, result.done, folder)
+                    else -> context.resources.getQuantityString(R.plurals.moved_to, result.done, result.done, folder)
+                }
+                if (!copy && result.moved.isNotEmpty()) {
+                    app.notices.show(text, context.getString(R.string.undo)) { undo(result.moved) }
+                } else {
+                    app.notices.show(text)
+                }
+                app.changed()
+            } catch (e: Exception) {
+                app.notices.show(context.getString(R.string.action_failed, e.message ?: e.javaClass.simpleName))
+            } finally {
+                busy = false
+            }
+        }
+    }
+
+    private fun undo(moves: List<com.infraviored.glimpse.data.Moved>) {
+        scope.launch {
+            try {
+                val result = api.undoMove(moves)
+                val text = if (result.failed.isNotEmpty()) {
+                    context.resources.getQuantityString(R.plurals.transfer_failed, result.failed.size, result.failed.size, result.done)
+                } else {
+                    context.resources.getQuantityString(R.plurals.moved_back, result.done, result.done)
+                }
+                app.notices.show(text)
+                app.changed()
+            } catch (e: Exception) {
+                app.notices.show(context.getString(R.string.action_failed, e.message ?: e.javaClass.simpleName))
+            }
+        }
+    }
+
+    /** Private or not; private pictures vanish while the area is locked. */
+    fun setPrivate(items: List<Item>, on: Boolean, onDone: () -> Unit = {}) {
+        if (items.isEmpty()) return
+        scope.launch {
+            try {
+                api.setPrivate(items.map { it.fileId }, on)
+                app.loadPrivate()
+                app.changed()
+                onDone()
+                val locked = app.privateArea?.unlocked != true
+                if (on && locked) app.hidePrivate(items.map { it.fileId })
+                app.notices.show(
+                    context.resources.getQuantityString(
+                        if (!on) R.plurals.made_public else if (locked) R.plurals.made_private_hidden else R.plurals.made_private,
+                        items.size, items.size,
+                    ),
+                )
+            } catch (e: com.infraviored.glimpse.data.ApiException) {
+                app.notices.show(if (e.code == 403) context.getString(R.string.private_unlock_first) else context.getString(R.string.action_failed, e.message))
+            } catch (e: Exception) {
+                app.notices.show(context.getString(R.string.action_failed, e.message ?: e.javaClass.simpleName))
+            }
+        }
+    }
+
+    fun addToAlbum(items: List<Item>, album: String, create: Boolean, onDone: () -> Unit = {}) {
+        if (items.isEmpty() || busy) return
+        busy = true
+        scope.launch {
+            try {
+                if (create) api.createAlbum(album)
+                val added = api.addToAlbum(album, items)
+                albumFor = null
+                onDone()
+                app.notices.show(context.resources.getQuantityString(R.plurals.added_to_album, added, added, album))
+            } catch (e: Exception) {
+                app.notices.show(context.getString(R.string.action_failed, e.message ?: e.javaClass.simpleName))
+            } finally {
+                busy = false
+            }
+        }
+    }
+
+    fun tag(items: List<Item>, tagIds: List<Long>, newTags: List<String>, onDone: () -> Unit = {}) {
+        if (items.isEmpty() || busy) return
+        busy = true
+        scope.launch {
+            try {
+                val result = api.tag(items.map { it.fileId }, tagIds, newTags)
+                tagFor = null
+                onDone()
+                app.notices.show(context.resources.getQuantityString(R.plurals.tagged, result.done, result.done))
+            } catch (e: Exception) {
+                app.notices.show(context.getString(R.string.action_failed, e.message ?: e.javaClass.simpleName))
+            } finally {
+                busy = false
+            }
+        }
+    }
     var busy by mutableStateOf(false)
         private set
 

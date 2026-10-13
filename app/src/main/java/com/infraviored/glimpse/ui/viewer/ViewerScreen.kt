@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
@@ -79,7 +80,12 @@ import com.infraviored.glimpse.R
 import com.infraviored.glimpse.data.Faces
 import com.infraviored.glimpse.data.Item
 import com.infraviored.glimpse.ui.photoBlur
-import com.infraviored.glimpse.ui.DeleteDialog
+import com.infraviored.glimpse.ui.ActionSheets
+import com.infraviored.glimpse.ui.PhotoActions
+import androidx.compose.material.icons.automirrored.outlined.DriveFileMove
+import androidx.compose.material.icons.outlined.FileCopy
+import androidx.compose.material.icons.outlined.PhotoAlbum
+import androidx.compose.material.icons.outlined.Sell
 import com.infraviored.glimpse.ui.LocalApp
 import com.infraviored.glimpse.ui.longDate
 import com.infraviored.glimpse.ui.photoElement
@@ -123,7 +129,7 @@ fun ViewerScreen() {
 
     ImmersiveBars(visible = chrome)
     BackHandler { app.back() }
-    DeleteDialog(actions) {}
+    ActionSheets(actions) {}
 
     val fade = (1f - abs(dismiss.value) / (threshold * 2.5f)).coerceIn(0f, 1f)
     Box(
@@ -169,6 +175,9 @@ fun ViewerScreen() {
                 listOf(
                     BarAction(Icons.Outlined.Share, stringResource(R.string.action_share)) { actions.share(listOf(current)) },
                     BarAction(Icons.Outlined.FavoriteBorder, stringResource(R.string.action_favorite)) { actions.favorite(listOf(current)) },
+                    BarAction(Icons.Outlined.AutoAwesomeMosaic, stringResource(R.string.action_similar_short), enabled = current.id != null) {
+                        current.id?.let { app.search(similar = it, label = current.taken?.let { t -> longDate(t) } ?: current.name) }
+                    },
                     BarAction(Icons.Outlined.Info, stringResource(R.string.action_info)) { info = true },
                     BarAction(Icons.Outlined.Delete, stringResource(R.string.action_delete)) { actions.confirmDelete = listOf(current) },
                 ),
@@ -176,7 +185,7 @@ fun ViewerScreen() {
         }
     }
 
-    if (info) InfoSheet(current, onDismiss = { info = false }, onDownload = { actions.download(listOf(current)) })
+    if (info) InfoSheet(current, actions, onDismiss = { info = false })
 }
 
 @Composable
@@ -240,7 +249,7 @@ private fun TopBar(item: Item, onBack: () -> Unit) {
     }
 }
 
-private class BarAction(val icon: ImageVector, val label: String, val onClick: () -> Unit)
+private class BarAction(val icon: ImageVector, val label: String, val enabled: Boolean = true, val onClick: () -> Unit)
 
 @Composable
 private fun BottomBar(actions: List<BarAction>) {
@@ -254,7 +263,8 @@ private fun BottomBar(actions: List<BarAction>) {
     ) {
         actions.forEach { a ->
             Column(
-                Modifier.clip(RoundedCornerShape(16.dp)).clickable(onClick = a.onClick).padding(horizontal = 14.dp, vertical = 6.dp),
+                Modifier.clip(RoundedCornerShape(16.dp)).clickable(enabled = a.enabled, onClick = a.onClick)
+                    .graphicsLayer { alpha = if (a.enabled) 1f else 0.4f }.padding(horizontal = 10.dp, vertical = 6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Icon(a.icon, null, tint = Color.White)
@@ -268,15 +278,16 @@ private fun BottomBar(actions: List<BarAction>) {
 /** When and where it was taken, who is in it, and what to do from here. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun InfoSheet(item: Item, onDismiss: () -> Unit, onDownload: () -> Unit) {
+private fun InfoSheet(item: Item, actions: PhotoActions, onDismiss: () -> Unit) {
     val app = LocalApp.current
     var faces by remember(item.fileId) { mutableStateOf<Faces?>(null) }
     LaunchedEffect(item.fileId) {
         item.id?.let { id -> faces = runCatching { app.api.faces(id) }.getOrNull() }
     }
-    val folder = item.path.substringBeforeLast('/', "").ifEmpty { "/" }
+    val path = app.api.pathOf(item)
+    val folder = path.substringBeforeLast('/', "").ifEmpty { "/" }
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
-        Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp)) {
+        Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp).verticalScroll(androidx.compose.foundation.rememberScrollState())) {
             item.taken?.let { taken ->
                 Text(longDate(taken), style = MaterialTheme.typography.headlineSmall)
                 Text(shortTime(taken), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -310,14 +321,18 @@ private fun InfoSheet(item: Item, onDismiss: () -> Unit, onDownload: () -> Unit)
                 }
                 Spacer(Modifier.height(16.dp))
             }
-            SheetRow(Icons.Outlined.Folder, item.name, folder) { onDismiss(); app.folder(folder) }
+            SheetRow(Icons.Outlined.Folder, path.substringAfterLast('/'), folder) { onDismiss(); app.folder(folder) }
             if (item.id != null) {
                 SheetRow(Icons.Outlined.AutoAwesomeMosaic, stringResource(R.string.action_similar), null) {
                     onDismiss()
                     app.search(similar = item.id, label = item.taken?.let { longDate(it) } ?: item.name)
                 }
             }
-            SheetRow(Icons.Outlined.Download, stringResource(R.string.action_download), null) { onDismiss(); onDownload() }
+            SheetRow(Icons.Outlined.Download, stringResource(R.string.action_download), null) { onDismiss(); actions.download(listOf(item)) }
+            SheetRow(Icons.AutoMirrored.Outlined.DriveFileMove, stringResource(R.string.action_move), null) { onDismiss(); actions.pickFolder(listOf(item), copy = false) }
+            SheetRow(Icons.Outlined.FileCopy, stringResource(R.string.action_copy), null) { onDismiss(); actions.pickFolder(listOf(item), copy = true) }
+            SheetRow(Icons.Outlined.PhotoAlbum, stringResource(R.string.action_album), null) { onDismiss(); actions.albumFor = listOf(item) }
+            SheetRow(Icons.Outlined.Sell, stringResource(R.string.action_tag), null) { onDismiss(); actions.tagFor = listOf(item) }
         }
     }
 }

@@ -7,11 +7,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.infraviored.glimpse.data.Api
 import com.infraviored.glimpse.data.Item
+import com.infraviored.glimpse.ui.components.Notices
 
 /** What the viewer pages through: the list the picture was opened from. */
 class ViewerRequest(
@@ -31,8 +33,47 @@ class AppState(
 ) {
     var viewer by mutableStateOf<ViewerRequest?>(null)
 
-    /** Pictures deleted anywhere, so every list can drop them. */
+    /** Pictures deleted anywhere (or hidden by the locked private area), so every list can drop them. */
     var deleted by mutableStateOf<Set<Long>>(emptySet())
+
+    /**
+     * Goes up when something changed that lists cannot patch themselves (people renamed or
+     * merged, files moved, the private area locked or unlocked): they load again.
+     */
+    var version by mutableIntStateOf(0)
+        private set
+
+    fun changed() {
+        version++
+    }
+
+    /** The private area as last heard from the server; null until asked. */
+    var privateArea by mutableStateOf<com.infraviored.glimpse.data.PrivateState?>(null)
+
+    /** Goes up when the private area is locked or unlocked: everything visible changes. */
+    var privateVersion by mutableIntStateOf(0)
+        private set
+
+    /** Pictures made private while locked: gone from view until unlocking. */
+    private var hiddenPrivate = emptySet<Long>()
+
+    fun hidePrivate(fileIds: Collection<Long>) {
+        hiddenPrivate = hiddenPrivate + fileIds
+        deleted = deleted + fileIds
+    }
+
+    fun privacyChanged(state: com.infraviored.glimpse.data.PrivateState) {
+        privateArea = state
+        if (state.unlocked) {
+            deleted = deleted - hiddenPrivate
+            hiddenPrivate = emptySet()
+        }
+        privateVersion++
+        version++
+    }
+
+    /** Short messages at the bottom, with Undo where there is one. */
+    val notices = Notices()
 
     fun open(items: List<Item>, item: Item, source: Paged? = null) {
         viewer = ViewerRequest(items, items.indexOf(item).coerceAtLeast(0), source)
@@ -45,6 +86,8 @@ class AppState(
     fun person(id: String) = navigate(Routes.person(id))
 
     fun folder(path: String) = navigate(Routes.folder(path))
+
+    fun duplicates() = navigate(Routes.DUPLICATES)
 }
 
 object Routes {
@@ -53,6 +96,7 @@ object Routes {
     const val SEARCH = "search?q={q}&person={person}&similar={similar}&label={label}"
     const val PERSON = "person/{id}"
     const val FOLDER = "folder?path={path}"
+    const val DUPLICATES = "duplicates"
 
     private fun e(s: String) = android.net.Uri.encode(s)
     fun search(q: String, person: String, similar: String, label: String) =

@@ -90,3 +90,68 @@ data class Faces(val faces: List<Face> = emptyList(), val canManage: Boolean = f
 
 @Serializable
 data class Tag(val id: Long, val name: String)
+
+@Serializable
+data class PersonUpdate(val id: String, val name: String = "", val hidden: Boolean = false, val favorite: Boolean = false)
+
+@Serializable
+data class MovedFaces(
+    val moved: List<String> = emptyList(),
+    val faces: Int = 0,
+    val failed: List<String> = emptyList(),
+    val personId: String? = null,
+)
+
+/** A file that was moved, and where from: enough to move it back. */
+@Serializable
+data class Moved(val fileId: Long, val from: String, val fromName: String? = null)
+
+@Serializable
+data class Failed(val fileId: Long = 0, val name: String = "", val error: String = "")
+
+@Serializable
+data class Transfer(val done: Int = 0, val failed: List<Failed> = emptyList(), val moved: List<Moved> = emptyList())
+
+@Serializable
+data class Done(val done: Int = 0, val failed: List<Failed> = emptyList())
+
+@Serializable
+data class PrivateState(
+    val files: Int = 0,
+    val folderCount: Int = 0,
+    val peopleCount: Int = 0,
+    val unlocked: Boolean = false,
+    val askPassword: Boolean = true,
+)
+
+/** A picture in a duplicate group, with what is needed to choose which to keep. */
+@Serializable
+data class DuplicateItem(
+    val id: String? = null,
+    val fileId: Long,
+    val type: String = "IMAGE",
+    val date: String? = null,
+    val name: String = "",
+    val path: String = "",
+    val mime: String = "",
+    val bytes: Long = 0,
+    val width: Int = 0,
+    val height: Int = 0,
+) {
+    fun toItem() = Item(id, fileId, type, date, name, path, mime)
+}
+
+@Serializable
+data class DuplicateGroup(
+    val id: String,
+    /** Immich's suggestion of what to keep (asset ids). */
+    val keep: List<String> = emptyList(),
+    val items: List<DuplicateItem> = emptyList(),
+) {
+    /** What is kept unless the user says otherwise: Immich's choice, else the largest file. */
+    fun suggestedKeep(): Set<Long> {
+        val suggested = items.filter { it.id != null && it.id in keep }.map { it.fileId }.toSet()
+        if (suggested.isNotEmpty()) return suggested
+        return items.maxByOrNull { it.bytes }?.let { setOf(it.fileId) } ?: emptySet()
+    }
+}
