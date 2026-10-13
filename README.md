@@ -15,10 +15,15 @@
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/app-timeline.png" width="24%" alt="Timeline with year jump">
-  <img src="docs/screenshots/app-search.png" width="24%" alt="Search by content">
+  <img src="docs/screenshots/app-timeline.png" width="24%" alt="Timeline in year bands">
+  <img src="docs/screenshots/app-search.png" width="24%" alt="Search by content: astronaut floating in space">
   <img src="docs/screenshots/app-people.png" width="24%" alt="People">
-  <img src="docs/screenshots/app-viewer.png" width="24%" alt="Full-screen viewer with the people in the photo">
+  <img src="docs/screenshots/app-map.png" width="24%" alt="Map with photo pins">
+</p>
+<p align="center">
+  <img src="docs/screenshots/app-person.png" width="24%" alt="A person's page">
+  <img src="docs/screenshots/app-viewer.png" width="24%" alt="Full-screen viewer">
+  <img src="docs/screenshots/app-login.png" width="24%" alt="Login with your Nextcloud">
 </p>
 
 ---
@@ -30,23 +35,25 @@ Nextcloud decides what you may see.
 ## Features
 
 - **Search by content.** The search lens sits at the bottom of every screen. Describe what is in
-  the picture, narrow the results to photos, videos or a tag, and come back to recent searches.
-- **Timeline.** All your pictures, newest first, with "On this day" memories. Jump to any year,
-  keep scrolling in both directions, and go "Back to today".
-- **People.** Everyone Immich recognised in pictures you can open. Find people by name and open
-  their pictures.
+  the picture, narrow the results to photos, videos, a person or a tag, and come back to recent
+  searches.
+- **Search inside videos.** With "Search inside videos" on in Glimpse, a search also finds the
+  moment in a video: the result shows that still with its time, and the video plays from there.
+- **Timeline.** All your pictures in year bands, newest first, with "On this day" memories. Drag
+  the year scrubber to jump to any year, keep scrolling in both directions, and go "Back to today".
+- **People.** Everyone Immich recognised in pictures you can open. Rename a person in place,
+  favorite or hide them, merge two that are the same, and take wrong pictures out of a person.
+- **Map.** Your geotagged pictures as pins on a map in the app's colours; tap a pin for its
+  pictures. The map tiles come through your Nextcloud.
 - **Folders.** Your Nextcloud folders as galleries.
-- **Viewer.**
-  - zoom into photos and play videos full screen
-  - see who is in a photo
-  - jump to similar photos
-- **Do things with many at once.** Select pictures, then:
-  - share them to other apps
-  - favorite them
-  - download them to *Downloads*
-  - delete them (they go to the Nextcloud trash bin)
-- **Private stays private.** Folders you marked private in Glimpse stay hidden. You unlock them
-  on the web.
+- **Viewer.** Zoom into photos, play videos, see who is in a photo, and jump to similar ones.
+- **Do things with many at once.** Select pictures (long-press), then share, favorite, download,
+  move or copy them to a folder (with undo), add them to an album, tag them, or delete them
+  (they go to the Nextcloud trash bin).
+- **Private area.** Mark pictures private; they only show after you unlock with your Nextcloud
+  password, and lock again with one tap.
+- **Duplicates.** Groups of near-identical pictures, with Immich's pick of what to keep; delete
+  the rest in one go or mark a group as not duplicates.
 - **Light and dark**, following the system setting, in Glimpse's design. English and German.
 
 ## Requirements
