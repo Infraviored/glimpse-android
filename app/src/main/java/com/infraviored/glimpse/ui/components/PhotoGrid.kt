@@ -197,13 +197,17 @@ fun PhotoGrid(
                     YearBand(year)
                 }
             }
+            // Always the item (its key anchors the scroll position), but empty without a title:
+            // search results are one untitled section and start right below the filters
             item(key = "head-${section.key}", span = { GridItemSpan(maxLineSpan) }, contentType = "head") {
-                Text(
-                    section.title,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = glimpse.text,
-                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 10.dp),
-                )
+                if (section.title.isNotEmpty()) {
+                    Text(
+                        section.title,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = glimpse.text,
+                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 10.dp),
+                    )
+                }
             }
             items(section.items, key = { it.fileId }, contentType = { "photo" }) { item ->
                 Thumbnail(
