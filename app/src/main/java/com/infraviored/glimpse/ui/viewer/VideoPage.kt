@@ -66,6 +66,9 @@ fun VideoPage(item: Item, active: Boolean, onTap: () -> Unit) {
     val api = LocalApp.current.api
     val context = LocalContext.current
     var started by remember(item.fileId, item.at) { mutableStateOf(false) }
+    var resumePosition by remember(item.fileId) {
+        mutableLongStateOf(item.at?.let { (it * 1000).toLong().coerceAtLeast(0L) } ?: 0L)
+    }
     val player = remember(item.fileId, item.at, started) {
         if (!started) null else ExoPlayer.Builder(context)
             .setMediaSourceFactory(DefaultMediaSourceFactory(OkHttpDataSource.Factory(api.http)))
@@ -73,14 +76,19 @@ fun VideoPage(item: Item, active: Boolean, onTap: () -> Unit) {
             .build()
             .apply {
                 setMediaItem(MediaItem.fromUri(api.fileUrl(item)))
-                // Found by a search at a moment: start there
-                item.at?.let { seekTo((it * 1000).toLong().coerceAtLeast(0L)) }
+                if (resumePosition > 0L) seekTo(resumePosition)
                 prepare()
                 playWhenReady = true
             }
     }
     DisposableEffect(player) { onDispose { player?.release() } }
-    LaunchedEffect(active) { if (!active) player?.pause() }
+    LaunchedEffect(active) {
+        if (!active && started) {
+            resumePosition = player?.currentPosition ?: resumePosition
+            player?.pause()
+            started = false
+        }
+    }
 
     Box(
         Modifier.fillMaxSize().clickable(interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = onTap),
