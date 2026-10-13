@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">Glimpse</string>
+
+    <!-- Login -->
+    <string name="login_intro">Find any photo by what is in it, who is in it, or when it was taken.</string>
+    <string name="login_server_label">Your Nextcloud</string>
+    <string name="login_server_hint">cloud.example.com</string>
+    <string name="login_connect">Log in</string>
+    <string name="login_cancel">Cancel</string>
+    <string name="login_checking">Checking the server …</string>
+    <string name="login_waiting">Log in in the browser and allow access. Then come back here.</string>
+    <string name="login_checking_glimpse">Logged in. Checking for Glimpse …</string>
+    <string name="login_done_return">Logged in. Come back to the app to continue.</string>
+    <string name="login_privacy">You log in on your Nextcloud\'s own page. The app never sees your password; it gets an app password you can revoke in Nextcloud at any time.</string>
+    <string name="logged_out">Logged out.</string>
+    <string name="error_address">That is not a valid address.</string>
+    <string name="error_unreachable">The server cannot be reached. Check the address and your connection.</string>
+    <string name="error_ssl">The server\'s certificate is not trusted.</string>
+    <string name="error_not_nextcloud">There is no Nextcloud at this address.</string>
+    <string name="error_maintenance">Nextcloud is in maintenance mode right now. Try again in a minute.</string>
+    <string name="error_login_start">Nextcloud did not start the login.</string>
+    <string name="error_login_timeout">The login took too long. Try again.</string>
+    <string name="error_no_browser">No browser found to open the login page.</string>
+    <string name="error_no_glimpse">Glimpse is not installed on this Nextcloud, or not enabled for you. Ask whoever runs it.</string>
+    <string name="error_unexpected">Something went wrong: %1$s</string>
+    <string name="error_session">Your login is no longer valid (the app password was removed). Log in again.</string>
+
+    <!-- Main -->
+    <string name="tab_timeline">Timeline</string>
+    <string name="tab_people">People</string>
+    <string name="tab_folders">Folders</string>
+    <string name="lens_hint">Search your photos</string>
+    <string name="account">Account</string>
+    <string name="account_open_web">Open Glimpse in the browser</string>
+    <string name="account_logout">Log out</string>
+    <string name="back">Back</string>
+    <string name="cancel">Cancel</string>
+    <string name="retry">Try again</string>
+    <string name="hide">Hide</string>
+    <string name="load_failed">Could not load: %1$s</string>
+    <string name="unknown_date">Unknown date</string>
+    <string name="unnamed">Unnamed</string>
+    <string name="timeline_back_to_now">Back to today</string>
+
+    <string name="people_filter">Find a person</string>
+    <string name="people_no_match">Nobody called “%1$s”.</string>
+    <string name="people_unnamed">Not named yet</string>
+
+    <string name="timeline_empty">No pictures found yet. Photos you put in Nextcloud show up here once Glimpse has indexed them.</string>
+    <string name="search_further">Look further back</string>
+    <string name="folder_empty">No pictures in this folder.</string>
+    <string name="folder_private">This folder is private. Unlock the private area in Glimpse on the web to see it.</string>
+    <string name="folder_truncated">Only the first pictures of this folder are shown.</string>
+
+    <string name="search_clear">Clear</string>
+    <string name="search_forget">Remove from recent searches</string>
+    <string name="search_recent">Recent</string>
+    <string name="search_tags">Tags</string>
+    <string name="search_intro">Describe what is in the picture: a beach at sunset, a red bicycle, a birthday cake.</string>
+    <string name="search_nothing">Nothing found</string>
+    <string name="search_nothing_hint">Try other words, or fewer filters.</string>
+    <string name="search_similar_to">Like the photo from %1$s</string>
+    <string name="kind_all">All</string>
+    <string name="kind_photos">Photos</string>
+    <string name="kind_videos">Videos</string>
+
+    <!-- Actions -->
+    <string name="selection_clear">Clear selection</string>
+    <string name="action_share">Share</string>
+    <string name="action_favorite">Favorite</string>
+    <string name="action_download">Download</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_info">Info</string>
+    <string name="action_similar">Show similar photos</string>
+    <string name="action_failed">That did not work: %1$s</string>
+    <string name="share_too_many">Share at most %1$d at once.</string>
+    <string name="delete_text">They go to the Nextcloud trash bin and can be restored from there.</string>
+    <string name="info_people">In this photo</string>
+    <string name="video_play">Play</string>
+    <string name="video_pause">Pause</string>
+
+    <plurals name="pictures">
+        <item quantity="one">%1$s photo</item>
+        <item quantity="other">%1$s photos</item>
+    </plurals>
+    <plurals name="years_ago">
+        <item quantity="one">%1$d year ago</item>
+        <item quantity="other">%1$d years ago</item>
+    </plurals>
+    <plurals name="selected_count">
+        <item quantity="one">%1$d selected</item>
+        <item quantity="other">%1$d selected</item>
+    </plurals>
+    <plurals name="people_show_unnamed">
+        <item quantity="one">Show %1$d</item>
+        <item quantity="other">Show all %1$d</item>
+    </plurals>
+    <plurals name="share_preparing">
+        <item quantity="one">Getting the file …</item>
+        <item quantity="other">Getting %1$d files …</item>
+    </plurals>
+    <plurals name="download_started">
+        <item quantity="one">Downloading …</item>
+        <item quantity="other">Downloading %1$d files …</item>
+    </plurals>
+    <plurals name="download_done">
+        <item quantity="one">Saved to Downloads/Glimpse</item>
+        <item quantity="other">%1$d files saved to Downloads/Glimpse</item>
+    </plurals>
+    <plurals name="favorited">
+        <item quantity="one">Added to favorites</item>
+        <item quantity="other">%1$d added to favorites</item>
+    </plurals>
+    <plurals name="unfavorited">
+        <item quantity="one">Removed from favorites</item>
+        <item quantity="other">%1$d removed from favorites</item>
+    </plurals>
+    <plurals name="deleted">
+        <item quantity="one">Deleted</item>
+        <item quantity="other">%1$d deleted</item>
+    </plurals>
+    <plurals name="delete_title">
+        <item quantity="one">Delete this photo?</item>
+        <item quantity="other">Delete %1$d photos?</item>
+    </plurals>
+</resources>

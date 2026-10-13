@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="login_intro">Finde jedes Foto über das, was darauf ist, wer darauf ist oder wann es entstand.</string>
+    <string name="login_server_label">Deine Nextcloud</string>
+    <string name="login_server_hint">cloud.example.com</string>
+    <string name="login_connect">Anmelden</string>
+    <string name="login_cancel">Abbrechen</string>
+    <string name="login_checking">Server wird geprüft …</string>
+    <string name="login_waiting">Melde dich im Browser an und erlaube den Zugriff. Komm dann hierher zurück.</string>
+    <string name="login_checking_glimpse">Angemeldet. Glimpse wird gesucht …</string>
+    <string name="login_done_return">Angemeldet. Komm zurück in die App, um weiterzumachen.</string>
+    <string name="login_privacy">Du meldest dich auf der Seite deiner Nextcloud an. Die App sieht dein Passwort nie; sie bekommt ein App-Passwort, das du in der Nextcloud jederzeit sperren kannst.</string>
+    <string name="logged_out">Abgemeldet.</string>
+    <string name="error_address">Das ist keine gültige Adresse.</string>
+    <string name="error_unreachable">Der Server ist nicht erreichbar. Prüfe die Adresse und deine Verbindung.</string>
+    <string name="error_ssl">Dem Zertifikat des Servers wird nicht vertraut.</string>
+    <string name="error_not_nextcloud">Unter dieser Adresse ist keine Nextcloud.</string>
+    <string name="error_maintenance">Die Nextcloud ist gerade im Wartungsmodus. Versuch es in einer Minute noch einmal.</string>
+    <string name="error_login_start">Die Nextcloud hat die Anmeldung nicht gestartet.</string>
+    <string name="error_login_timeout">Die Anmeldung hat zu lange gedauert. Versuch es noch einmal.</string>
+    <string name="error_no_browser">Kein Browser gefunden, um die Anmeldeseite zu öffnen.</string>
+    <string name="error_no_glimpse">Glimpse ist in dieser Nextcloud nicht installiert oder für dich nicht freigegeben. Frag, wer sie betreibt.</string>
+    <string name="error_unexpected">Etwas ist schiefgelaufen: %1$s</string>
+    <string name="error_session">Deine Anmeldung gilt nicht mehr (das App-Passwort wurde entfernt). Melde dich neu an.</string>
+
+    <string name="tab_timeline">Zeitleiste</string>
+    <string name="tab_people">Personen</string>
+    <string name="tab_folders">Ordner</string>
+    <string name="lens_hint">Fotos durchsuchen</string>
+    <string name="account">Konto</string>
+    <string name="account_open_web">Glimpse im Browser öffnen</string>
+    <string name="account_logout">Abmelden</string>
+    <string name="back">Zurück</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="retry">Erneut versuchen</string>
+    <string name="hide">Ausblenden</string>
+    <string name="load_failed">Laden fehlgeschlagen: %1$s</string>
+    <string name="unknown_date">Datum unbekannt</string>
+    <string name="unnamed">Ohne Namen</string>
+    <string name="timeline_back_to_now">Zurück zu heute</string>
+
+    <string name="people_filter">Person finden</string>
+    <string name="people_no_match">Niemand heißt „%1$s“.</string>
+    <string name="people_unnamed">Noch ohne Namen</string>
+
+    <string name="timeline_empty">Noch keine Bilder gefunden. Fotos, die du in Nextcloud ablegst, erscheinen hier, sobald Glimpse sie erfasst hat.</string>
+    <string name="search_further">Weiter zurück suchen</string>
+    <string name="folder_empty">Keine Bilder in diesem Ordner.</string>
+    <string name="folder_private">Dieser Ordner ist privat. Entsperre den privaten Bereich in Glimpse im Browser, um ihn zu sehen.</string>
+    <string name="folder_truncated">Es werden nur die ersten Bilder dieses Ordners gezeigt.</string>
+
+    <string name="search_clear">Leeren</string>
+    <string name="search_forget">Aus den letzten Suchen entfernen</string>
+    <string name="search_recent">Zuletzt gesucht</string>
+    <string name="search_tags">Schlagwörter</string>
+    <string name="search_intro">Beschreib, was auf dem Bild ist: Strand im Sonnenuntergang, rotes Fahrrad, Geburtstagstorte.</string>
+    <string name="search_nothing">Nichts gefunden</string>
+    <string name="search_nothing_hint">Versuch andere Wörter oder weniger Filter.</string>
+    <string name="search_similar_to">Wie das Foto vom %1$s</string>
+    <string name="kind_all">Alle</string>
+    <string name="kind_photos">Fotos</string>
+    <string name="kind_videos">Videos</string>
+
+    <string name="selection_clear">Auswahl aufheben</string>
+    <string name="action_share">Teilen</string>
+    <string name="action_favorite">Favorit</string>
+    <string name="action_download">Herunterladen</string>
+    <string name="action_delete">Löschen</string>
+    <string name="action_info">Info</string>
+    <string name="action_similar">Ähnliche Fotos zeigen</string>
+    <string name="action_failed">Das hat nicht geklappt: %1$s</string>
+    <string name="share_too_many">Teile höchstens %1$d auf einmal.</string>
+    <string name="delete_text">Sie landen im Papierkorb der Nextcloud und lassen sich von dort wiederherstellen.</string>
+    <string name="info_people">Auf diesem Foto</string>
+    <string name="video_play">Abspielen</string>
+    <string name="video_pause">Pause</string>
+
+    <plurals name="pictures">
+        <item quantity="one">%1$s Foto</item>
+        <item quantity="other">%1$s Fotos</item>
+    </plurals>
+    <plurals name="years_ago">
+        <item quantity="one">Vor %1$d Jahr</item>
+        <item quantity="other">Vor %1$d Jahren</item>
+    </plurals>
+    <plurals name="selected_count">
+        <item quantity="one">%1$d ausgewählt</item>
+        <item quantity="other">%1$d ausgewählt</item>
+    </plurals>
+    <plurals name="people_show_unnamed">
+        <item quantity="one">%1$d zeigen</item>
+        <item quantity="other">Alle %1$d zeigen</item>
+    </plurals>
+    <plurals name="share_preparing">
+        <item quantity="one">Datei wird geholt …</item>
+        <item quantity="other">%1$d Dateien werden geholt …</item>
+    </plurals>
+    <plurals name="download_started">
+        <item quantity="one">Wird heruntergeladen …</item>
+        <item quantity="other">%1$d Dateien werden heruntergeladen …</item>
+    </plurals>
+    <plurals name="download_done">
+        <item quantity="one">In Downloads/Glimpse gespeichert</item>
+        <item quantity="other">%1$d Dateien in Downloads/Glimpse gespeichert</item>
+    </plurals>
+    <plurals name="favorited">
+        <item quantity="one">Zu Favoriten hinzugefügt</item>
+        <item quantity="other">%1$d zu Favoriten hinzugefügt</item>
+    </plurals>
+    <plurals name="unfavorited">
+        <item quantity="one">Aus Favoriten entfernt</item>
+        <item quantity="other">%1$d aus Favoriten entfernt</item>
+    </plurals>
+    <plurals name="deleted">
+        <item quantity="one">Gelöscht</item>
+        <item quantity="other">%1$d gelöscht</item>
+    </plurals>
+    <plurals name="delete_title">
+        <item quantity="one">Dieses Foto löschen?</item>
+        <item quantity="other">%1$d Fotos löschen?</item>
+    </plurals>
+</resources>
