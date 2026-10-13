@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -117,10 +118,21 @@ fun TimelineGrid(
     // the user has scrolled up since: a year with few pictures fits on the screen, its top
     // stays in view whatever is added above, and every page would load the next one.
     var newerArmed by remember(vm.jumpedTo) { mutableStateOf(true) }
+    LaunchedEffect(vm.jumpedTo, newer.loaded) {
+        if (!newer.loaded) newerArmed = true
+    }
     LaunchedEffect(vm.jumpedTo) {
+        if (vm.jumpedTo == null) return@LaunchedEffect
         // every step of the user's scrolling up counts, also within one long fling
-        snapshotFlow { Triple(gridState.isScrollInProgress && gridState.lastScrolledBackward, gridState.firstVisibleItemIndex, gridState.firstVisibleItemScrollOffset) }
-            .collect { (up) -> if (up) newerArmed = true }
+        snapshotFlow {
+            val arm = shouldArmNewer(
+                isScrollInProgress = gridState.isScrollInProgress,
+                scrolledBackward = gridState.lastScrolledBackward,
+                canScrollBackward = gridState.canScrollBackward,
+                canScrollForward = gridState.canScrollForward,
+            )
+            Triple(arm, gridState.firstVisibleItemScrollOffset, newer.items.size)
+        }.collect { (arm) -> if (arm) newerArmed = true }
     }
     LaunchedEffect(vm.jumpedTo) {
         if (vm.jumpedTo == null) return@LaunchedEffect
@@ -154,6 +166,12 @@ fun TimelineGrid(
                     if (vm.jumpedTo != null && newer.loading) {
                         Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
                             CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 2.5.dp, color = glimpse.muted)
+                        }
+                    } else if (vm.jumpedTo != null && newer.error != null) {
+                        Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                            TextButton(onClick = { newer.loadMore() }) {
+                                Text(stringResource(R.string.retry), color = glimpse.muted)
+                            }
                         }
                     }
                 }

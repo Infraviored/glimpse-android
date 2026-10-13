@@ -2,7 +2,9 @@ package com.infraviored.glimpse.ui.timeline
 
 import com.infraviored.glimpse.data.Item
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class TimelineLogicTest {
@@ -82,5 +84,50 @@ class TimelineLogicTest {
         assertEquals(4, anchorIndex(newer, older, emptySet(), "head-2020-01", "?"))
         assertEquals(6, anchorIndex(newer, older, emptySet(), "year-2019-12", "?"))
         assertEquals(7, anchorIndex(newer, older, emptySet(), "head-2019-12", "?"))
+    }
+
+    @Test
+    fun contentFittingScreenArmsWithoutScrolling() {
+        // Fits entirely on screen: neither backward nor forward scroll possible
+        assertTrue(shouldArmNewer(isScrollInProgress = false, scrolledBackward = false, canScrollBackward = false, canScrollForward = false))
+        assertTrue(shouldArmNewer(isScrollInProgress = true, scrolledBackward = false, canScrollBackward = false, canScrollForward = false))
+    }
+
+    @Test
+    fun draggingAtTopBoundaryArms() {
+        // At the top of an overflowing list: cannot scroll backward, user dragging downwards
+        assertTrue(shouldArmNewer(isScrollInProgress = true, scrolledBackward = false, canScrollBackward = false, canScrollForward = true))
+    }
+
+    @Test
+    fun idleAtTopBoundaryDoesNotArm() {
+        // Overflowing list at top boundary without user interaction
+        assertFalse(shouldArmNewer(isScrollInProgress = false, scrolledBackward = false, canScrollBackward = false, canScrollForward = true))
+    }
+
+    @Test
+    fun scrollingBackwardArmsWhenContentScrollable() {
+        // Middle of list, user scrolling up / backward
+        assertTrue(shouldArmNewer(isScrollInProgress = true, scrolledBackward = true, canScrollBackward = true, canScrollForward = true))
+    }
+
+    @Test
+    fun scrollingForwardDoesNotArmWhenContentScrollable() {
+        // Middle of list, user scrolling down / forward
+        assertFalse(shouldArmNewer(isScrollInProgress = true, scrolledBackward = false, canScrollBackward = true, canScrollForward = true))
+    }
+
+    @Test
+    fun idleDoesNotArmWhenContentScrollable() {
+        // Middle of list, stationary
+        assertFalse(shouldArmNewer(isScrollInProgress = false, scrolledBackward = false, canScrollBackward = true, canScrollForward = true))
+        assertFalse(shouldArmNewer(isScrollInProgress = false, scrolledBackward = true, canScrollBackward = true, canScrollForward = true))
+    }
+
+    @Test
+    fun bottomBoundaryScrollBehavior() {
+        // At bottom of list: backward scroll arms, forward does not
+        assertTrue(shouldArmNewer(isScrollInProgress = true, scrolledBackward = true, canScrollBackward = true, canScrollForward = false))
+        assertFalse(shouldArmNewer(isScrollInProgress = true, scrolledBackward = false, canScrollBackward = true, canScrollForward = false))
     }
 }
