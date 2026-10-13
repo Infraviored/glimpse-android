@@ -146,11 +146,20 @@ fun TimelineScreen(
     }
     LaunchedEffect(newer.items) {
         val added = newer.items
-        val first = gridState.layoutInfo.visibleItemsInfo.firstOrNull()
-        if (added.size > shownNewer.size && first != null && first.index > 0) {
-            val after = byMonth((added.asReversed() + paged.items).filterNot { it.fileId in app.deleted }, unknown)
-            val index = gridKeys(after).indexOf(first.key)
-            if (index >= 0) gridState.requestScrollToItem(index + 1, gridState.firstVisibleItemScrollOffset)
+        if (added.size > shownNewer.size) {
+            val visiblePhoto = gridState.layoutInfo.visibleItemsInfo.firstOrNull { it.contentType == "photo" && it.key is Long }
+            val anchorKey = (visiblePhoto?.key as? Long)
+                ?: (shownNewer.lastOrNull { it.fileId !in app.deleted } ?: paged.items.firstOrNull { it.fileId !in app.deleted })?.fileId
+            if (anchorKey != null) {
+                val after = byMonth((added.asReversed() + paged.items).filterNot { it.fileId in app.deleted }, unknown)
+                val index = gridKeys(after).indexOf(anchorKey)
+                val offset = if (visiblePhoto != null && visiblePhoto.index == gridState.firstVisibleItemIndex) {
+                    gridState.firstVisibleItemScrollOffset
+                } else {
+                    0
+                }
+                if (index >= 0) gridState.requestScrollToItem(index + 1, offset)
+            }
         }
         shownNewer = added
     }
