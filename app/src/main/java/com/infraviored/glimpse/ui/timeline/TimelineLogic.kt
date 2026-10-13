@@ -51,3 +51,19 @@ internal fun anchorIndex(newer: List<Item>, older: List<Item>, deleted: Set<Long
     val index = gridKeys(sections).indexOf(anchorKey)
     return if (index < 0) -1 else index + HEADER_ITEMS
 }
+
+/**
+ * Whether newer-page loading should be armed:
+ * - Content fits entirely on screen (!canScrollBackward && !canScrollForward), so pages
+ *   may load until the viewport is filled (bounded cascade).
+ * - User is scrolling/dragging (isScrollInProgress) and either moving backward (upwards)
+ *   or already at the top boundary (!canScrollBackward), where dragging means "show me newer".
+ */
+internal fun shouldArmNewer(
+    isScrollInProgress: Boolean,
+    scrolledBackward: Boolean,
+    canScrollBackward: Boolean,
+    canScrollForward: Boolean,
+): Boolean = (!canScrollBackward && !canScrollForward) ||
+    (isScrollInProgress && (scrolledBackward || !canScrollBackward))
+
