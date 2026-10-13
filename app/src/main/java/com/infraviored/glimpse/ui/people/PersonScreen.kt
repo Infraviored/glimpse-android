@@ -159,7 +159,12 @@ fun PersonScreen(id: String) {
     val extra = if (vm.canManage && person != null) {
         listOf(
             DockAction(Icons.Outlined.PersonRemove, stringResource(R.string.not_person_action, name), stringResource(R.string.not_person_action_hint)) {
-                notPerson = items.filter { it.fileId in selection.ids && it.id != null }
+                val movable = items.filter { it.fileId in selection.ids && it.id != null }
+                if (movable.isNotEmpty()) {
+                    notPerson = movable
+                } else {
+                    app.notices.show(context.getString(R.string.action_failed, context.getString(R.string.not_person_noface)))
+                }
             },
         )
     } else {
@@ -182,7 +187,7 @@ fun PersonScreen(id: String) {
     }
 
     val chosen = notPerson
-    if (chosen != null && person != null) {
+    if (!chosen.isNullOrEmpty() && person != null) {
         NotPersonSheet(
             person = person,
             count = chosen.size,
