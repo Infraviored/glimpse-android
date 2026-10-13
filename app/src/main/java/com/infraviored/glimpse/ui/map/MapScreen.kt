@@ -329,18 +329,27 @@ private fun PlaceSheet(markers: List<Marker>, onZoom: () -> Unit, onDismiss: () 
 
 /**
  * OpenStreetMap's colours would shout next to the photos: the map is turned into the app's
- * own two tones, night blue to mist (or paper to slate in the light theme), by lightness.
+ * own two tones by lightness. Dark: land (nearly white in OSM) becomes the raised night blue,
+ * water, parks and labels rise towards mist, stretched so the map stays readable.
+ * Light: paper to slate.
  */
 fun mapTint(dark: Boolean): ColorFilter {
-    val (lo, hi) = if (dark) Palette.Night to Palette.Mist else Palette.Slate to Palette.Paper
     val r = 0.299f; val g = 0.587f; val b = 0.114f
     val rows = FloatArray(20)
-    listOf(lo.red to hi.red, lo.green to hi.green, lo.blue to hi.blue).forEachIndexed { i, (l, hh) ->
-        val d = hh - l
-        if (dark) {
-            // light land becomes dark: out = hi - d * lightness
-            rows[i * 5] = -d * r; rows[i * 5 + 1] = -d * g; rows[i * 5 + 2] = -d * b; rows[i * 5 + 4] = hh * 255f
-        } else {
+    if (dark) {
+        val lo = Palette.Raised
+        val hi = Palette.Mist
+        val stretch = 3f
+        listOf(lo.red to hi.red, lo.green to hi.green, lo.blue to hi.blue).forEachIndexed { i, (l, hh) ->
+            val d = (hh - l) * stretch
+            // out = lo + stretch * (hi - lo) * (1 - lightness), clamped by the filter
+            rows[i * 5] = -d * r; rows[i * 5 + 1] = -d * g; rows[i * 5 + 2] = -d * b; rows[i * 5 + 4] = (l + d) * 255f
+        }
+    } else {
+        val lo = Palette.Slate
+        val hi = Palette.Paper
+        listOf(lo.red to hi.red, lo.green to hi.green, lo.blue to hi.blue).forEachIndexed { i, (l, hh) ->
+            val d = hh - l
             rows[i * 5] = d * r; rows[i * 5 + 1] = d * g; rows[i * 5 + 2] = d * b; rows[i * 5 + 4] = l * 255f
         }
     }

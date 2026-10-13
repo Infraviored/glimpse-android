@@ -61,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.infraviored.glimpse.R
 import com.infraviored.glimpse.data.Item
+import com.infraviored.glimpse.ui.clock
 import com.infraviored.glimpse.ui.photoBlur
 import com.infraviored.glimpse.ui.LocalApp
 import com.infraviored.glimpse.ui.Section
@@ -196,13 +197,17 @@ fun PhotoGrid(
                     YearBand(year)
                 }
             }
+            // Always the item (its key anchors the scroll position), but empty without a title:
+            // search results are one untitled section and start right below the filters
             item(key = "head-${section.key}", span = { GridItemSpan(maxLineSpan) }, contentType = "head") {
-                Text(
-                    section.title,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = glimpse.text,
-                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 10.dp),
-                )
+                if (section.title.isNotEmpty()) {
+                    Text(
+                        section.title,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = glimpse.text,
+                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 10.dp),
+                    )
+                }
             }
             items(section.items, key = { it.fileId }, contentType = { "photo" }) { item ->
                 Thumbnail(
@@ -285,13 +290,29 @@ fun Thumbnail(
                 .clip(RoundedCornerShape(corner))
                 .photoElement(item.fileId).photoBlur(),
         )
-        if (item.isVideo) {
+        if (item.isVideo && item.at != null) {
+            // Found inside the video: the mark says where
+            Row(
+                Modifier
+                    .align(Alignment.BottomEnd)
+                    .scale(inset)
+                    .padding(6.dp)
+                    .background(Color.Black.copy(alpha = 0.55f), RoundedCornerShape(12.dp))
+                    .padding(start = 3.dp, end = 8.dp, top = 2.dp, bottom = 2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                Icon(Icons.Filled.PlayArrow, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                Text(clock(item.at.toLong()), color = Color.White, style = MaterialTheme.typography.labelSmall, maxLines = 1, softWrap = false)
+            }
+        } else if (item.isVideo) {
             Icon(
                 Icons.Filled.PlayArrow,
                 contentDescription = null,
                 tint = Color.White,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
+                    .scale(inset)
                     .padding(6.dp)
                     .size(20.dp)
                     .background(Color.Black.copy(alpha = 0.35f), CircleShape)

@@ -97,12 +97,12 @@ class Api(val account: Account) {
 
     /** Grid size: Immich's small thumbnail; for files Immich has not indexed, Nextcloud's preview. */
     fun thumbnailUrl(item: Item): String =
-        item.id?.let { appUrl("/api/assets/${enc(it)}/thumbnail") }
+        (item.thumbId ?: item.id)?.let { appUrl("/api/assets/${enc(it)}/thumbnail") }
             ?: "${account.server}/index.php/core/preview?fileId=${item.fileId}&x=256&y=256&a=1&mimeFallback=true"
 
     /** Screen size (about 1440 px). */
     fun previewUrl(item: Item): String =
-        item.id?.let { appUrl("/api/assets/${enc(it)}/thumbnail?size=preview") }
+        (item.thumbId ?: item.id)?.let { appUrl("/api/assets/${enc(it)}/thumbnail?size=preview") }
             ?: "${account.server}/index.php/core/preview?fileId=${item.fileId}&x=2048&y=2048&a=1&mimeFallback=true"
 
     fun faceUrl(personId: String): String = appUrl("/api/people/${enc(personId)}/face")

@@ -16,6 +16,10 @@ data class Item(
     val name: String = "",
     val path: String = "",
     val mime: String = "",
+    /** A video found by one of its stills: the second the search found it at */
+    val at: Double? = null,
+    /** That still, shown instead of the video's own thumbnail */
+    val thumbId: String? = null,
 ) {
     val isVideo: Boolean get() = type == "VIDEO" || mime.startsWith("video/")
 
