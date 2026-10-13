@@ -29,6 +29,13 @@ internal fun timelineItems(jumped: Boolean, newer: List<Item>, older: List<Item>
 }
 
 /**
+ * Paging source for the viewer: after a jump the timeline combines newer and older
+ * sets that a single [Paged] cannot represent, so the viewer receives the snapshot items.
+ */
+internal fun <T> viewerSource(jumped: Boolean, source: T?): T? = if (jumped) null else source
+
+
+/**
  * The picture to hold in place when no photo is on screen: the topmost newer one shown so far
  * (the last the server sent), else the first one from the jump point.
  */

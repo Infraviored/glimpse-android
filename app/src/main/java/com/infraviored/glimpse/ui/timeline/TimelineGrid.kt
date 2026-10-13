@@ -123,7 +123,7 @@ fun TimelineGrid(
         PhotoGrid(
             sections = sections,
             selection = selection,
-            onOpen = { app.open(items, it, paged) },
+            onOpen = { app.open(items, it, viewerSource(vm.jumpedTo != null, paged)) },
             state = gridState,
             loading = paged.loading,
             error = paged.error,

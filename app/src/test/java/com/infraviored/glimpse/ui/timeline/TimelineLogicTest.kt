@@ -52,6 +52,13 @@ class TimelineLogicTest {
     }
 
     @Test
+    fun viewerSourceOmittedWhenJumped() {
+        assertNull(viewerSource(true, "dummy-paged"))
+        assertEquals("dummy-paged", viewerSource(false, "dummy-paged"))
+    }
+
+
+    @Test
     fun fallbackAnchorIsTheTopmostPictureShown() {
         // The newest of the newer pictures shown so far (last from the server) sits on top
         assertEquals(4L, fallbackAnchor(newer, older, emptySet()))
