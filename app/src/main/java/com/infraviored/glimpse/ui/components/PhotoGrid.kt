@@ -1,6 +1,5 @@
 package com.infraviored.glimpse.ui.components
 
-import kotlinx.coroutines.flow.first
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -107,6 +106,8 @@ fun PhotoGrid(
     onLoadMore: () -> Unit = {},
     contentPadding: PaddingValues = PaddingValues(),
     columnsKey: String = "grid",
+    gridKey: String = columnsKey,
+    headerCount: Int = 0,
     empty: String? = null,
     header: LazyGridScope.() -> Unit = {},
 ) {
@@ -114,21 +115,27 @@ fun PhotoGrid(
 
     // Back from the viewer: the picture last shown there is in view, wherever swiping led
     val app = LocalApp.current
-    val latestSections by rememberUpdatedState(sections)
-    LaunchedEffect(Unit) {
-        val id = app.lastViewed ?: return@LaunchedEffect
-        app.lastViewed = null
-        val total = snapshotFlow { state.layoutInfo.totalItemsCount }.first { it > 0 }
-        val info = state.layoutInfo
-        val shown = info.visibleItemsInfo.firstOrNull { it.key == id }
-        if (shown != null && shown.offset.y >= info.viewportStartOffset && shown.offset.y + shown.size.height <= info.viewportEndOffset) return@LaunchedEffect
-        val keys = gridKeys(latestSections)
-        val index = keys.indexOf(id)
-        if (index < 0) return@LaunchedEffect
-        // Items before the sections (screen headers) and the one footer after them
-        val headerItems = (total - keys.size - 1).coerceAtLeast(0)
-        state.scrollToItem(headerItems + index)
-        state.scrollBy(-info.viewportSize.height / 3f)
+    val target = app.lastViewed
+    if (target != null && target.gridKey == gridKey) {
+        val targetId = target.fileId
+        LaunchedEffect(targetId, sections) {
+            val itemIndex = photoGridItemIndex(sections, targetId, headerCount)
+            if (itemIndex < 0) {
+                if (!loading) app.lastViewed = null
+                return@LaunchedEffect
+            }
+            app.lastViewed = null
+            val info = state.layoutInfo
+            val shown = info.visibleItemsInfo.firstOrNull { it.key == targetId }
+            if (shown != null && shown.offset.y >= info.viewportStartOffset && shown.offset.y + shown.size.height <= info.viewportEndOffset) {
+                return@LaunchedEffect
+            }
+            state.scrollToItem(itemIndex)
+            val height = state.layoutInfo.viewportSize.height
+            if (height > 0) {
+                state.scrollBy(-height / 3f)
+            }
+        }
     }
     val haptics = LocalHapticFeedback.current
     val all = remember(sections) { sections.flatMap { it.items } }
@@ -269,6 +276,16 @@ fun gridKeys(sections: List<Section>): List<Any> = buildList {
         add("head-${section.key}")
         section.items.forEach { add(it.fileId) }
     }
+}
+
+/**
+ * Where the item [fileId] sits in the grid, counting [headerCount] items before the sections;
+ * -1 if it is not in [sections].
+ */
+fun photoGridItemIndex(sections: List<Section>, fileId: Long, headerCount: Int = 0): Int {
+    val keys = gridKeys(sections)
+    val index = keys.indexOf(fileId)
+    return if (index < 0) -1 else headerCount + index
 }
 
 /** The year, set big: scrolling past one is a step further back in time. */

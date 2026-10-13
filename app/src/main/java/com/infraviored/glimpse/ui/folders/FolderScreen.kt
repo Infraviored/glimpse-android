@@ -86,13 +86,15 @@ fun FolderScreen(path: String, asTab: Boolean = false, bottomPadding: Dp = 0.dp)
         PhotoGrid(
             sections = sections,
             selection = selection,
-            onOpen = { app.open(items, it) },
+            onOpen = { app.open(items, it, gridKey = "folder-$path") },
             state = gridState,
             loading = folder == null && vm.error == null,
             error = vm.error,
             onRetry = vm::load,
             contentPadding = PaddingValues(bottom = bottom),
             columnsKey = "folder",
+            gridKey = "folder-$path",
+            headerCount = 1,
         ) {
             item(key = "head", span = { GridItemSpan(maxLineSpan) }, contentType = "top") {
                 Column(Modifier.statusBarsPadding()) {

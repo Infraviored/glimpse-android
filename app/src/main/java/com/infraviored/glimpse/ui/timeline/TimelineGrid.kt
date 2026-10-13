@@ -151,7 +151,7 @@ fun TimelineGrid(
         PhotoGrid(
             sections = sections,
             selection = selection,
-            onOpen = { app.open(items, it, viewerSource(vm.jumpedTo != null, paged)) },
+            onOpen = { app.open(items, it, viewerSource(vm.jumpedTo != null, paged), gridKey = columnsKey) },
             state = gridState,
             loading = paged.loading,
             error = paged.error,
@@ -160,6 +160,8 @@ fun TimelineGrid(
             onLoadMore = { paged.loadMore() },
             contentPadding = PaddingValues(bottom = bottomPadding),
             columnsKey = columnsKey,
+            gridKey = columnsKey,
+            headerCount = HEADER_ITEMS,
             empty = empty,
         ) {
             item(key = "top", span = { GridItemSpan(maxLineSpan) }, contentType = "top") {

@@ -15,12 +15,20 @@ import com.infraviored.glimpse.data.Api
 import com.infraviored.glimpse.data.Item
 import com.infraviored.glimpse.ui.components.Notices
 
+/** Scopes the picture last viewed in the viewer to the grid that opened it. */
+data class RestoreTarget(
+    val gridKey: String,
+    val fileId: Long,
+)
+
 /** What the viewer pages through: the list the picture was opened from. */
 class ViewerRequest(
     val items: List<Item>,
     val start: Int,
     /** Lets the viewer page further than what is loaded (timeline, results). */
     val source: Paged? = null,
+    /** Scopes restore-on-return to the grid that opened the viewer. */
+    val gridKey: String? = null,
 )
 
 /** Navigation and shared state the screens reach through [LocalApp]. */
@@ -34,7 +42,7 @@ class AppState(
     var viewer by mutableStateOf<ViewerRequest?>(null)
 
     /** The picture the viewer showed last; the grid it was opened from scrolls to it on return. */
-    var lastViewed: Long? = null
+    var lastViewed by mutableStateOf<RestoreTarget?>(null)
 
     /** Pictures deleted anywhere (or hidden by the locked private area), so every list can drop them. */
     var deleted by mutableStateOf<Set<Long>>(emptySet())
@@ -78,8 +86,8 @@ class AppState(
     /** Short messages at the bottom, with Undo where there is one. */
     val notices = Notices()
 
-    fun open(items: List<Item>, item: Item, source: Paged? = null) {
-        viewer = ViewerRequest(items, items.indexOf(item).coerceAtLeast(0), source)
+    fun open(items: List<Item>, item: Item, source: Paged? = null, gridKey: String? = null) {
+        viewer = ViewerRequest(items, items.indexOf(item).coerceAtLeast(0), source, gridKey)
         navigate(Routes.VIEWER)
     }
 

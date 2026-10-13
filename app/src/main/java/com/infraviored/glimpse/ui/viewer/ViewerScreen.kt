@@ -122,7 +122,10 @@ fun ViewerScreen() {
     val density = LocalDensity.current
     val threshold = with(density) { 140.dp.toPx() }
 
-    LaunchedEffect(current.fileId) { app.lastViewed = current.fileId }
+    val gridKey = request.gridKey
+    LaunchedEffect(current.fileId, gridKey) {
+        app.lastViewed = gridKey?.let { com.infraviored.glimpse.ui.RestoreTarget(it, current.fileId) }
+    }
 
     // Page further than what is loaded
     LaunchedEffect(pager.currentPage, items.size) {
