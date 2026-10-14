@@ -32,6 +32,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.outlined.Explicit
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -309,7 +310,8 @@ fun Thumbnail(
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val api = LocalApp.current.api
+    val app = LocalApp.current
+    val api = app.api
     val inset by animateFloatAsState(if (selected) 0.86f else 1f, label = "inset")
     val corner by animateDpAsState(if (selected) 14.dp else 0.dp, label = "corner")
     Box(
@@ -354,6 +356,21 @@ fun Thumbnail(
                     .padding(6.dp)
                     .size(20.dp)
                     .background(Color.Black.copy(alpha = 0.35f), CircleShape)
+                    .padding(2.dp),
+            )
+        }
+        if (app.sensitive?.badge == true && app.isSensitive(item)) {
+            // Counted as sensitive: small, in the corner nothing else uses
+            Icon(
+                Icons.Outlined.Explicit,
+                contentDescription = stringResource(R.string.sensitive_mark),
+                tint = Color.White,
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .scale(inset)
+                    .padding(6.dp)
+                    .size(20.dp)
+                    .background(Color.Black.copy(alpha = 0.55f), RoundedCornerShape(5.dp))
                     .padding(2.dp),
             )
         }

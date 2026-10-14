@@ -56,6 +56,15 @@ class RequestsTest {
     }
 
     @Test
+    fun sensitiveMarks() {
+        assertEquals(
+            """{"marks":{"5":true,"6":null}}""",
+            Requests.sensitiveMarks(linkedMapOf("5" to true, "6" to null)).toString(),
+        )
+        assertEquals("""{"prefs":{"sensitive_mode":"hide"}}""", Requests.prefs(mapOf("sensitive_mode" to "hide")).toString())
+    }
+
+    @Test
     fun privateFiles() {
         assertEquals("""{"fileIds":[5,6],"on":false}""", Requests.privateFiles(listOf(5, 6), false).toString())
     }

@@ -61,7 +61,10 @@ class AppState(
     /** The private area as last heard from the server; null until asked. */
     var privateArea by mutableStateOf<com.infraviored.glimpse.data.PrivateState?>(null)
 
-    /** Goes up when the private area is locked or unlocked: everything visible changes. */
+    /**
+     * Goes up when the private area is locked or unlocked, or the sensitive mode changes:
+     * everything visible changes.
+     */
     var privateVersion by mutableIntStateOf(0)
         private set
 
@@ -79,6 +82,22 @@ class AppState(
             deleted = deleted - hiddenPrivate
             hiddenPrivate = emptySet()
         }
+        privateVersion++
+        version++
+    }
+
+    /** Sensitive pictures: null while off (not allowed by the admin, or not turned on by the user). */
+    var sensitive by mutableStateOf<com.infraviored.glimpse.data.SensitivePrefs?>(null)
+
+    /** Marked by hand in this session, so tiles change before the lists load again. */
+    var sensitiveMarks by mutableStateOf<Map<Long, Boolean>>(emptyMap())
+
+    fun isSensitive(item: Item): Boolean = sensitiveMarks[item.fileId] ?: item.sensitive
+
+    /** The sensitive mode changed what may be shown: everything loads again. */
+    fun sensitiveModeChanged(prefs: com.infraviored.glimpse.data.SensitivePrefs) {
+        sensitive = prefs
+        sensitiveMarks = emptyMap()
         privateVersion++
         version++
     }

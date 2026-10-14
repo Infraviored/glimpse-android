@@ -282,4 +282,22 @@
     <!-- Similar -->
     <string name="action_similar_short">Similar</string>
     <string name="similar_one">Choose one picture</string>
+    <string name="sensitive_title">Sensitive pictures</string>
+    <string name="sensitive_all">All pictures</string>
+    <string name="sensitive_hide">Without sensitive pictures</string>
+    <string name="sensitive_only">Only sensitive pictures</string>
+    <string name="sensitive_hide_short">Without sensitive</string>
+    <string name="sensitive_only_short">Only sensitive</string>
+    <string name="sensitive_mark">Sensitive</string>
+    <string name="sensitive_not">Not sensitive</string>
+    <string name="action_sensitive">Mark as sensitive</string>
+    <string name="action_not_sensitive">Mark as not sensitive</string>
+    <plurals name="marked_sensitive">
+        <item quantity="one">%d picture marked as sensitive</item>
+        <item quantity="other">%d pictures marked as sensitive</item>
+    </plurals>
+    <plurals name="marked_not_sensitive">
+        <item quantity="one">%d picture marked as not sensitive</item>
+        <item quantity="other">%d pictures marked as not sensitive</item>
+    </plurals>
 </resources>

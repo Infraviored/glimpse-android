@@ -20,6 +20,8 @@ data class Item(
     val at: Double? = null,
     /** That still, shown instead of the video's own thumbnail */
     val thumbId: String? = null,
+    /** Counted as sensitive (only sent when the user turned sensitive pictures on) */
+    val sensitive: Boolean = false,
 ) {
     val isVideo: Boolean get() = type == "VIDEO" || mime.startsWith("video/")
 
@@ -118,6 +120,28 @@ data class Transfer(val done: Int = 0, val failed: List<Failed> = emptyList(), v
 
 @Serializable
 data class Done(val done: Int = 0, val failed: List<Failed> = emptyList())
+
+@Serializable
+data class SensitiveStatus(
+    /** The admin allows it */
+    val available: Boolean = false,
+    /** ... and the user turned it on (on the web page) */
+    val enabled: Boolean = false,
+)
+
+/** The user's settings for sensitive pictures, from their server-side preferences. */
+@Serializable
+data class SensitivePrefs(
+    @SerialName("sensitive_mode") val mode: String = "all",
+    @SerialName("sensitive_badge") val badge: Boolean = true,
+)
+
+/** After marking: how each file stands now, and the marks before (for undo). */
+@Serializable
+data class SensitiveMarks(
+    val previous: Map<String, Boolean?> = emptyMap(),
+    val sensitive: Map<String, Boolean> = emptyMap(),
+)
 
 @Serializable
 data class PrivateState(
