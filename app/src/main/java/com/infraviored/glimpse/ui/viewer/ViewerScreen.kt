@@ -135,7 +135,9 @@ fun ViewerScreen() {
     ImmersiveBars(visible = chrome)
     BackHandler { app.back() }
     ActionSheets(actions) {}
-    DisposableEffect(Unit) { onDispose { app.viewer = null } }
+    // Free the list once this viewer is gone – unless a new one was opened meanwhile (a quick
+    // tap during the exit animation), whose request must stay
+    DisposableEffect(request) { onDispose { if (app.viewer === request) app.viewer = null } }
 
     val fade = (1f - abs(dismiss.value) / (threshold * 2.5f)).coerceIn(0f, 1f)
     Box(
