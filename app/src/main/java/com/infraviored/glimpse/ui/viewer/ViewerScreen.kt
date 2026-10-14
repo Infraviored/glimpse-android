@@ -192,7 +192,7 @@ fun ViewerScreen() {
                     BarAction(Icons.Outlined.Info, stringResource(R.string.action_info)) { info = true },
                     // Only with sensitive pictures turned on; one tap marks it the other way
                     if (app.sensitive != null) {
-                        BarAction(Icons.Outlined.Explicit, stringResource(if (sensitive) R.string.sensitive_not else R.string.sensitive_mark), on = sensitive) {
+                        BarAction(Icons.Outlined.Explicit, stringResource(if (sensitive) R.string.sensitive_not else R.string.sensitive_mark)) {
                             actions.markSensitive(listOf(current), !sensitive)
                         }
                     } else {
