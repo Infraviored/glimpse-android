@@ -13,6 +13,18 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.School
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.addPathNodes
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -124,6 +136,22 @@ fun SensitiveSheet(onDismiss: () -> Unit, scope: CoroutineScope = rememberCorout
                 }
             }
 
+            Spacer(Modifier.height(8.dp))
+            Row(
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).clickable {
+                    onDismiss()
+                    app.trainSensitive()
+                }.padding(vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(Icons.Outlined.School, null, tint = glimpse.accentText)
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(stringResource(R.string.trainer_title), style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.trainer_subtitle), style = MaterialTheme.typography.bodySmall, color = glimpse.muted)
+                }
+            }
+
             Spacer(Modifier.height(16.dp))
             Text(stringResource(R.string.sensitive_terms), style = MaterialTheme.typography.titleSmall, color = glimpse.text)
             val st = status
@@ -166,8 +194,8 @@ fun SensitiveSheet(onDismiss: () -> Unit, scope: CoroutineScope = rememberCorout
             if (st != null) {
                 Spacer(Modifier.height(4.dp))
                 Text(res.getQuantityString(R.plurals.sensitive_count, st.flagged, st.flagged), style = MaterialTheme.typography.bodySmall, color = glimpse.muted)
-                if (st.added + st.removed > 0) {
-                    Text(stringResource(R.string.sensitive_marks_moved, st.added, st.removed), style = MaterialTheme.typography.bodySmall, color = glimpse.muted)
+                st.change?.takeIf { it.added + it.removed > 0 }?.let { c ->
+                    Text(stringResource(R.string.sensitive_marks_moved, c.added, c.removed), style = MaterialTheme.typography.bodySmall, color = glimpse.muted)
                 }
                 st.error?.let { Text(stringResource(R.string.sensitive_failed, it), style = MaterialTheme.typography.bodySmall, color = glimpse.muted) }
             }
@@ -189,4 +217,76 @@ private fun SwitchRow(label: String, checked: Boolean, enabled: Boolean, onChang
         Text(label, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
         Switch(checked = checked, onCheckedChange = null, enabled = enabled, colors = SwitchDefaults.colors(checkedTrackColor = glimpse.accent))
     }
+}
+
+/** Material Design Icons' eye-check-outline: only sensitive pictures. */
+val EyeCheckOutline: ImageVector by lazy { svgIcon("EyeCheckOutline", "M23.5,17L18.5,22L15,18.5L16.5,17L18.5,19L22,15.5L23.5,17M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9M12,4.5C17,4.5 21.27,7.61 23,12C22.75,12.65 22.44,13.26 22.08,13.85C21.5,13.5 20.86,13.25 20.18,13.12L20.82,12C19.17,8.64 15.76,6.5 12,6.5C8.24,6.5 4.83,8.64 3.18,12C4.83,15.36 8.24,17.5 12,17.5L13.21,17.43C13.07,17.93 13,18.46 13,19V19.46L12,19.5C7,19.5 2.73,16.39 1,12C2.73,7.61 7,4.5 12,4.5Z") }
+
+/** Material Design Icons' folder-off-outline: ignore a folder. */
+val FolderOffOutline: ImageVector by lazy { svgIcon("FolderOffOutline", "M2.39 1.73L1.11 3L2.64 4.53C2.25 4.9 2 5.42 2 6V18C2 19.11 2.9 20 4 20H18.11L20.84 22.73L22.11 21.46L2.39 1.73M4 18V8H6.11L16.11 18H4M11.2 8L7.2 4H10L12 6H20C21.1 6 22 6.89 22 8V18C22 18.24 21.96 18.47 21.88 18.68L20 16.8V8H11.2Z") }
+
+private fun svgIcon(name: String, d: String): ImageVector =
+    ImageVector.Builder(name, 24.dp, 24.dp, 24f, 24f).addPath(addPathNodes(d), fill = SolidColor(Color.Black)).build()
+
+/** The eye says what is shown: all (eye), without sensitive (eye off), only sensitive (eye check). */
+fun sensitiveModeIcon(mode: String?): ImageVector = when (mode) {
+    "hide" -> Icons.Outlined.VisibilityOff
+    "only" -> EyeCheckOutline
+    else -> Icons.Outlined.Visibility
+}
+
+/** A sensitive picture is one the filter hides. */
+val SensitiveIcon: ImageVector get() = Icons.Outlined.VisibilityOff
+
+/**
+ * The sensitive mode, quiet: only the eye, a tap opens the three modes, training the filter
+ * and the settings.
+ */
+@Composable
+fun SensitiveModeButton(scope: CoroutineScope) {
+    val app = LocalApp.current
+    val prefs = app.sensitive ?: return
+    var open by remember { mutableStateOf(false) }
+    var settings by remember { mutableStateOf(false) }
+    val failed = stringResource(R.string.action_failed, "%s")
+    val label = when (prefs.mode) {
+        "hide" -> stringResource(R.string.sensitive_state_hidden)
+        "only" -> stringResource(R.string.sensitive_state_only)
+        else -> stringResource(R.string.sensitive_state_shown)
+    }
+    Box {
+        IconButton(onClick = { open = true }) {
+            Icon(sensitiveModeIcon(prefs.mode), contentDescription = label, tint = glimpse.muted)
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            sensitiveModes().forEach { (mode, text) ->
+                DropdownMenuItem(
+                    text = { Text(text) },
+                    leadingIcon = { Icon(sensitiveModeIcon(mode), null, tint = if (mode == prefs.mode) glimpse.accent else glimpse.muted) },
+                    onClick = {
+                        open = false
+                        if (mode != prefs.mode) scope.launch {
+                            try {
+                                app.sensitiveModeChanged(app.api.saveSensitive(mapOf("sensitive_mode" to mode)))
+                            } catch (e: Exception) {
+                                app.notices.show(failed.replace("%s", e.message ?: e.javaClass.simpleName))
+                            }
+                        }
+                    },
+                )
+            }
+            HorizontalDivider()
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.trainer_title)) },
+                leadingIcon = { Icon(Icons.Outlined.School, null) },
+                onClick = { open = false; app.trainSensitive() },
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.sensitive_settings)) },
+                leadingIcon = { Icon(Icons.Outlined.Settings, null) },
+                onClick = { open = false; settings = true },
+            )
+        }
+    }
+    if (settings) SensitiveSheet(onDismiss = { settings = false }, scope = scope)
 }

@@ -51,7 +51,6 @@ import com.infraviored.glimpse.ui.components.Selection
 import com.infraviored.glimpse.ui.loadInto
 import com.infraviored.glimpse.ui.SensitiveSheet
 import com.infraviored.glimpse.ui.photoBlur
-import com.infraviored.glimpse.ui.sensitiveFilterName
 import com.infraviored.glimpse.ui.theme.glimpse
 import java.time.LocalDate
 
@@ -173,21 +172,8 @@ private fun TopLine(onAccount: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text("Glimpse", style = MaterialTheme.typography.displaySmall, color = glimpse.text, modifier = Modifier.weight(1f))
-        // A sensitive filter is on: its name, so it is never forgotten; a tap changes it
-        sensitiveFilterName(app.sensitive?.mode)?.let { name ->
-            var choosing by remember { mutableStateOf(false) }
-            Text(
-                name,
-                style = MaterialTheme.typography.labelLarge,
-                color = glimpse.accent,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(18.dp))
-                    .background(glimpse.raised)
-                    .clickable { choosing = true }
-                    .padding(horizontal = 14.dp, vertical = 8.dp),
-            )
-            if (choosing) SensitiveSheet(onDismiss = { choosing = false }, scope = scope)
-        }
+        // Sensitive pictures on: the eye says what is shown, a tap changes it
+        com.infraviored.glimpse.ui.SensitiveModeButton(scope)
         AsyncImage(
             model = "${app.api.account.server}/index.php/avatar/${android.net.Uri.encode(app.api.userId)}/96",
             contentDescription = stringResource(R.string.account),

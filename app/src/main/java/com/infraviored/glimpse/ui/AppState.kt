@@ -105,6 +105,9 @@ class AppState(
         version++
     }
 
+    /** Whether the user is a Glimpse admin; null while unknown (admin actions then show and may get a 403). */
+    var isAdmin by mutableStateOf<Boolean?>(null)
+
     /** Short messages at the bottom, with Undo where there is one. */
     val notices = Notices()
 
@@ -121,6 +124,8 @@ class AppState(
     fun folder(path: String) = navigate(Routes.folder(path))
 
     fun duplicates() = navigate(Routes.DUPLICATES)
+
+    fun trainSensitive() = navigate(Routes.SENSITIVE)
 }
 
 object Routes {
@@ -130,6 +135,7 @@ object Routes {
     const val PERSON = "person/{id}"
     const val FOLDER = "folder?path={path}"
     const val DUPLICATES = "duplicates"
+    const val SENSITIVE = "sensitive"
 
     private fun e(s: String) = android.net.Uri.encode(s)
     fun search(q: String, person: String, similar: String, label: String) =

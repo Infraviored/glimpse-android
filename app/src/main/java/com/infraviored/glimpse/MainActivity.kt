@@ -153,6 +153,11 @@ private fun App(api: Api, onLogout: (String?) -> Unit) {
                                 Box(Modifier.fillMaxSize().background(glimpse.background)) { com.infraviored.glimpse.ui.duplicates.DuplicatesScreen() }
                             }
                         }
+                        composable(Routes.SENSITIVE) {
+                            CompositionLocalProvider(LocalAnimated provides this) {
+                                Box(Modifier.fillMaxSize().background(glimpse.background)) { com.infraviored.glimpse.ui.SensitiveTrainer() }
+                            }
+                        }
                         composable(Routes.FOLDER, arguments = listOf(navArgument("path") { type = NavType.StringType; defaultValue = "/" })) { entry ->
                             CompositionLocalProvider(LocalAnimated provides this) {
                                 Box(Modifier.fillMaxSize().background(glimpse.background)) { FolderScreen(entry.arguments?.getString("path") ?: "/") }

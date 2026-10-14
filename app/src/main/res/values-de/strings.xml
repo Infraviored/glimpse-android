@@ -320,4 +320,46 @@
         <item quantity="one">%1$d Bild gilt als heikel</item>
         <item quantity="other">%1$d Bilder gelten als heikel</item>
     </plurals>
+    <string name="trainer_title">Filter trainieren</string>
+    <string name="trainer_subtitle">Blende aus, was er übersieht, und hol zurück, was er zu viel ausblendet</string>
+    <string name="trainer_visible">Sichtbar</string>
+    <string name="trainer_hidden">Ausgeblendet</string>
+    <string name="trainer_order_harmless">Harmloseste zuerst</string>
+    <string name="trainer_order_sensitive">Heikelste zuerst</string>
+    <string name="trainer_order_closest">Am nächsten an „%1$s“ zuerst</string>
+    <plurals name="trainer_hides">
+        <item quantity="one">Der Filter blendet %1$d Bild aus.</item>
+        <item quantity="other">Der Filter blendet %1$d Bilder aus.</item>
+    </plurals>
+    <string name="trainer_learns">Er lernt aus %1$d Bildern, die du ausgeblendet, und %2$d, die du zurückgeholt hast.</string>
+    <string name="trainer_learning">Lernt …</string>
+    <string name="trainer_learned">Gelernt: %1$d mehr ausgeblendet, %2$d weniger.</string>
+    <string name="trainer_sort_again">Neu sortieren</string>
+    <string name="trainer_hide">Ausblenden</string>
+    <string name="trainer_bring_back">Zurückholen</string>
+    <string name="trainer_select_all">Alle auswählen</string>
+    <string name="trainer_select_hint">Tippen vergrößert, lange drücken wählt aus</string>
+    <string name="trainer_search_hint">Was soll ausgeblendet werden?</string>
+    <string name="trainer_search">Suchen</string>
+    <string name="trainer_clear_term">Begriff löschen</string>
+    <string name="trainer_hint_visible">Was der Filter durchlässt, das heikelste zuerst. Wähl aus, was er ausblenden soll. Für ein neues Thema such danach.</string>
+    <string name="trainer_hint_visible_start">Gib etwas ein, das der Filter ausblenden soll, zum Beispiel „nude breasts“. Englische Begriffe funktionieren meist besser. Wähl die passenden Bilder aus und blende sie aus.</string>
+    <string name="trainer_hint_hidden">Was der Filter ausblendet und du nicht selbst markiert hast, das harmloseste zuerst. Wähl aus, was sichtbar bleiben soll, und hol es zurück.</string>
+    <plurals name="trainer_hint_hidden_start">
+        <item quantity="one">Der Filter lernt, sobald du %1$d Bild ausgeblendet hast; es fehlen noch %2$d. Fang bei „Sichtbar“ mit einem Begriff an.</item>
+        <item quantity="other">Der Filter lernt, sobald du %1$d Bilder ausgeblendet hast; es fehlen noch %2$d. Fang bei „Sichtbar“ mit einem Begriff an.</item>
+    </plurals>
+    <string name="trainer_empty_hidden">Der Filter blendet nur aus, was du selbst markiert hast</string>
+    <string name="trainer_empty_term">Zu diesem Begriff kommt nichts mehr</string>
+    <string name="trainer_empty_visible">Nichts mehr, was heikel aussieht</string>
+    <string name="sensitive_settings">Einstellungen …</string>
+    <string name="sensitive_state_shown">Heikle Bilder: sichtbar</string>
+    <string name="sensitive_state_hidden">Heikle Bilder: ausgeblendet</string>
+    <string name="sensitive_state_only">Heikle Bilder: nur diese</string>
+    <string name="ignore_folder">Diesen Ordner ignorieren …</string>
+    <string name="ignore_folder_title">„%1$s“ ignorieren?</string>
+    <string name="ignore_folder_text">Glimpse und Immich indexieren diesen Ordner samt Inhalt nicht mehr, für alle. Seine Bilder verschwinden nach dem nächsten Scan der Bibliothek. Rückgängig machen kannst du das unter Einstellungen → Was indexiert wird.</string>
+    <string name="ignore_folder_confirm">Ordner ignorieren</string>
+    <string name="ignore_folder_done">„%1$s“ wird ab jetzt ignoriert</string>
+    <string name="ignore_folder_forbidden">Nur Admins können Ordner ignorieren</string>
 </resources>

@@ -304,6 +304,26 @@ class Api(val account: Account) {
     suspend fun removeSensitiveTerm(q: String): SensitiveStatus =
         decode(post(appUrl("/api/sensitive/terms/remove"), Requests.sensitiveTerm(q, null)))
 
+    /**
+     * One page of training the filter: [side] "hidden" (what it hides, most harmless first) or
+     * "visible" (what it lets through, most sensitive-looking first, or sorted by [q]).
+     * [page] is the previous answer's nextPage, 0 for the first.
+     */
+    suspend fun sensitiveReview(side: String, q: String, page: Int): Page =
+        decode(get(appUrl("/api/sensitive/review") + query("side" to side, "q" to q, "page" to page)))
+
+    /** The filter learns from the marks (one to five seconds). */
+    suspend fun rebuildSensitive(): SensitiveStatus = decode(post(appUrl("/api/sensitive/rebuild"), buildJsonObject { }))
+
+    // ---- admin -------------------------------------------------------------------------------
+
+    /** Whether the user is a Glimpse admin (the status is full only for them); null if unknown. */
+    suspend fun isAdmin(): Boolean? = runCatching { decode<GlimpseStatus>(get(appUrl("/api/status"))).full }.getOrNull()
+
+    /** Admins: the folder of [fileId] is no longer indexed, for everyone. */
+    suspend fun excludeFolder(fileId: Long): ExcludedFolder =
+        decode(post(appUrl("/api/admin/exclude-folder"), buildJsonObject { put("fileId", fileId) }))
+
     // ---- map, duplicates ---------------------------------------------------------------------
 
     suspend fun mapMarkers(): MapData {

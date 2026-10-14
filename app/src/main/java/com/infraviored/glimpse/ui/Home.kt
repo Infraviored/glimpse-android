@@ -52,7 +52,6 @@ import com.infraviored.glimpse.R
 import androidx.compose.material.icons.automirrored.outlined.CallMerge
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.ContentCopy
-import androidx.compose.material.icons.outlined.Explicit
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.LockOpen
 import androidx.compose.material.icons.outlined.StarBorder
@@ -121,6 +120,7 @@ fun Home() {
     androidx.compose.runtime.LaunchedEffect(Unit) {
         app.loadPrivate()
         app.loadSensitive()
+        if (app.isAdmin == null) app.isAdmin = app.api.isAdmin()
     }
     if (account) AccountSheet(onDismiss = { account = false }, onUnlock = { account = false; unlock = true }, onSensitive = { account = false; sensitiveSheet = true })
     if (unlock) UnlockSheet(onDismiss = { unlock = false })
@@ -193,7 +193,7 @@ private fun AccountSheet(onDismiss: () -> Unit, onUnlock: () -> Unit, onSensitiv
             if (app.sensitiveAvailable) {
                 val mode = app.sensitive?.mode
                 AccountRow(
-                    Icons.Outlined.Explicit,
+                    sensitiveModeIcon(app.sensitive?.mode),
                     stringResource(R.string.sensitive_title),
                     if (mode == null) stringResource(R.string.sensitive_off) else sensitiveModes().firstOrNull { it.first == mode }?.second,
                     onSensitive,

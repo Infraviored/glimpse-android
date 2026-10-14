@@ -32,7 +32,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.outlined.Explicit
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -362,7 +361,7 @@ fun Thumbnail(
         if (app.sensitive?.badge == true && app.isSensitive(item)) {
             // Counted as sensitive: small, in the corner nothing else uses
             Icon(
-                Icons.Outlined.Explicit,
+                com.infraviored.glimpse.ui.SensitiveIcon,
                 contentDescription = stringResource(R.string.sensitive_mark),
                 tint = Color.White,
                 modifier = Modifier

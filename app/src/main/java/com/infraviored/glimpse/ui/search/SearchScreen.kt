@@ -33,7 +33,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Explicit
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -169,7 +168,7 @@ fun SearchScreen(q: String, personId: String, similar: String, label: String) {
     val extra = if (app.sensitive != null && term.isNotEmpty()) {
         listOf(
             DockAction(
-                Icons.Outlined.Explicit,
+                com.infraviored.glimpse.ui.SensitiveIcon,
                 stringResource(R.string.sensitive_up_to_here),
                 subtitle = if (single == null) stringResource(R.string.sensitive_up_to_here_one) else null,
                 enabled = single != null,

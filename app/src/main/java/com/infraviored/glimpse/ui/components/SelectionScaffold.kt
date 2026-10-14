@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.FavoriteBorder
@@ -28,7 +29,6 @@ import androidx.compose.material.icons.automirrored.outlined.DriveFileMove
 import androidx.compose.material.icons.outlined.AutoAwesomeMosaic
 import androidx.compose.material.icons.outlined.FileCopy
 import androidx.compose.material.icons.outlined.HeartBroken
-import androidx.compose.material.icons.outlined.Explicit
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.LockOpen
 import androidx.compose.material.icons.outlined.PhotoAlbum
@@ -82,8 +82,8 @@ fun selectionMore(actions: PhotoActions, selection: Selection, items: List<Item>
         ) { actions.setPrivate(chosen(), on = false) { selection.clear() } },
     ) + if (app.sensitive != null) {
         listOf(
-            DockAction(Icons.Outlined.Explicit, stringResource(R.string.action_sensitive)) { actions.markSensitive(chosen(), on = true) { selection.clear() } },
-            DockAction(Icons.Outlined.Explicit, stringResource(R.string.action_not_sensitive)) { actions.markSensitive(chosen(), on = false) { selection.clear() } },
+            DockAction(com.infraviored.glimpse.ui.SensitiveIcon, stringResource(R.string.action_sensitive)) { actions.markSensitive(chosen(), on = true) { selection.clear() } },
+            DockAction(Icons.Outlined.Visibility, stringResource(R.string.action_not_sensitive)) { actions.markSensitive(chosen(), on = false) { selection.clear() } },
         )
     } else {
         emptyList()

@@ -22,8 +22,8 @@ android {
         applicationId = "com.infraviored.glimpse"
         minSdk = 29
         targetSdk = 36
-        versionCode = 14
-        versionName = "2.3.1"
+        versionCode = 15
+        versionName = "2.4.0"
     }
 
     signingConfigs {

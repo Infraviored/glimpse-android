@@ -150,11 +150,30 @@ data class SensitiveStatus(
     val flagged: Int = 0,
     val marked: Int = 0,
     val unmarked: Int = 0,
-    /** Pictures like a mark that followed it: added, taken out */
-    val added: Int = 0,
-    val removed: Int = 0,
+    /** What the last training changed: pictures added to and taken out of the filter */
+    val change: SensitiveChange? = null,
+    /** What the filter learns from: pictures the user hid and brought back */
+    val learned: SensitiveLearned = SensitiveLearned(),
+    /** The filter has learned (enough pictures hidden) */
+    val model: Boolean = false,
+    /** How many hidden pictures the filter needs before it learns */
+    val minPositive: Int = 20,
     val error: String? = null,
 )
+
+@Serializable
+data class SensitiveChange(val added: Int = 0, val removed: Int = 0)
+
+@Serializable
+data class SensitiveLearned(val positives: Int = 0, val negatives: Int = 0)
+
+/** Glimpse's own status; [full] only for admins. */
+@Serializable
+data class GlimpseStatus(val full: Boolean = false)
+
+/** After "Ignore this folder": the pattern now in the excluded folders. */
+@Serializable
+data class ExcludedFolder(val pattern: String = "")
 
 /** A search that counts as sensitive down to the picture the user picked ("Sensitive up to here"). */
 @Serializable
