@@ -12,7 +12,11 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,6 +26,7 @@ import com.infraviored.glimpse.R
 import com.infraviored.glimpse.ui.components.GlimpseSheet
 import com.infraviored.glimpse.ui.components.SheetTitle
 import com.infraviored.glimpse.ui.theme.glimpse
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 /**
@@ -52,36 +57,50 @@ fun sensitiveFilterName(mode: String?): String? = when (mode) {
 
 /** All, without, or only sensitive pictures; applies everywhere at once. */
 @Composable
-fun SensitiveModeSheet(onDismiss: () -> Unit) {
+fun SensitiveModeSheet(
+    onDismiss: () -> Unit,
+    scope: CoroutineScope = rememberCoroutineScope(),
+) {
     val app = LocalApp.current
-    val scope = rememberCoroutineScope()
     val current = app.sensitive?.mode ?: "all"
     val failed = stringResource(R.string.action_failed, "%s")
+    var inFlight by remember { mutableStateOf(false) }
     GlimpseSheet(onDismiss) {
         SheetTitle(stringResource(R.string.sensitive_title))
         sensitiveModes().forEach { (mode, label) ->
             Row(
-                Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).clickable {
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).clickable(enabled = !inFlight) {
+                    if (inFlight) return@clickable
                     if (mode == current) {
                         onDismiss()
                         return@clickable
                     }
-                    // Closed only afterwards: closing ends this sheet's scope, and the request with it
+                    inFlight = true
                     scope.launch {
                         try {
                             app.sensitiveModeChanged(app.api.setSensitiveMode(mode))
                         } catch (e: Exception) {
                             app.notices.show(failed.replace("%s", e.message ?: e.javaClass.simpleName))
                         } finally {
+                            inFlight = false
                             onDismiss()
                         }
                     }
                 }.padding(vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                RadioButton(selected = mode == current, onClick = null, colors = RadioButtonDefaults.colors(selectedColor = glimpse.accent))
+                RadioButton(
+                    selected = mode == current,
+                    onClick = null,
+                    enabled = !inFlight,
+                    colors = RadioButtonDefaults.colors(selectedColor = glimpse.accent),
+                )
                 Spacer(Modifier.width(12.dp))
-                Text(label, style = MaterialTheme.typography.titleMedium)
+                Text(
+                    label,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = if (inFlight) glimpse.muted else glimpse.text,
+                )
             }
         }
     }

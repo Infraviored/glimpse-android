@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -172,6 +173,7 @@ private fun TopLine(onAccount: () -> Unit) {
         Text("Glimpse", style = MaterialTheme.typography.displaySmall, color = glimpse.text, modifier = Modifier.weight(1f))
         // A sensitive filter is on: its name, so it is never forgotten; a tap changes it
         sensitiveFilterName(app.sensitive?.mode)?.let { name ->
+            val scope = rememberCoroutineScope()
             var choosing by remember { mutableStateOf(false) }
             Text(
                 name,
@@ -183,7 +185,7 @@ private fun TopLine(onAccount: () -> Unit) {
                     .clickable { choosing = true }
                     .padding(horizontal = 14.dp, vertical = 8.dp),
             )
-            if (choosing) SensitiveModeSheet(onDismiss = { choosing = false })
+            if (choosing) SensitiveModeSheet(onDismiss = { choosing = false }, scope = scope)
         }
         AsyncImage(
             model = "${app.api.account.server}/index.php/avatar/${android.net.Uri.encode(app.api.userId)}/96",

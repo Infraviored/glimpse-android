@@ -115,6 +115,7 @@ fun Home() {
         )
     }
 
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
     var unlock by remember { mutableStateOf(false) }
     var sensitiveSheet by remember { mutableStateOf(false) }
     androidx.compose.runtime.LaunchedEffect(Unit) {
@@ -123,7 +124,7 @@ fun Home() {
     }
     if (account) AccountSheet(onDismiss = { account = false }, onUnlock = { account = false; unlock = true }, onSensitive = { account = false; sensitiveSheet = true })
     if (unlock) UnlockSheet(onDismiss = { unlock = false })
-    if (sensitiveSheet) SensitiveModeSheet(onDismiss = { sensitiveSheet = false })
+    if (sensitiveSheet) SensitiveModeSheet(onDismiss = { sensitiveSheet = false }, scope = scope)
 }
 
 /** What can be done with the chosen people: favorite, hide, merge. */
