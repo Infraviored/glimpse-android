@@ -134,6 +134,26 @@ class PhotoActions(
         }
     }
 
+    /**
+     * "Sensitive up to here" on one result of a text search: the search counts down to it.
+     * The results above it get the mark at once; the lists load again for the rest.
+     */
+    fun sensitiveUpToHere(q: String, item: Item, items: List<Item>, onDone: () -> Unit = {}) {
+        val assetId = item.thumbId ?: item.id ?: return
+        scope.launch {
+            try {
+                val status = api.setSensitiveTerm(q, assetId)
+                val upTo = items.indexOfFirst { it.fileId == item.fileId }
+                app.sensitiveMarks = app.sensitiveMarks + items.take(upTo + 1).associate { it.fileId to true }
+                onDone()
+                val count = status.terms.firstOrNull { it.q.equals(q, ignoreCase = true) }?.count ?: (upTo + 1)
+                app.notices.show(context.resources.getQuantityString(R.plurals.sensitive_term_set, count, count, q))
+            } catch (e: Exception) {
+                app.notices.show(context.getString(R.string.action_failed, e.message ?: e.javaClass.simpleName))
+            }
+        }
+    }
+
     /** Private or not; private pictures vanish while the area is locked. */
     fun setPrivate(items: List<Item>, on: Boolean, onDone: () -> Unit = {}) {
         if (items.isEmpty()) return

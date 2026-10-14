@@ -1,8 +1,6 @@
 package com.infraviored.glimpse.ui
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,20 +11,19 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -45,12 +42,12 @@ import com.infraviored.glimpse.ui.components.SheetTitle
 import com.infraviored.glimpse.ui.theme.glimpse
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
 
 /**
  * Sensitive pictures (the server's SensitiveContent): optional, the admin allows it and the user
- * turns it on. The app shows the mark, offers marking by hand, the choice between all, without
- * and only sensitive pictures, and the same settings as the web page.
+ * turns it on. What counts are the user's own terms, each down to a picture they picked, and
+ * their marks by hand. The app shows the mark, offers marking and "Sensitive up to here", the
+ * choice between all, without and only sensitive pictures, and the same settings as the web page.
  */
 suspend fun AppState.loadSensitive() {
     val status = runCatching { api.sensitiveStatus() }.getOrNull() ?: return
@@ -75,9 +72,9 @@ fun sensitiveFilterName(mode: String?): String? = when (mode) {
 }
 
 /**
- * Everything about sensitive pictures in one sheet: on or off, what is shown, which body parts
- * count, how sure the detector must be (with how many pictures that makes), and the mark on
- * tiles. Changes are saved at once and the lists load again.
+ * Everything about sensitive pictures in one sheet: on or off, what is shown, the user's terms
+ * (each with how many pictures it brings in; set in the search with "Sensitive up to here"),
+ * and the mark on tiles. Changes are saved at once and the lists load again.
  *
  * [scope] outlives the sheet: closing it must not cancel a change on its way to the server.
  */
@@ -113,10 +110,6 @@ fun SensitiveSheet(onDismiss: () -> Unit, scope: CoroutineScope = rememberCorout
                 Text(stringResource(R.string.sensitive_explain), style = MaterialTheme.typography.bodySmall, color = glimpse.muted)
                 return@Column
             }
-            status?.scan?.takeIf { !it.firstPassDone && it.total != null }?.let {
-                Text(stringResource(R.string.sensitive_scanning, it.scanned, it.total ?: 0), style = MaterialTheme.typography.bodySmall, color = glimpse.muted)
-            }
-
             Spacer(Modifier.height(12.dp))
             sensitiveModes().forEach { (mode, label) ->
                 Row(
@@ -132,41 +125,54 @@ fun SensitiveSheet(onDismiss: () -> Unit, scope: CoroutineScope = rememberCorout
             }
 
             Spacer(Modifier.height(16.dp))
-            Text(stringResource(R.string.sensitive_what_counts), style = MaterialTheme.typography.titleSmall, color = glimpse.text)
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf(
-                    Triple("sensitive_breast", R.string.sensitive_breast, prefs.breast),
-                    Triple("sensitive_genitals", R.string.sensitive_genitals, prefs.genitals),
-                    Triple("sensitive_buttocks", R.string.sensitive_buttocks, prefs.buttocks),
-                    Triple("sensitive_chest", R.string.sensitive_chest, prefs.chest),
-                ).forEach { (key, label, on) ->
-                    FilterChip(
-                        selected = on,
-                        onClick = { save(mapOf(key to !on)) },
-                        enabled = !busy,
-                        label = { Text(stringResource(label)) },
-                        colors = FilterChipDefaults.filterChipColors(selectedContainerColor = glimpse.raised, selectedLabelColor = glimpse.accent),
-                    )
+            Text(stringResource(R.string.sensitive_terms), style = MaterialTheme.typography.titleSmall, color = glimpse.text)
+            val st = status
+            if (st != null && st.terms.isEmpty()) {
+                Text(stringResource(R.string.sensitive_no_terms), style = MaterialTheme.typography.bodySmall, color = glimpse.muted)
+            }
+            st?.terms?.forEach { term ->
+                Row(
+                    Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).clickable {
+                        onDismiss()
+                        app.search(term.q)
+                    }.padding(vertical = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text(stringResource(R.string.sensitive_term_quoted, term.q), style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            if (term.stale) stringResource(R.string.sensitive_term_stale) else res.getQuantityString(R.plurals.sensitive_term_count, term.count, term.count),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = glimpse.muted,
+                        )
+                    }
+                    IconButton(enabled = !busy, onClick = {
+                        busy = true
+                        scope.launch {
+                            try {
+                                status = app.api.removeSensitiveTerm(term.q)
+                                app.sensitiveModeChanged(prefs)
+                            } catch (e: Exception) {
+                                app.notices.show(failed.replace("%s", e.message ?: e.javaClass.simpleName))
+                            } finally {
+                                busy = false
+                            }
+                        }
+                    }) {
+                        Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.sensitive_remove_term, term.q), tint = glimpse.muted)
+                    }
                 }
             }
-
-            // Further right counts more pictures: a lower threshold (as on the web page)
-            Spacer(Modifier.height(12.dp))
-            var sensitivity by remember(prefs.threshold) { mutableFloatStateOf((115 - prefs.threshold).toFloat()) }
-            val threshold = 115 - (sensitivity / 5).roundToInt() * 5
-            Text(stringResource(R.string.sensitive_sensitivity), style = MaterialTheme.typography.titleSmall, color = glimpse.text)
-            Slider(
-                value = sensitivity,
-                onValueChange = { sensitivity = it },
-                onValueChangeFinished = { if (threshold != prefs.threshold) save(mapOf("sensitive_threshold" to threshold)) },
-                valueRange = 20f..95f,
-                steps = 14,
-                enabled = !busy,
-                colors = SliderDefaults.colors(thumbColor = glimpse.accent, activeTrackColor = glimpse.accent),
-            )
-            status?.counts?.get(threshold.toString())?.let { count ->
-                Text(res.getQuantityString(R.plurals.sensitive_count, count, count), style = MaterialTheme.typography.bodySmall, color = glimpse.muted)
+            if (st != null) {
+                Spacer(Modifier.height(4.dp))
+                Text(res.getQuantityString(R.plurals.sensitive_count, st.flagged, st.flagged), style = MaterialTheme.typography.bodySmall, color = glimpse.muted)
+                if (st.added + st.removed > 0) {
+                    Text(stringResource(R.string.sensitive_marks_moved, st.added, st.removed), style = MaterialTheme.typography.bodySmall, color = glimpse.muted)
+                }
+                st.error?.let { Text(stringResource(R.string.sensitive_failed, it), style = MaterialTheme.typography.bodySmall, color = glimpse.muted) }
             }
+            Spacer(Modifier.height(4.dp))
+            Text(stringResource(R.string.sensitive_marks_hint), style = MaterialTheme.typography.bodySmall, color = glimpse.muted)
 
             Spacer(Modifier.height(8.dp))
             SwitchRow(stringResource(R.string.sensitive_badge), prefs.badge, enabled = !busy) { save(mapOf("sensitive_badge" to it)) }

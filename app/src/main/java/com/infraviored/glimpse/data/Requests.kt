@@ -71,6 +71,11 @@ object Requests {
         put("marks", buildJsonObject { marks.forEach { (id, on) -> put(id, on) } })
     }
 
+    fun sensitiveTerm(q: String, assetId: String?): JsonObject = buildJsonObject {
+        put("q", q)
+        assetId?.let { put("assetId", it) }
+    }
+
     fun prefs(prefs: Map<String, Any>): JsonObject = buildJsonObject {
         put(
             "prefs",

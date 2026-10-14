@@ -297,6 +297,13 @@ class Api(val account: Account) {
     suspend fun markSensitive(marks: Map<String, Boolean?>): SensitiveMarks =
         decode(post(appUrl("/api/sensitive/marks"), Requests.sensitiveMarks(marks)))
 
+    /** "Sensitive up to here": [q] counts down to the picture [assetId] (for a video found through a still, the still's). */
+    suspend fun setSensitiveTerm(q: String, assetId: String): SensitiveStatus =
+        decode(post(appUrl("/api/sensitive/terms"), Requests.sensitiveTerm(q, assetId)))
+
+    suspend fun removeSensitiveTerm(q: String): SensitiveStatus =
+        decode(post(appUrl("/api/sensitive/terms/remove"), Requests.sensitiveTerm(q, null)))
+
     // ---- map, duplicates ---------------------------------------------------------------------
 
     suspend fun mapMarkers(): MapData {

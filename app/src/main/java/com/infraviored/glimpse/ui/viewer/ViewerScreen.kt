@@ -135,7 +135,15 @@ fun ViewerScreen() {
     }
 
     ImmersiveBars(visible = chrome)
-    BackHandler { app.back() }
+    // Once: the viewer stays on screen while it fades out, and a second back (or a swipe)
+    // then would close the screen below it too
+    var closing by remember { mutableStateOf(false) }
+    fun close() {
+        if (closing) return
+        closing = true
+        app.back()
+    }
+    BackHandler(enabled = !closing) { close() }
     ActionSheets(actions) {}
     // Free the list once this viewer is gone – unless a new one was opened meanwhile (a quick
     // tap during the exit animation), whose request must stay
@@ -150,7 +158,7 @@ fun ViewerScreen() {
                 orientation = Orientation.Vertical,
                 state = rememberDraggableState { delta -> scope.launch { dismiss.snapTo(dismiss.value + delta) } },
                 onDragStopped = {
-                    if (abs(dismiss.value) > threshold) app.back() else dismiss.animateTo(0f)
+                    if (abs(dismiss.value) > threshold) close() else dismiss.animateTo(0f)
                 },
             ),
     ) {

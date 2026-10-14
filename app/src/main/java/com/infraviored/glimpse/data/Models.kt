@@ -70,6 +70,8 @@ data class Person(
     val favorite: Boolean = false,
     @SerialName("private") val isPrivate: Boolean = false,
     val count: Int = 0,
+    /** In search results: the person was named in the text, these are the other words */
+    val rest: String? = null,
 )
 
 @Serializable
@@ -142,17 +144,25 @@ data class SensitiveStatus(
     val available: Boolean = false,
     /** ... and the user turned it on */
     val enabled: Boolean = false,
-    /** Threshold in percent => how many pictures would count */
-    val counts: Map<String, Int> = emptyMap(),
-    val scan: SensitiveScan? = null,
+    /** The user's terms, each with how many pictures it brings in */
+    val terms: List<SensitiveTerm> = emptyList(),
+    /** How many pictures count now, terms, marks and their neighbours together */
+    val flagged: Int = 0,
+    val marked: Int = 0,
+    val unmarked: Int = 0,
+    /** Pictures like a mark that followed it: added, taken out */
+    val added: Int = 0,
+    val removed: Int = 0,
+    val error: String? = null,
 )
 
-/** How far the detector is through the pictures. */
+/** A search that counts as sensitive down to the picture the user picked ("Sensitive up to here"). */
 @Serializable
-data class SensitiveScan(
-    val scanned: Int = 0,
-    val total: Int? = null,
-    val firstPassDone: Boolean = false,
+data class SensitiveTerm(
+    val q: String,
+    val count: Int = 0,
+    /** Made with another search model: set it again */
+    val stale: Boolean = false,
 )
 
 /** The user's settings for sensitive pictures, from their server-side preferences. */
@@ -161,12 +171,6 @@ data class SensitivePrefs(
     @SerialName("sensitive_enabled") val enabled: Boolean = false,
     @SerialName("sensitive_mode") val mode: String = "all",
     @SerialName("sensitive_badge") val badge: Boolean = true,
-    /** How sure the detector must be, in percent */
-    @SerialName("sensitive_threshold") val threshold: Int = 50,
-    @SerialName("sensitive_breast") val breast: Boolean = true,
-    @SerialName("sensitive_genitals") val genitals: Boolean = true,
-    @SerialName("sensitive_buttocks") val buttocks: Boolean = true,
-    @SerialName("sensitive_chest") val chest: Boolean = false,
 )
 
 /** After marking: how each file stands now, and the marks before (for undo). */

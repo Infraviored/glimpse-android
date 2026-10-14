@@ -294,16 +294,27 @@
         <item quantity="one">%1$d Bild als nicht heikel markiert</item>
         <item quantity="other">%1$d Bilder als nicht heikel markiert</item>
     </plurals>
-    <string name="sensitive_enable">Heikle Bilder erkennen</string>
+    <string name="sensitive_enable">Heikle Bilder kennzeichnen</string>
     <string name="sensitive_off">Aus</string>
-    <string name="sensitive_explain">Erkennt unbedeckte Brüste, Genitalien und Pos, damit du solche Bilder markieren, ausblenden oder nur sie ansehen kannst. Badekleidung und Unterwäsche zählen nicht. Was für dich zählt, siehst nur du.</string>
-    <string name="sensitive_scanning">Bilder werden noch angesehen: %1$d von %2$d</string>
-    <string name="sensitive_what_counts">Was zählt</string>
-    <string name="sensitive_breast">Unbedeckte Brüste</string>
-    <string name="sensitive_genitals">Genitalien</string>
-    <string name="sensitive_buttocks">Nackter Po</string>
-    <string name="sensitive_chest">Nackter Männeroberkörper</string>
-    <string name="sensitive_sensitivity">Empfindlichkeit</string>
+    <string name="sensitive_explain">Du legst fest, was als heikel gilt: Such danach, wähl das letzte Ergebnis aus, das noch zählt, und tippe auf „Bis hierher heikel“. Deine Begriffe und Markierungen siehst nur du.</string>
+    <string name="sensitive_term_quoted">„%1$s“</string>
+    <string name="sensitive_terms">Deine Begriffe</string>
+    <string name="sensitive_no_terms">Noch keine Begriffe. Such nach dem, was für dich heikel ist, wähl das letzte Bild aus, das noch zählt, und tippe auf „Bis hierher heikel“.</string>
+    <string name="sensitive_term_stale">mit einem anderen Suchmodell gesetzt, bitte neu setzen</string>
+    <string name="sensitive_remove_term">„%1$s“ entfernen</string>
+    <string name="sensitive_up_to_here">Bis hierher heikel</string>
+    <string name="sensitive_up_to_here_one">Wähl ein Bild in den Ergebnissen aus</string>
+    <string name="sensitive_marks_moved">Ähnliche Bilder wie deine Markierungen: %1$d dazu, %2$d heraus</string>
+    <string name="sensitive_marks_hint">Einzelne Bilder markierst du im Viewer oder per Auswahl. Deine Markierung gilt immer für das Bild, und die ähnlichsten Bilder folgen ihr.</string>
+    <string name="sensitive_failed">Letzter Versuch fehlgeschlagen: %1$s</string>
+    <plurals name="sensitive_term_count">
+        <item quantity="one">%1$d Bild</item>
+        <item quantity="other">%1$d Bilder</item>
+    </plurals>
+    <plurals name="sensitive_term_set">
+        <item quantity="one">„%2$s“: %1$d Bild gilt als heikel</item>
+        <item quantity="other">„%2$s“: %1$d Bilder gelten als heikel</item>
+    </plurals>
     <string name="sensitive_badge">Auf den Kacheln kennzeichnen</string>
     <plurals name="sensitive_count">
         <item quantity="one">%1$d Bild gilt als heikel</item>
