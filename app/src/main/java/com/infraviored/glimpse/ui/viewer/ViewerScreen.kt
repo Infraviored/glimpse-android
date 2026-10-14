@@ -190,9 +190,10 @@ fun ViewerScreen() {
                         current.id?.let { app.search(similar = it, label = current.taken?.let { t -> longDate(t) } ?: current.name) }
                     },
                     BarAction(Icons.Outlined.Info, stringResource(R.string.action_info)) { info = true },
-                    // Only with sensitive pictures turned on; one tap marks it the other way
+                    // Only with sensitive pictures turned on: a toggle, lit while the picture counts as
+                    // sensitive (a longer label for the other state did not fit six actions)
                     if (app.sensitive != null) {
-                        BarAction(Icons.Outlined.Explicit, stringResource(if (sensitive) R.string.sensitive_not else R.string.sensitive_mark)) {
+                        BarAction(Icons.Outlined.Explicit, stringResource(R.string.sensitive_mark), on = sensitive) {
                             actions.markSensitive(listOf(current), !sensitive)
                         }
                     } else {

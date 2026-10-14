@@ -284,7 +284,6 @@
     <string name="sensitive_hide_short">Ohne heikle</string>
     <string name="sensitive_only_short">Nur heikle</string>
     <string name="sensitive_mark">Heikel</string>
-    <string name="sensitive_not">Nicht heikel</string>
     <string name="action_sensitive">Als heikel markieren</string>
     <string name="action_not_sensitive">Als nicht heikel markieren</string>
     <plurals name="marked_sensitive">
