@@ -25,6 +25,12 @@
   <img src="docs/screenshots/app-viewer.png" width="24%" alt="Full-screen viewer">
   <img src="docs/screenshots/app-login.png" width="24%" alt="Login with your Nextcloud">
 </p>
+<p align="center">
+  <img src="docs/screenshots/app-video.png" width="24%" alt="Search for 'astronaut underwater in a pool': two video moments, 9:53 and 1:22, among the photos">
+  <img src="docs/screenshots/app-moment.png" width="24%" alt="The video opened at 9:53, divers in the training pool">
+  <img src="docs/screenshots/app-info.png" width="24%" alt="Info sheet: date, who is in the photo, folder, similar, download, move, copy, album, tag">
+</p>
+<p align="center"><sub>Search finds the moment inside a video and plays it from there. Info shows when, who and where, and what to do next.</sub></p>
 
 ---
 
@@ -46,7 +52,9 @@ Nextcloud decides what you may see.
 - **Map.** Your geotagged pictures as pins on a map in the app's colours; tap a pin for its
   pictures. The map tiles come through your Nextcloud.
 - **Folders.** Your Nextcloud folders as galleries.
-- **Viewer.** Zoom into photos, play videos, see who is in a photo, and jump to similar ones.
+- **Viewer.** Zoom into photos and play videos. Below the picture: share, favorite, similar,
+  info and delete; the info sheet shows the date, who is in the photo and its folder, and offers
+  download, move, copy, album and tag.
 - **Do things with many at once.** Select pictures (long-press), then share, favorite, download,
   move or copy them to a folder (with undo), add them to an album, tag them, or delete them
   (they go to the Nextcloud trash bin).
