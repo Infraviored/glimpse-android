@@ -124,7 +124,7 @@ fun Home() {
     }
     if (account) AccountSheet(onDismiss = { account = false }, onUnlock = { account = false; unlock = true }, onSensitive = { account = false; sensitiveSheet = true })
     if (unlock) UnlockSheet(onDismiss = { unlock = false })
-    if (sensitiveSheet) SensitiveModeSheet(onDismiss = { sensitiveSheet = false }, scope = scope)
+    if (sensitiveSheet) SensitiveSheet(onDismiss = { sensitiveSheet = false }, scope = scope)
 }
 
 /** What can be done with the chosen people: favorite, hide, merge. */
@@ -190,8 +190,14 @@ private fun AccountSheet(onDismiss: () -> Unit, onUnlock: () -> Unit, onSensitiv
                     if (!p.unlocked && p.askPassword) onUnlock() else app.togglePrivate(scope) { app.notices.show(failed.replace("%s", it)) }
                 }
             }
-            app.sensitive?.let { s ->
-                AccountRow(Icons.Outlined.Explicit, stringResource(R.string.sensitive_title), sensitiveModes().firstOrNull { it.first == s.mode }?.second, onSensitive)
+            if (app.sensitiveAvailable) {
+                val mode = app.sensitive?.mode
+                AccountRow(
+                    Icons.Outlined.Explicit,
+                    stringResource(R.string.sensitive_title),
+                    if (mode == null) stringResource(R.string.sensitive_off) else sensitiveModes().firstOrNull { it.first == mode }?.second,
+                    onSensitive,
+                )
             }
             AccountRow(Icons.Outlined.ContentCopy, stringResource(R.string.duplicates_title), stringResource(R.string.duplicates_subtitle)) {
                 onDismiss()

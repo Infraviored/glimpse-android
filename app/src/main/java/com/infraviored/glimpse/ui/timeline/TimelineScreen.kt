@@ -49,7 +49,7 @@ import com.infraviored.glimpse.ui.LocalApp
 import com.infraviored.glimpse.ui.Paged
 import com.infraviored.glimpse.ui.components.Selection
 import com.infraviored.glimpse.ui.loadInto
-import com.infraviored.glimpse.ui.SensitiveModeSheet
+import com.infraviored.glimpse.ui.SensitiveSheet
 import com.infraviored.glimpse.ui.photoBlur
 import com.infraviored.glimpse.ui.sensitiveFilterName
 import com.infraviored.glimpse.ui.theme.glimpse
@@ -65,9 +65,9 @@ class TimelineVm(private val api: Api, val person: String? = null) : ViewModel()
         private set
     var jumpedTo by mutableStateOf<Int?>(null)
         private set
-    val paged = Paged(viewModelScope) { page -> api.timeline(page, before, person = person) }
+    val paged = Paged(viewModelScope) { page, seen -> api.timeline(page, before, person = person, seen = seen) }
     /** After a jump: the pictures from the jump point forward to today, loaded as one scrolls up. */
-    val newer = Paged(viewModelScope) { page -> api.timeline(page, before = null, after = before, person = person) }
+    val newer = Paged(viewModelScope) { page, _ -> api.timeline(page, before = null, after = before, person = person) }
     /** The newer pictures on screen; they join the list in the frame that keeps the view in place. */
     var shownNewer by mutableStateOf<List<Item>>(emptyList())
         private set
@@ -166,6 +166,8 @@ fun TimelineScreen(
 @Composable
 private fun TopLine(onAccount: () -> Unit) {
     val app = LocalApp.current
+    // Outlives the filter chip, which goes away when the filter is turned off from its sheet
+    val scope = rememberCoroutineScope()
     Row(
         Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -173,7 +175,6 @@ private fun TopLine(onAccount: () -> Unit) {
         Text("Glimpse", style = MaterialTheme.typography.displaySmall, color = glimpse.text, modifier = Modifier.weight(1f))
         // A sensitive filter is on: its name, so it is never forgotten; a tap changes it
         sensitiveFilterName(app.sensitive?.mode)?.let { name ->
-            val scope = rememberCoroutineScope()
             var choosing by remember { mutableStateOf(false) }
             Text(
                 name,
@@ -185,7 +186,7 @@ private fun TopLine(onAccount: () -> Unit) {
                     .clickable { choosing = true }
                     .padding(horizontal = 14.dp, vertical = 8.dp),
             )
-            if (choosing) SensitiveModeSheet(onDismiss = { choosing = false }, scope = scope)
+            if (choosing) SensitiveSheet(onDismiss = { choosing = false }, scope = scope)
         }
         AsyncImage(
             model = "${app.api.account.server}/index.php/avatar/${android.net.Uri.encode(app.api.userId)}/96",

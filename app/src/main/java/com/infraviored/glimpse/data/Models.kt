@@ -140,15 +140,33 @@ data class Done(val done: Int = 0, val failed: List<Failed> = emptyList())
 data class SensitiveStatus(
     /** The admin allows it */
     val available: Boolean = false,
-    /** ... and the user turned it on (on the web page) */
+    /** ... and the user turned it on */
     val enabled: Boolean = false,
+    /** Threshold in percent => how many pictures would count */
+    val counts: Map<String, Int> = emptyMap(),
+    val scan: SensitiveScan? = null,
+)
+
+/** How far the detector is through the pictures. */
+@Serializable
+data class SensitiveScan(
+    val scanned: Int = 0,
+    val total: Int? = null,
+    val firstPassDone: Boolean = false,
 )
 
 /** The user's settings for sensitive pictures, from their server-side preferences. */
 @Serializable
 data class SensitivePrefs(
+    @SerialName("sensitive_enabled") val enabled: Boolean = false,
     @SerialName("sensitive_mode") val mode: String = "all",
     @SerialName("sensitive_badge") val badge: Boolean = true,
+    /** How sure the detector must be, in percent */
+    @SerialName("sensitive_threshold") val threshold: Int = 50,
+    @SerialName("sensitive_breast") val breast: Boolean = true,
+    @SerialName("sensitive_genitals") val genitals: Boolean = true,
+    @SerialName("sensitive_buttocks") val buttocks: Boolean = true,
+    @SerialName("sensitive_chest") val chest: Boolean = false,
 )
 
 /** After marking: how each file stands now, and the marks before (for undo). */

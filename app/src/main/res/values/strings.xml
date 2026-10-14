@@ -299,4 +299,19 @@
         <item quantity="one">%1$d picture marked as not sensitive</item>
         <item quantity="other">%1$d pictures marked as not sensitive</item>
     </plurals>
+    <string name="sensitive_enable">Recognise sensitive pictures</string>
+    <string name="sensitive_off">Off</string>
+    <string name="sensitive_explain">Recognises uncovered breasts, genitals and buttocks, so you can mark such pictures, hide them or look at only them. Swimwear and underwear do not count. Only you see what counts for you.</string>
+    <string name="sensitive_scanning">Still looking at pictures: %1$d of %2$d</string>
+    <string name="sensitive_what_counts">What counts</string>
+    <string name="sensitive_breast">Uncovered breasts</string>
+    <string name="sensitive_genitals">Genitals</string>
+    <string name="sensitive_buttocks">Bare buttocks</string>
+    <string name="sensitive_chest">Bare male chest</string>
+    <string name="sensitive_sensitivity">Sensitivity</string>
+    <string name="sensitive_badge">Mark them on the tiles</string>
+    <plurals name="sensitive_count">
+        <item quantity="one">%1$d picture counts as sensitive</item>
+        <item quantity="other">%1$d pictures count as sensitive</item>
+    </plurals>
 </resources>

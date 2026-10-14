@@ -86,6 +86,9 @@ class AppState(
         version++
     }
 
+    /** Sensitive pictures: the admin allows them (the user can turn them on). */
+    var sensitiveAvailable by mutableStateOf(false)
+
     /** Sensitive pictures: null while off (not allowed by the admin, or not turned on by the user). */
     var sensitive by mutableStateOf<com.infraviored.glimpse.data.SensitivePrefs?>(null)
 
@@ -94,9 +97,9 @@ class AppState(
 
     fun isSensitive(item: Item): Boolean = sensitiveMarks[item.fileId] ?: item.sensitive
 
-    /** The sensitive mode changed what may be shown: everything loads again. */
+    /** Sensitive settings changed what may be shown: everything loads again. */
     fun sensitiveModeChanged(prefs: com.infraviored.glimpse.data.SensitivePrefs) {
-        sensitive = prefs
+        sensitive = prefs.takeIf { it.enabled }
         sensitiveMarks = emptyMap()
         privateVersion++
         version++

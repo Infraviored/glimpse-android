@@ -100,8 +100,8 @@ class SearchVm(private val api: Api, private val context: Context, q: String, pe
         private set
     private val initialPerson = personId
 
-    val paged = Paged(viewModelScope) { page ->
-        api.search(q = submitted, page = page, person = person?.id.orEmpty(), type = kind.value, similar = similar, tag = tag?.id?.toString().orEmpty())
+    val paged = Paged(viewModelScope) { page, seen ->
+        api.search(q = submitted, page = page, person = person?.id.orEmpty(), type = kind.value, similar = similar, tag = tag?.id?.toString().orEmpty(), seen = seen)
     }
 
     val active: Boolean get() = submitted.isNotBlank() || person != null || tag != null || similar.isNotEmpty()

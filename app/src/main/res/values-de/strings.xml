@@ -294,4 +294,19 @@
         <item quantity="one">%1$d Bild als nicht heikel markiert</item>
         <item quantity="other">%1$d Bilder als nicht heikel markiert</item>
     </plurals>
+    <string name="sensitive_enable">Heikle Bilder erkennen</string>
+    <string name="sensitive_off">Aus</string>
+    <string name="sensitive_explain">Erkennt unbedeckte Brüste, Genitalien und Pos, damit du solche Bilder markieren, ausblenden oder nur sie ansehen kannst. Badekleidung und Unterwäsche zählen nicht. Was für dich zählt, siehst nur du.</string>
+    <string name="sensitive_scanning">Bilder werden noch angesehen: %1$d von %2$d</string>
+    <string name="sensitive_what_counts">Was zählt</string>
+    <string name="sensitive_breast">Unbedeckte Brüste</string>
+    <string name="sensitive_genitals">Genitalien</string>
+    <string name="sensitive_buttocks">Nackter Po</string>
+    <string name="sensitive_chest">Nackter Männeroberkörper</string>
+    <string name="sensitive_sensitivity">Empfindlichkeit</string>
+    <string name="sensitive_badge">Auf den Kacheln kennzeichnen</string>
+    <plurals name="sensitive_count">
+        <item quantity="one">%1$d Bild gilt als heikel</item>
+        <item quantity="other">%1$d Bilder gelten als heikel</item>
+    </plurals>
 </resources>

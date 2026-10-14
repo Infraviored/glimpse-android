@@ -137,8 +137,8 @@ class Api(val account: Account) {
      * Back in time from [before] (newest first), or forward from [after] to today (oldest first).
      * With [person]: only the pictures that person is in; page 1 then lists that person's years.
      */
-    suspend fun timeline(page: Int, before: String?, after: String? = null, person: String? = null): Page =
-        decode(get(appUrl("/api/timeline") + query("page" to page, "before" to before, "after" to after, "person" to person)))
+    suspend fun timeline(page: Int, before: String?, after: String? = null, person: String? = null, seen: Int = 0): Page =
+        decode(get(appUrl("/api/timeline") + query("page" to page, "before" to before, "after" to after, "person" to person, "seen" to seen)))
 
     suspend fun memories(date: String): List<Memory> = decode(get(appUrl("/api/memories") + query("date" to date)))
 
@@ -149,8 +149,9 @@ class Api(val account: Account) {
         type: String = "",
         similar: String = "",
         tag: String = "",
+        seen: Int = 0,
     ): Page = decode(
-        get(appUrl("/api/search") + query("q" to q, "page" to page, "person" to person, "type" to type, "similar" to similar, "tag" to tag)),
+        get(appUrl("/api/search") + query("q" to q, "page" to page, "person" to person, "type" to type, "similar" to similar, "tag" to tag, "seen" to seen)),
     )
 
     suspend fun people(): People = decode(get(appUrl("/api/people")))
@@ -289,8 +290,9 @@ class Api(val account: Account) {
 
     suspend fun sensitivePrefs(): SensitivePrefs = decode(get(appUrl("/api/prefs")))
 
-    suspend fun setSensitiveMode(mode: String): SensitivePrefs =
-        decode(send("PUT", appUrl("/api/prefs"), Requests.prefs(mapOf("sensitive_mode" to mode))))
+    /** Save some of the user's sensitive settings (keys as on the server: sensitive_mode, ...). */
+    suspend fun saveSensitive(changes: Map<String, Any>): SensitivePrefs =
+        decode(send("PUT", appUrl("/api/prefs"), Requests.prefs(changes)))
 
     suspend fun markSensitive(marks: Map<String, Boolean?>): SensitiveMarks =
         decode(post(appUrl("/api/sensitive/marks"), Requests.sensitiveMarks(marks)))

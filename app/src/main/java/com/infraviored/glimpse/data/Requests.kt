@@ -71,8 +71,19 @@ object Requests {
         put("marks", buildJsonObject { marks.forEach { (id, on) -> put(id, on) } })
     }
 
-    fun prefs(prefs: Map<String, String>): JsonObject = buildJsonObject {
-        put("prefs", buildJsonObject { prefs.forEach { (k, v) -> put(k, v) } })
+    fun prefs(prefs: Map<String, Any>): JsonObject = buildJsonObject {
+        put(
+            "prefs",
+            buildJsonObject {
+                prefs.forEach { (k, v) ->
+                    when (v) {
+                        is Boolean -> put(k, v)
+                        is Number -> put(k, v)
+                        else -> put(k, v.toString())
+                    }
+                }
+            },
+        )
     }
 
     fun privateFiles(fileIds: List<Long>, on: Boolean): JsonObject = buildJsonObject {
