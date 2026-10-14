@@ -293,11 +293,11 @@
     <string name="action_sensitive">Mark as sensitive</string>
     <string name="action_not_sensitive">Mark as not sensitive</string>
     <plurals name="marked_sensitive">
-        <item quantity="one">%d picture marked as sensitive</item>
-        <item quantity="other">%d pictures marked as sensitive</item>
+        <item quantity="one">%1$d picture marked as sensitive</item>
+        <item quantity="other">%1$d pictures marked as sensitive</item>
     </plurals>
     <plurals name="marked_not_sensitive">
-        <item quantity="one">%d picture marked as not sensitive</item>
-        <item quantity="other">%d pictures marked as not sensitive</item>
+        <item quantity="one">%1$d picture marked as not sensitive</item>
+        <item quantity="other">%1$d pictures marked as not sensitive</item>
     </plurals>
 </resources>

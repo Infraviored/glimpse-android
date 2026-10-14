@@ -288,11 +288,11 @@
     <string name="action_sensitive">Als heikel markieren</string>
     <string name="action_not_sensitive">Als nicht heikel markieren</string>
     <plurals name="marked_sensitive">
-        <item quantity="one">%d Bild als heikel markiert</item>
-        <item quantity="other">%d Bilder als heikel markiert</item>
+        <item quantity="one">%1$d Bild als heikel markiert</item>
+        <item quantity="other">%1$d Bilder als heikel markiert</item>
     </plurals>
     <plurals name="marked_not_sensitive">
-        <item quantity="one">%d Bild als nicht heikel markiert</item>
-        <item quantity="other">%d Bilder als nicht heikel markiert</item>
+        <item quantity="one">%1$d Bild als nicht heikel markiert</item>
+        <item quantity="other">%1$d Bilder als nicht heikel markiert</item>
     </plurals>
 </resources>
