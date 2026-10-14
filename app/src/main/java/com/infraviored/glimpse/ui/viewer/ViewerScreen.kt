@@ -282,13 +282,23 @@ private fun BottomBar(actions: List<BarAction>) {
     ) {
         actions.forEach { a ->
             Column(
-                Modifier.clip(RoundedCornerShape(16.dp)).clickable(enabled = a.enabled, onClick = a.onClick)
-                    .graphicsLayer { alpha = if (a.enabled) 1f else 0.4f }.padding(horizontal = if (actions.size > 5) 4.dp else 10.dp, vertical = 6.dp),
+                Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(16.dp))
+                    .clickable(enabled = a.enabled, onClick = a.onClick)
+                    .graphicsLayer { alpha = if (a.enabled) 1f else 0.4f }
+                    .padding(horizontal = if (actions.size > 5) 2.dp else 4.dp, vertical = 6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Icon(a.icon, null, tint = if (a.on) glimpse.accent else Color.White)
                 Spacer(Modifier.height(4.dp))
-                Text(a.label, style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.85f), maxLines = 1)
+                Text(
+                    a.label,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Color.White.copy(alpha = 0.85f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
             }
         }
     }
