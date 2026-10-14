@@ -230,7 +230,7 @@ fun SearchScreen(q: String, personId: String, similar: String, label: String) {
                     PhotoGrid(
                         sections = sections,
                         selection = selection,
-                        onOpen = { app.open(items, it, vm.paged) },
+                        onOpen = { app.open(items, it, vm.paged, gridKey = "search") },
                         state = gridState,
                         loading = vm.paged.loading,
                         error = vm.paged.error,
@@ -239,6 +239,8 @@ fun SearchScreen(q: String, personId: String, similar: String, label: String) {
                         onLoadMore = { vm.paged.loadMore() },
                         contentPadding = PaddingValues(bottom = bottom),
                         columnsKey = "search",
+                        gridKey = "search",
+                        headerCount = 0,
                     ) {
                         if (vm.paged.loaded && items.isEmpty() && !vm.paged.loading) {
                             item(span = { GridItemSpan(maxLineSpan) }) {

@@ -1,5 +1,6 @@
 package com.infraviored.glimpse.ui.components
 
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -105,10 +106,37 @@ fun PhotoGrid(
     onLoadMore: () -> Unit = {},
     contentPadding: PaddingValues = PaddingValues(),
     columnsKey: String = "grid",
+    gridKey: String = columnsKey,
+    headerCount: Int = 0,
     empty: String? = null,
     header: LazyGridScope.() -> Unit = {},
 ) {
     var columns by rememberSaveable(columnsKey) { mutableIntStateOf(4) }
+
+    // Back from the viewer: the picture last shown there is in view, wherever swiping led
+    val app = LocalApp.current
+    val target = app.lastViewed
+    if (target != null && target.gridKey == gridKey) {
+        val targetId = target.fileId
+        LaunchedEffect(targetId, sections) {
+            val itemIndex = photoGridItemIndex(sections, targetId, headerCount)
+            if (itemIndex < 0) {
+                if (!loading) app.lastViewed = null
+                return@LaunchedEffect
+            }
+            app.lastViewed = null
+            val info = state.layoutInfo
+            val shown = info.visibleItemsInfo.firstOrNull { it.key == targetId }
+            if (shown != null && shown.offset.y >= info.viewportStartOffset && shown.offset.y + shown.size.height <= info.viewportEndOffset) {
+                return@LaunchedEffect
+            }
+            state.scrollToItem(itemIndex)
+            val height = state.layoutInfo.viewportSize.height
+            if (height > 0) {
+                state.scrollBy(-height / 3f)
+            }
+        }
+    }
     val haptics = LocalHapticFeedback.current
     val all = remember(sections) { sections.flatMap { it.items } }
     val latestAll by rememberUpdatedState(all)
@@ -248,6 +276,16 @@ fun gridKeys(sections: List<Section>): List<Any> = buildList {
         add("head-${section.key}")
         section.items.forEach { add(it.fileId) }
     }
+}
+
+/**
+ * Where the item [fileId] sits in the grid, counting [headerCount] items before the sections;
+ * -1 if it is not in [sections].
+ */
+fun photoGridItemIndex(sections: List<Section>, fileId: Long, headerCount: Int = 0): Int {
+    val keys = gridKeys(sections)
+    val index = keys.indexOf(fileId)
+    return if (index < 0) -1 else headerCount + index
 }
 
 /** The year, set big: scrolling past one is a step further back in time. */

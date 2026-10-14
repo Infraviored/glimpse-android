@@ -92,8 +92,11 @@ fun TimelineGrid(
 
     // After a jump the list opens at that year, just below the header, so that what loads
     // above it (scrolling up towards today) slides in without moving the pictures in view
-    LaunchedEffect(vm.jumpedTo, paged.loaded) {
-        if (vm.jumpedTo != null && paged.loaded && items.isNotEmpty()) gridState.scrollToItem(HEADER_ITEMS)
+    LaunchedEffect(vm.jumpId, paged.loaded) {
+        if (vm.jumpedTo != null && paged.loaded && items.isNotEmpty() && vm.jumpShown != vm.jumpId) {
+            vm.jumpShown = vm.jumpId
+            gridState.scrollToItem(HEADER_ITEMS)
+        }
     }
     // The newer pictures join the list in the same frame that keeps the pictures in view in
     // place (the grid's own anchoring loses them after many inserts). The anchor is always a
@@ -117,9 +120,8 @@ fun TimelineGrid(
     // Newer pages load while the top of the list is near, but after the first one only once
     // the user has scrolled up since: a year with few pictures fits on the screen, its top
     // stays in view whatever is added above, and every page would load the next one.
-    var newerArmed by remember(vm.jumpedTo) { mutableStateOf(true) }
     LaunchedEffect(vm.jumpedTo, newer.loaded) {
-        if (!newer.loaded) newerArmed = true
+        if (!newer.loaded) vm.newerArmed = true
     }
     LaunchedEffect(vm.jumpedTo) {
         if (vm.jumpedTo == null) return@LaunchedEffect
@@ -132,14 +134,14 @@ fun TimelineGrid(
                 canScrollForward = gridState.canScrollForward,
             )
             Triple(arm, gridState.firstVisibleItemScrollOffset, newer.items.size)
-        }.collect { (arm) -> if (arm) newerArmed = true }
+        }.collect { (arm) -> if (arm) vm.newerArmed = true }
     }
     LaunchedEffect(vm.jumpedTo) {
         if (vm.jumpedTo == null) return@LaunchedEffect
-        snapshotFlow { newerArmed && paged.loaded && !newer.loading && newer.hasMore && newer.error == null && gridState.firstVisibleItemIndex < 40 }
+        snapshotFlow { vm.newerArmed && paged.loaded && !newer.loading && newer.hasMore && newer.error == null && gridState.firstVisibleItemIndex < 40 }
             .collect {
                 if (it) {
-                    newerArmed = false
+                    vm.newerArmed = false
                     newer.loadMore()
                 }
             }
@@ -149,7 +151,7 @@ fun TimelineGrid(
         PhotoGrid(
             sections = sections,
             selection = selection,
-            onOpen = { app.open(items, it, viewerSource(vm.jumpedTo != null, paged)) },
+            onOpen = { app.open(items, it, viewerSource(vm.jumpedTo != null, paged), gridKey = columnsKey) },
             state = gridState,
             loading = paged.loading,
             error = paged.error,
@@ -158,6 +160,8 @@ fun TimelineGrid(
             onLoadMore = { paged.loadMore() },
             contentPadding = PaddingValues(bottom = bottomPadding),
             columnsKey = columnsKey,
+            gridKey = columnsKey,
+            headerCount = HEADER_ITEMS,
             empty = empty,
         ) {
             item(key = "top", span = { GridItemSpan(maxLineSpan) }, contentType = "top") {
