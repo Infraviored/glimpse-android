@@ -111,8 +111,18 @@ fun TimelineGrid(
             val anchorKey = (photo?.key as? Long) ?: fallbackAnchor(vm.shownNewer, paged.items, app.deleted)
             val index = if (anchorKey != null) anchorIndex(added, paged.items, app.deleted, anchorKey, unknown) else -1
             if (index >= 0) {
-                val offset = if (photo != null && photo.index == gridState.firstVisibleItemIndex) gridState.firstVisibleItemScrollOffset else 0
-                gridState.requestScrollToItem(index, offset)
+                // Exactly in place: the item at the top of the screen (say the year band right
+                // after a jump) and its offset, when it is still the same distance above the
+                // picture – true for a year band or heading the new pictures do not merge into,
+                // never for the header, which gets the new pictures right below it
+                val top = visible.firstOrNull()
+                val topIndex = top?.key?.let { anchorIndex(added, paged.items, app.deleted, it, unknown) } ?: -1
+                if (top != null && photo != null && topIndex >= 0 && index - topIndex == photo.index - top.index) {
+                    gridState.requestScrollToItem(topIndex, gridState.firstVisibleItemScrollOffset)
+                } else {
+                    val offset = if (photo != null && photo.index == gridState.firstVisibleItemIndex) gridState.firstVisibleItemScrollOffset else 0
+                    gridState.requestScrollToItem(index, offset)
+                }
             }
         }
         vm.showNewer(added)
