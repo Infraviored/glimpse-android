@@ -1,7 +1,22 @@
 package com.infraviored.glimpse.data
 
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.buildClassSerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.JsonEncoder
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.boolean
+import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.put
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
@@ -137,11 +152,40 @@ data class SensitivePrefs(
 )
 
 /** After marking: how each file stands now, and the marks before (for undo). */
-@Serializable
+@Serializable(with = SensitiveMarksSerializer::class)
 data class SensitiveMarks(
     val previous: Map<String, Boolean?> = emptyMap(),
     val sensitive: Map<String, Boolean> = emptyMap(),
 )
+
+object SensitiveMarksSerializer : KSerializer<SensitiveMarks> {
+    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("com.infraviored.glimpse.data.SensitiveMarks")
+
+    override fun serialize(encoder: Encoder, value: SensitiveMarks) {
+        val json = encoder as? JsonEncoder ?: throw SerializationException("Only JSON supported")
+        val obj = buildJsonObject {
+            put("previous", buildJsonObject {
+                value.previous.forEach { (k, v) -> put(k, v) }
+            })
+            put("sensitive", buildJsonObject {
+                value.sensitive.forEach { (k, v) -> put(k, v) }
+            })
+        }
+        json.encodeJsonElement(obj)
+    }
+
+    override fun deserialize(decoder: Decoder): SensitiveMarks {
+        val json = decoder as? JsonDecoder ?: throw SerializationException("Only JSON supported")
+        val root = json.decodeJsonElement() as? JsonObject ?: return SensitiveMarks()
+        val previous = (root["previous"] as? JsonObject)?.mapValues { (_, v) ->
+            if (v is JsonNull) null else v.jsonPrimitive.booleanOrNull
+        }.orEmpty()
+        val sensitive = (root["sensitive"] as? JsonObject)?.mapValues { (_, v) ->
+            v.jsonPrimitive.boolean
+        }.orEmpty()
+        return SensitiveMarks(previous = previous, sensitive = sensitive)
+    }
+}
 
 @Serializable
 data class PrivateState(
