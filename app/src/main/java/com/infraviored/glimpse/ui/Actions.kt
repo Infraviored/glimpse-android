@@ -109,6 +109,31 @@ class PhotoActions(
         }
     }
 
+    /**
+     * Sensitive or not, by hand, with undo. The tiles change at once; the pictures stay in
+     * the list until it loads again (going through a list stays calm that way).
+     */
+    fun markSensitive(items: List<Item>, on: Boolean, onDone: () -> Unit = {}) {
+        if (items.isEmpty()) return
+        scope.launch {
+            try {
+                val res = api.markSensitive(items.associate { it.fileId.toString() to on })
+                app.sensitiveMarks = app.sensitiveMarks + res.sensitive.mapKeys { it.key.toLong() }
+                onDone()
+                val text = context.resources.getQuantityString(if (on) R.plurals.marked_sensitive else R.plurals.marked_not_sensitive, items.size, items.size)
+                app.notices.show(text, context.getString(R.string.undo)) {
+                    scope.launch {
+                        runCatching { api.markSensitive(res.previous) }
+                            .onSuccess { back -> app.sensitiveMarks = app.sensitiveMarks + back.sensitive.mapKeys { it.key.toLong() } }
+                            .onFailure { app.notices.show(context.getString(R.string.action_failed, it.message ?: it.javaClass.simpleName)) }
+                    }
+                }
+            } catch (e: Exception) {
+                app.notices.show(context.getString(R.string.action_failed, e.message ?: e.javaClass.simpleName))
+            }
+        }
+    }
+
     /** Private or not; private pictures vanish while the area is locked. */
     fun setPrivate(items: List<Item>, on: Boolean, onDone: () -> Unit = {}) {
         if (items.isEmpty()) return

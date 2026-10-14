@@ -41,6 +41,7 @@ import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.outlined.Explicit
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -77,6 +78,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.infraviored.glimpse.R
+import com.infraviored.glimpse.ui.theme.glimpse
 import com.infraviored.glimpse.data.Faces
 import com.infraviored.glimpse.data.Item
 import com.infraviored.glimpse.ui.photoBlur
@@ -179,14 +181,24 @@ fun ViewerScreen() {
             TopBar(current, onBack = app.back)
         }
         AnimatedVisibility(chrome && dismiss.value == 0f, enter = fadeIn(), exit = fadeOut(), modifier = Modifier.align(Alignment.BottomCenter)) {
+            val sensitive = app.isSensitive(current)
             BottomBar(
-                listOf(
+                listOfNotNull(
                     BarAction(Icons.Outlined.Share, stringResource(R.string.action_share)) { actions.share(listOf(current)) },
                     BarAction(Icons.Outlined.FavoriteBorder, stringResource(R.string.action_favorite)) { actions.favorite(listOf(current)) },
                     BarAction(Icons.Outlined.AutoAwesomeMosaic, stringResource(R.string.action_similar_short), enabled = current.id != null) {
                         current.id?.let { app.search(similar = it, label = current.taken?.let { t -> longDate(t) } ?: current.name) }
                     },
                     BarAction(Icons.Outlined.Info, stringResource(R.string.action_info)) { info = true },
+                    // Only with sensitive pictures turned on: a toggle, lit while the picture counts as
+                    // sensitive (a longer label for the other state did not fit six actions)
+                    if (app.sensitive != null) {
+                        BarAction(Icons.Outlined.Explicit, stringResource(R.string.sensitive_mark), on = sensitive) {
+                            actions.markSensitive(listOf(current), !sensitive)
+                        }
+                    } else {
+                        null
+                    },
                     BarAction(Icons.Outlined.Delete, stringResource(R.string.action_delete)) { actions.confirmDelete = listOf(current) },
                 ),
             )
@@ -257,7 +269,7 @@ private fun TopBar(item: Item, onBack: () -> Unit) {
     }
 }
 
-private class BarAction(val icon: ImageVector, val label: String, val enabled: Boolean = true, val onClick: () -> Unit)
+private class BarAction(val icon: ImageVector, val label: String, val enabled: Boolean = true, val on: Boolean = false, val onClick: () -> Unit)
 
 @Composable
 private fun BottomBar(actions: List<BarAction>) {
@@ -271,13 +283,23 @@ private fun BottomBar(actions: List<BarAction>) {
     ) {
         actions.forEach { a ->
             Column(
-                Modifier.clip(RoundedCornerShape(16.dp)).clickable(enabled = a.enabled, onClick = a.onClick)
-                    .graphicsLayer { alpha = if (a.enabled) 1f else 0.4f }.padding(horizontal = 10.dp, vertical = 6.dp),
+                Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(16.dp))
+                    .clickable(enabled = a.enabled, onClick = a.onClick)
+                    .graphicsLayer { alpha = if (a.enabled) 1f else 0.4f }
+                    .padding(horizontal = if (actions.size > 5) 2.dp else 4.dp, vertical = 6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Icon(a.icon, null, tint = Color.White)
+                Icon(a.icon, null, tint = if (a.on) glimpse.accent else Color.White)
                 Spacer(Modifier.height(4.dp))
-                Text(a.label, style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.85f))
+                Text(
+                    a.label,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Color.White.copy(alpha = 0.85f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
             }
         }
     }

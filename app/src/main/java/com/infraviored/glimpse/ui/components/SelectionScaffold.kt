@@ -28,6 +28,7 @@ import androidx.compose.material.icons.automirrored.outlined.DriveFileMove
 import androidx.compose.material.icons.outlined.AutoAwesomeMosaic
 import androidx.compose.material.icons.outlined.FileCopy
 import androidx.compose.material.icons.outlined.HeartBroken
+import androidx.compose.material.icons.outlined.Explicit
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.LockOpen
 import androidx.compose.material.icons.outlined.PhotoAlbum
@@ -79,7 +80,14 @@ fun selectionMore(actions: PhotoActions, selection: Selection, items: List<Item>
             subtitle = if (unlocked) null else stringResource(R.string.private_unlock_first),
             enabled = unlocked,
         ) { actions.setPrivate(chosen(), on = false) { selection.clear() } },
-    )
+    ) + if (app.sensitive != null) {
+        listOf(
+            DockAction(Icons.Outlined.Explicit, stringResource(R.string.action_sensitive)) { actions.markSensitive(chosen(), on = true) { selection.clear() } },
+            DockAction(Icons.Outlined.Explicit, stringResource(R.string.action_not_sensitive)) { actions.markSensitive(chosen(), on = false) { selection.clear() } },
+        )
+    } else {
+        emptyList()
+    }
 }
 
 /**

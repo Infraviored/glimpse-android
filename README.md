@@ -60,6 +60,9 @@ Nextcloud decides what you may see.
   (they go to the Nextcloud trash bin).
 - **Private area.** Mark pictures private; they only show after you unlock with your Nextcloud
   password, and lock again with one tap.
+- **Sensitive pictures** (when your server allows it and you turned it on in Glimpse's settings
+  on the web): recognised pictures carry a small mark; show all, hide them or see only them
+  from the account menu, and mark a picture as sensitive or not with one tap in the viewer.
 - **Duplicates.** Groups of near-identical pictures, with Immich's pick of what to keep; delete
   the rest in one go or mark a group as not duplicates.
 - **Light and dark**, following the system setting, in Glimpse's design. English and German.

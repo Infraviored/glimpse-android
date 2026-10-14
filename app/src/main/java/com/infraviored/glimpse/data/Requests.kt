@@ -66,6 +66,15 @@ object Requests {
         putJsonArray("newTags") { newTags.map { it.trim() }.filter { it.isNotEmpty() }.distinct().forEach { add(JsonPrimitive(it)) } }
     }
 
+    /** fileId => true (sensitive), false (not), null (back to what was recognised) */
+    fun sensitiveMarks(marks: Map<String, Boolean?>): JsonObject = buildJsonObject {
+        put("marks", buildJsonObject { marks.forEach { (id, on) -> put(id, on) } })
+    }
+
+    fun prefs(prefs: Map<String, String>): JsonObject = buildJsonObject {
+        put("prefs", buildJsonObject { prefs.forEach { (k, v) -> put(k, v) } })
+    }
+
     fun privateFiles(fileIds: List<Long>, on: Boolean): JsonObject = buildJsonObject {
         putJsonArray("fileIds") { fileIds.distinct().forEach { add(JsonPrimitive(it)) } }
         put("on", on)

@@ -24,6 +24,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,7 +49,9 @@ import com.infraviored.glimpse.ui.LocalApp
 import com.infraviored.glimpse.ui.Paged
 import com.infraviored.glimpse.ui.components.Selection
 import com.infraviored.glimpse.ui.loadInto
+import com.infraviored.glimpse.ui.SensitiveModeSheet
 import com.infraviored.glimpse.ui.photoBlur
+import com.infraviored.glimpse.ui.sensitiveFilterName
 import com.infraviored.glimpse.ui.theme.glimpse
 import java.time.LocalDate
 
@@ -167,6 +171,22 @@ private fun TopLine(onAccount: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text("Glimpse", style = MaterialTheme.typography.displaySmall, color = glimpse.text, modifier = Modifier.weight(1f))
+        // A sensitive filter is on: its name, so it is never forgotten; a tap changes it
+        sensitiveFilterName(app.sensitive?.mode)?.let { name ->
+            val scope = rememberCoroutineScope()
+            var choosing by remember { mutableStateOf(false) }
+            Text(
+                name,
+                style = MaterialTheme.typography.labelLarge,
+                color = glimpse.accent,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(glimpse.raised)
+                    .clickable { choosing = true }
+                    .padding(horizontal = 14.dp, vertical = 8.dp),
+            )
+            if (choosing) SensitiveModeSheet(onDismiss = { choosing = false }, scope = scope)
+        }
         AsyncImage(
             model = "${app.api.account.server}/index.php/avatar/${android.net.Uri.encode(app.api.userId)}/96",
             contentDescription = stringResource(R.string.account),

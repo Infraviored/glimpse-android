@@ -56,6 +56,31 @@ class RequestsTest {
     }
 
     @Test
+    fun sensitiveMarks() {
+        assertEquals(
+            """{"marks":{"5":true,"6":null}}""",
+            Requests.sensitiveMarks(linkedMapOf("5" to true, "6" to null)).toString(),
+        )
+        assertEquals("""{"prefs":{"sensitive_mode":"hide"}}""", Requests.prefs(mapOf("sensitive_mode" to "hide")).toString())
+    }
+
+    @Test
+    fun sensitiveMarksDeserializerToleratesEmptyArrays() {
+        val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+        val emptyResult = json.decodeFromString<SensitiveMarks>("""{"previous":[],"sensitive":[]}""")
+        assertEquals(emptyMap<String, Boolean?>(), emptyResult.previous)
+        assertEquals(emptyMap<String, Boolean>(), emptyResult.sensitive)
+
+        val populated = json.decodeFromString<SensitiveMarks>("""{"previous":{"5":null,"6":false},"sensitive":{"5":true,"6":false}}""")
+        assertEquals(mapOf("5" to null, "6" to false), populated.previous)
+        assertEquals(mapOf("5" to true, "6" to false), populated.sensitive)
+
+        val missing = json.decodeFromString<SensitiveMarks>("""{}""")
+        assertEquals(emptyMap<String, Boolean?>(), missing.previous)
+        assertEquals(emptyMap<String, Boolean>(), missing.sensitive)
+    }
+
+    @Test
     fun privateFiles() {
         assertEquals("""{"fileIds":[5,6],"on":false}""", Requests.privateFiles(listOf(5, 6), false).toString())
     }

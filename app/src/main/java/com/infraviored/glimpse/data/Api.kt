@@ -283,6 +283,18 @@ class Api(val account: Account) {
         post(appUrl("/api/private/files"), Requests.privateFiles(fileIds, on))
     }
 
+    // ---- sensitive pictures ------------------------------------------------------------------
+
+    suspend fun sensitiveStatus(): SensitiveStatus = decode(get(appUrl("/api/sensitive")))
+
+    suspend fun sensitivePrefs(): SensitivePrefs = decode(get(appUrl("/api/prefs")))
+
+    suspend fun setSensitiveMode(mode: String): SensitivePrefs =
+        decode(send("PUT", appUrl("/api/prefs"), Requests.prefs(mapOf("sensitive_mode" to mode))))
+
+    suspend fun markSensitive(marks: Map<String, Boolean?>): SensitiveMarks =
+        decode(post(appUrl("/api/sensitive/marks"), Requests.sensitiveMarks(marks)))
+
     // ---- map, duplicates ---------------------------------------------------------------------
 
     suspend fun mapMarkers(): MapData {
