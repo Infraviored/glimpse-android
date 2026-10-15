@@ -315,7 +315,7 @@
         <item quantity="one">„%2$s“: %1$d Bild gilt als heikel</item>
         <item quantity="other">„%2$s“: %1$d Bilder gelten als heikel</item>
     </plurals>
-    <string name="sensitive_badge">Auf den Kacheln kennzeichnen</string>
+    <string name="sensitive_badge">Heikle Bilder auf den Kacheln markieren</string>
     <plurals name="sensitive_count">
         <item quantity="one">%1$d Bild gilt als heikel</item>
         <item quantity="other">%1$d Bilder gelten als heikel</item>
@@ -352,10 +352,6 @@
     <string name="trainer_empty_hidden">Der Filter blendet nur aus, was du selbst markiert hast</string>
     <string name="trainer_empty_term">Zu diesem Begriff kommt nichts mehr</string>
     <string name="trainer_empty_visible">Nichts mehr, was heikel aussieht</string>
-    <string name="sensitive_settings">Einstellungen …</string>
-    <string name="sensitive_state_shown">Heikle Bilder: sichtbar</string>
-    <string name="sensitive_state_hidden">Heikle Bilder: ausgeblendet</string>
-    <string name="sensitive_state_only">Heikle Bilder: nur diese</string>
     <string name="ignore_folder">Diesen Ordner ignorieren …</string>
     <string name="ignore_folder_title">„%1$s“ ignorieren?</string>
     <string name="ignore_folder_text">Glimpse und Immich indexieren diesen Ordner samt Inhalt nicht mehr, für alle. Seine Bilder verschwinden nach dem nächsten Scan der Bibliothek. Rückgängig machen kannst du das unter Einstellungen → Was indexiert wird.</string>

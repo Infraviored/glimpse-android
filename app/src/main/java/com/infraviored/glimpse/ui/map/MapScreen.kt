@@ -75,7 +75,7 @@ import com.infraviored.glimpse.ui.theme.Palette
 import com.infraviored.glimpse.ui.theme.glimpse
 import kotlin.math.roundToInt
 
-class MapVm(private val api: Api) : ViewModel() {
+class MapVm(private val api: Api, /** see TimelineVm.loadedForVersion */ var loadedForVersion: Int = 0) : ViewModel() {
     var markers by mutableStateOf<List<Marker>?>(null)
         private set
     var error by mutableStateOf<String?>(null)
@@ -102,11 +102,16 @@ class MapVm(private val api: Api) : ViewModel() {
 @Composable
 fun MapScreen(bottomPadding: Dp) {
     val app = LocalApp.current
-    val vm: MapVm = viewModel { MapVm(app.api) }
+    val vm: MapVm = viewModel { MapVm(app.api, app.privateVersion) }
     val density = LocalDensity.current
     var shown by remember { mutableStateOf<List<Marker>?>(null) }
     val privateVersion = app.privateVersion
-    LaunchedEffect(privateVersion) { if (privateVersion > 0) vm.reload() }
+    LaunchedEffect(privateVersion) {
+        if (privateVersion != vm.loadedForVersion) {
+            vm.loadedForVersion = privateVersion
+            vm.reload()
+        }
+    }
     val markers = vm.markers.orEmpty().filterNot { it.fileId in app.deleted }
     val tint = mapTint(glimpse.isDark)
 

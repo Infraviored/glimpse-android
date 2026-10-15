@@ -152,7 +152,7 @@ private fun peopleActions(vm: PeopleVm): List<DockAction> {
 @Composable
 private fun currentTimelineItems(): List<com.infraviored.glimpse.data.Item> {
     val app = LocalApp.current
-    val vm: com.infraviored.glimpse.ui.timeline.TimelineVm = androidx.lifecycle.viewmodel.compose.viewModel { com.infraviored.glimpse.ui.timeline.TimelineVm(app.api) }
+    val vm: com.infraviored.glimpse.ui.timeline.TimelineVm = androidx.lifecycle.viewmodel.compose.viewModel { com.infraviored.glimpse.ui.timeline.TimelineVm(app.api, loadedForVersion = app.privateVersion) }
     return vm.paged.items
 }
 

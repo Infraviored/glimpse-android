@@ -12,6 +12,8 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.draw.blur
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -359,19 +361,28 @@ fun Thumbnail(
             )
         }
         if (app.sensitive?.badge == true && app.isSensitive(item)) {
-            // Counted as sensitive: small, in the corner nothing else uses
-            Icon(
-                com.infraviored.glimpse.ui.SensitiveIcon,
-                contentDescription = stringResource(R.string.sensitive_mark),
-                tint = Color.White,
-                modifier = Modifier
+            // Counted as sensitive (only if the user wants the mark): a small, light eye in the
+            // corner nothing else uses, no chip; a soft shadow keeps it readable on bright pictures
+            Box(
+                Modifier
                     .align(Alignment.BottomStart)
                     .scale(inset)
-                    .padding(6.dp)
-                    .size(20.dp)
-                    .background(Color.Black.copy(alpha = 0.55f), RoundedCornerShape(5.dp))
-                    .padding(2.dp),
-            )
+                    .padding(5.dp)
+                    .size(13.dp),
+            ) {
+                Icon(
+                    com.infraviored.glimpse.ui.SensitiveIcon,
+                    contentDescription = null,
+                    tint = Color.Black.copy(alpha = 0.28f),
+                    modifier = Modifier.matchParentSize().offset(0.5.dp, 0.5.dp).blur(1.dp),
+                )
+                Icon(
+                    com.infraviored.glimpse.ui.SensitiveIcon,
+                    contentDescription = stringResource(R.string.sensitive_mark),
+                    tint = Color.White.copy(alpha = 0.72f),
+                    modifier = Modifier.matchParentSize(),
+                )
+            }
         }
         if (selecting) {
             Box(

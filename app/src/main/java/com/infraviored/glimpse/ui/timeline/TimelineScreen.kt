@@ -25,7 +25,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,7 +48,6 @@ import com.infraviored.glimpse.ui.LocalApp
 import com.infraviored.glimpse.ui.Paged
 import com.infraviored.glimpse.ui.components.Selection
 import com.infraviored.glimpse.ui.loadInto
-import com.infraviored.glimpse.ui.SensitiveSheet
 import com.infraviored.glimpse.ui.photoBlur
 import com.infraviored.glimpse.ui.theme.glimpse
 import java.time.LocalDate
@@ -58,7 +56,17 @@ import java.time.LocalDate
  * A timeline, newest first, that can jump to a year and grow from there in both directions.
  * With [person]: only the pictures that person is in (their page), without memories.
  */
-class TimelineVm(private val api: Api, val person: String? = null) : ViewModel() {
+class TimelineVm(
+    private val api: Api,
+    val person: String? = null,
+    /**
+     * The AppState.privateVersion this list was loaded for. Kept here, not in the screen: the
+     * screen is composed anew when coming back from the viewer, and a check on "> 0" there
+     * reloaded the whole list (back to page 1, scroll position lost) on every return once the
+     * private area or the sensitive mode had changed once in the session.
+     */
+    var loadedForVersion: Int = 0,
+) : ViewModel() {
     /** Start of the list: null for now, else the end of a year jumped to. */
     var before by mutableStateOf<String?>(null)
         private set
@@ -138,11 +146,13 @@ fun TimelineScreen(
     onAccount: () -> Unit,
 ) {
     val app = LocalApp.current
-    val vm: TimelineVm = viewModel { TimelineVm(app.api) }
-    // Locked or unlocked: other pictures are visible now
+    val vm: TimelineVm = viewModel { TimelineVm(app.api, loadedForVersion = app.privateVersion) }
+    // Locked or unlocked, sensitive mode changed: other pictures are visible now. Only a real
+    // change reloads; coming back from the viewer must leave the list (and its scroll) alone.
     val privateVersion = app.privateVersion
     LaunchedEffect(privateVersion) {
-        if (privateVersion > 0) {
+        if (privateVersion != vm.loadedForVersion) {
+            vm.loadedForVersion = privateVersion
             vm.reload()
             vm.reloadMemories()
         }
@@ -165,15 +175,11 @@ fun TimelineScreen(
 @Composable
 private fun TopLine(onAccount: () -> Unit) {
     val app = LocalApp.current
-    // Outlives the filter chip, which goes away when the filter is turned off from its sheet
-    val scope = rememberCoroutineScope()
     Row(
         Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text("Glimpse", style = MaterialTheme.typography.displaySmall, color = glimpse.text, modifier = Modifier.weight(1f))
-        // Sensitive pictures on: the eye says what is shown, a tap changes it
-        com.infraviored.glimpse.ui.SensitiveModeButton(scope)
         AsyncImage(
             model = "${app.api.account.server}/index.php/avatar/${android.net.Uri.encode(app.api.userId)}/96",
             contentDescription = stringResource(R.string.account),

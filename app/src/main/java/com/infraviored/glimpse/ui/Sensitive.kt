@@ -14,13 +14,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.School
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -100,12 +95,14 @@ fun SensitiveSheet(onDismiss: () -> Unit, scope: CoroutineScope = rememberCorout
     val prefs = app.sensitive
     LaunchedEffect(prefs) { status = runCatching { app.api.sensitiveStatus() }.getOrNull() }
 
-    fun save(changes: Map<String, Any>) {
+    /** [reload]: false for what only changes the look (the mark), so the lists keep their place. */
+    fun save(changes: Map<String, Any>, reload: Boolean = true) {
         if (busy) return
         busy = true
         scope.launch {
             try {
-                app.sensitiveModeChanged(app.api.saveSensitive(changes))
+                val saved = app.api.saveSensitive(changes)
+                if (reload) app.sensitiveModeChanged(saved) else app.sensitive = saved.takeIf { it.enabled }
             } catch (e: Exception) {
                 app.notices.show(failed.replace("%s", e.message ?: e.javaClass.simpleName))
             } finally {
@@ -203,7 +200,7 @@ fun SensitiveSheet(onDismiss: () -> Unit, scope: CoroutineScope = rememberCorout
             Text(stringResource(R.string.sensitive_marks_hint), style = MaterialTheme.typography.bodySmall, color = glimpse.muted)
 
             Spacer(Modifier.height(8.dp))
-            SwitchRow(stringResource(R.string.sensitive_badge), prefs.badge, enabled = !busy) { save(mapOf("sensitive_badge" to it)) }
+            SwitchRow(stringResource(R.string.sensitive_badge), prefs.badge, enabled = !busy) { save(mapOf("sensitive_badge" to it), reload = false) }
         }
     }
 }
@@ -237,56 +234,3 @@ fun sensitiveModeIcon(mode: String?): ImageVector = when (mode) {
 
 /** A sensitive picture is one the filter hides. */
 val SensitiveIcon: ImageVector get() = Icons.Outlined.VisibilityOff
-
-/**
- * The sensitive mode, quiet: only the eye, a tap opens the three modes, training the filter
- * and the settings.
- */
-@Composable
-fun SensitiveModeButton(scope: CoroutineScope) {
-    val app = LocalApp.current
-    val prefs = app.sensitive ?: return
-    var open by remember { mutableStateOf(false) }
-    var settings by remember { mutableStateOf(false) }
-    val failed = stringResource(R.string.action_failed, "%s")
-    val label = when (prefs.mode) {
-        "hide" -> stringResource(R.string.sensitive_state_hidden)
-        "only" -> stringResource(R.string.sensitive_state_only)
-        else -> stringResource(R.string.sensitive_state_shown)
-    }
-    Box {
-        IconButton(onClick = { open = true }) {
-            Icon(sensitiveModeIcon(prefs.mode), contentDescription = label, tint = glimpse.muted)
-        }
-        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
-            sensitiveModes().forEach { (mode, text) ->
-                DropdownMenuItem(
-                    text = { Text(text) },
-                    leadingIcon = { Icon(sensitiveModeIcon(mode), null, tint = if (mode == prefs.mode) glimpse.accent else glimpse.muted) },
-                    onClick = {
-                        open = false
-                        if (mode != prefs.mode) scope.launch {
-                            try {
-                                app.sensitiveModeChanged(app.api.saveSensitive(mapOf("sensitive_mode" to mode)))
-                            } catch (e: Exception) {
-                                app.notices.show(failed.replace("%s", e.message ?: e.javaClass.simpleName))
-                            }
-                        }
-                    },
-                )
-            }
-            HorizontalDivider()
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.trainer_title)) },
-                leadingIcon = { Icon(Icons.Outlined.School, null) },
-                onClick = { open = false; app.trainSensitive() },
-            )
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.sensitive_settings)) },
-                leadingIcon = { Icon(Icons.Outlined.Settings, null) },
-                onClick = { open = false; settings = true },
-            )
-        }
-    }
-    if (settings) SensitiveSheet(onDismiss = { settings = false }, scope = scope)
-}
