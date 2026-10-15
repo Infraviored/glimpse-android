@@ -320,7 +320,7 @@
         <item quantity="one">“%2$s”: %1$d picture counts as sensitive</item>
         <item quantity="other">“%2$s”: %1$d pictures count as sensitive</item>
     </plurals>
-    <string name="sensitive_badge">Mark them on the tiles</string>
+    <string name="sensitive_badge">Show a mark on sensitive pictures</string>
     <plurals name="sensitive_count">
         <item quantity="one">%1$d picture counts as sensitive</item>
         <item quantity="other">%1$d pictures count as sensitive</item>
@@ -357,10 +357,6 @@
     <string name="trainer_empty_hidden">The filter hides nothing but what you marked yourself</string>
     <string name="trainer_empty_term">Nothing more for this term</string>
     <string name="trainer_empty_visible">Nothing more that looks sensitive</string>
-    <string name="sensitive_settings">Settings …</string>
-    <string name="sensitive_state_shown">Sensitive pictures: shown</string>
-    <string name="sensitive_state_hidden">Sensitive pictures: hidden</string>
-    <string name="sensitive_state_only">Sensitive pictures: only those</string>
     <string name="ignore_folder">Ignore this folder …</string>
     <string name="ignore_folder_title">Ignore “%1$s”?</string>
     <string name="ignore_folder_text">Glimpse and Immich stop indexing this folder and everything in it, for everyone. Its pictures disappear after the next library scan. You can take it back under Settings → What gets indexed.</string>

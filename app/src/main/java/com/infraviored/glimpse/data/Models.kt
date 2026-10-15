@@ -189,7 +189,7 @@ data class SensitiveTerm(
 data class SensitivePrefs(
     @SerialName("sensitive_enabled") val enabled: Boolean = false,
     @SerialName("sensitive_mode") val mode: String = "all",
-    @SerialName("sensitive_badge") val badge: Boolean = true,
+    @SerialName("sensitive_badge") val badge: Boolean = false,
 )
 
 /** After marking: how each file stands now, and the marks before (for undo). */
