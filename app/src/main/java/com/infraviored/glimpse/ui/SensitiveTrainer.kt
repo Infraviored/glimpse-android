@@ -293,12 +293,13 @@ fun SensitiveTrainer() {
     BackHandler(enabled = selection.active) { selection.clear() }
 
     fun act() {
+        if (vm.busy) return
         val chosen = items.filter { it.fileId in selection.ids }
         val on = vm.side == "visible"
+        selection.clear()
         vm.mark(
             chosen,
             onMarked = { marks ->
-                selection.clear()
                 app.sensitiveMarks = app.sensitiveMarks + marks.sensitive.mapKeys { it.key.toLong() }
                 val text = res.getQuantityString(if (on) R.plurals.marked_sensitive else R.plurals.marked_not_sensitive, chosen.size, chosen.size)
                 app.notices.show(text, undoLabel) {
@@ -452,7 +453,7 @@ fun SensitiveTrainer() {
                     color = glimpse.text,
                     modifier = Modifier.weight(1f),
                 )
-                TextButton(onClick = { selection.ids = items.mapTo(HashSet()) { it.fileId } }) { Text(stringResource(R.string.trainer_select_all)) }
+                TextButton(enabled = !vm.busy, onClick = { selection.ids = items.mapTo(HashSet()) { it.fileId } }) { Text(stringResource(R.string.trainer_select_all)) }
                 Spacer(Modifier.width(4.dp))
                 Button(
                     onClick = { act() },
