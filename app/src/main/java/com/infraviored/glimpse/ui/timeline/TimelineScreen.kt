@@ -24,6 +24,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,6 +49,7 @@ import com.infraviored.glimpse.ui.LocalApp
 import com.infraviored.glimpse.ui.Paged
 import com.infraviored.glimpse.ui.components.Selection
 import com.infraviored.glimpse.ui.loadInto
+import com.infraviored.glimpse.ui.SensitiveSheet
 import com.infraviored.glimpse.ui.photoBlur
 import com.infraviored.glimpse.ui.theme.glimpse
 import java.time.LocalDate
@@ -61,9 +64,9 @@ class TimelineVm(private val api: Api, val person: String? = null) : ViewModel()
         private set
     var jumpedTo by mutableStateOf<Int?>(null)
         private set
-    val paged = Paged(viewModelScope) { page -> api.timeline(page, before, person = person) }
+    val paged = Paged(viewModelScope) { page, seen -> api.timeline(page, before, person = person, seen = seen) }
     /** After a jump: the pictures from the jump point forward to today, loaded as one scrolls up. */
-    val newer = Paged(viewModelScope) { page -> api.timeline(page, before = null, after = before, person = person) }
+    val newer = Paged(viewModelScope) { page, _ -> api.timeline(page, before = null, after = before, person = person) }
     /** The newer pictures on screen; they join the list in the frame that keeps the view in place. */
     var shownNewer by mutableStateOf<List<Item>>(emptyList())
         private set
@@ -162,11 +165,15 @@ fun TimelineScreen(
 @Composable
 private fun TopLine(onAccount: () -> Unit) {
     val app = LocalApp.current
+    // Outlives the filter chip, which goes away when the filter is turned off from its sheet
+    val scope = rememberCoroutineScope()
     Row(
         Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text("Glimpse", style = MaterialTheme.typography.displaySmall, color = glimpse.text, modifier = Modifier.weight(1f))
+        // Sensitive pictures on: the eye says what is shown, a tap changes it
+        com.infraviored.glimpse.ui.SensitiveModeButton(scope)
         AsyncImage(
             model = "${app.api.account.server}/index.php/avatar/${android.net.Uri.encode(app.api.userId)}/96",
             contentDescription = stringResource(R.string.account),

@@ -2,6 +2,7 @@ package com.infraviored.glimpse
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -91,8 +92,17 @@ private fun App(api: Api, onLogout: (String?) -> Unit) {
     val app = remember(api) {
         AppState(
             api = api,
-            navigate = { route -> nav.navigate(route) { launchSingleTop = true } },
-            back = { nav.popBackStack() },
+            navigate = { route ->
+                Log.d("Glimpse", "open $route")
+                nav.navigate(route) { launchSingleTop = true }
+            },
+            // Never the last screen: a second back while the viewer is still fading out (its
+            // back handler is live until it is gone) popped the start screen too, and the app
+            // was an empty dark background
+            back = {
+                Log.d("Glimpse", "back from ${nav.currentDestination?.route}")
+                if (nav.previousBackStackEntry != null) nav.popBackStack()
+            },
             logout = { onLogout(null) },
         )
     }
@@ -141,6 +151,11 @@ private fun App(api: Api, onLogout: (String?) -> Unit) {
                         composable(Routes.DUPLICATES) {
                             CompositionLocalProvider(LocalAnimated provides this) {
                                 Box(Modifier.fillMaxSize().background(glimpse.background)) { com.infraviored.glimpse.ui.duplicates.DuplicatesScreen() }
+                            }
+                        }
+                        composable(Routes.SENSITIVE) {
+                            CompositionLocalProvider(LocalAnimated provides this) {
+                                Box(Modifier.fillMaxSize().background(glimpse.background)) { com.infraviored.glimpse.ui.SensitiveTrainer() }
                             }
                         }
                         composable(Routes.FOLDER, arguments = listOf(navArgument("path") { type = NavType.StringType; defaultValue = "/" })) { entry ->

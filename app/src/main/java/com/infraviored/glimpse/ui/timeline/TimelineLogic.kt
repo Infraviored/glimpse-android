@@ -25,7 +25,9 @@ internal fun yearEnd(year: Int): String = "${year + 1}-01-01T00:00:00.000Z"
  */
 internal fun timelineItems(jumped: Boolean, newer: List<Item>, older: List<Item>, deleted: Set<Long>): List<Item> {
     val all = if (jumped) newer.asReversed() + older else older
-    return all.filterNot { it.fileId in deleted }
+    // Both halves of a jump can meet at the same picture; the grid needs every file once
+    val seen = HashSet<Long>()
+    return all.filter { it.fileId !in deleted && seen.add(it.fileId) }
 }
 
 /**

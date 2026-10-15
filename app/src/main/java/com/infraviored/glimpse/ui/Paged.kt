@@ -1,5 +1,6 @@
 package com.infraviored.glimpse.ui
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -16,7 +17,8 @@ import kotlinx.coroutines.launch
  */
 class Paged(
     private val scope: CoroutineScope,
-    private val fetch: suspend (page: Int) -> Page,
+    /** [seen]: results already in the list; with a filter set (tag, only sensitive) the server stops once it has them all */
+    private val fetch: suspend (page: Int, seen: Int) -> Page,
 ) {
     var items by mutableStateOf<List<Item>>(emptyList())
         private set
@@ -41,21 +43,29 @@ class Paged(
         job = scope.launch {
             loading = true
             error = null
+            val started = System.currentTimeMillis()
+            Log.d(TAG, "load page $page (have ${items.size})")
             try {
                 // The server filters pages by what this user may see; a few empty ones in a
                 // row are skipped here so the list does not stall without saying why
-                var result = fetch(page)
+                var result = fetch(page, items.size)
                 var empty = 0
                 while (result.items.isEmpty() && result.nextPage != null && ++empty < EMPTY_PAGES) {
-                    result = fetch(result.nextPage!!)
+                    result = fetch(result.nextPage!!, items.size)
                 }
-                items = items + result.items
+                // A video can come again on a later page, found by another of its stills; the
+                // grid needs every file once (a key twice crashes it)
+                val shown = items.mapTo(HashSet()) { it.fileId }
+                items = items + result.items.filter { shown.add(it.fileId) }
                 next = result.nextPage
                 lastPage = result
                 loaded = true
+                Log.d(TAG, "page $page: ${result.items.size} items, next ${result.nextPage}, ${System.currentTimeMillis() - started} ms")
             } catch (e: CancellationException) {
+                Log.d(TAG, "page $page dropped after ${System.currentTimeMillis() - started} ms")
                 throw e
             } catch (e: Exception) {
+                Log.w(TAG, "page $page failed after ${System.currentTimeMillis() - started} ms", e)
                 error = e.message ?: e.javaClass.simpleName
             } finally {
                 loading = false
@@ -86,6 +96,7 @@ class Paged(
 }
 
 private const val EMPTY_PAGES = 5
+private const val TAG = "Glimpse"
 
 /** Load something once, with the same error handling. */
 fun <T> CoroutineScope.loadInto(onError: (String) -> Unit, block: suspend () -> T, onResult: (T) -> Unit): Job = launch {

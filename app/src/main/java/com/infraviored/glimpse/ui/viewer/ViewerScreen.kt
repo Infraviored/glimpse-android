@@ -41,7 +41,9 @@ import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -77,6 +79,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.infraviored.glimpse.R
+import com.infraviored.glimpse.ui.theme.glimpse
 import com.infraviored.glimpse.data.Faces
 import com.infraviored.glimpse.data.Item
 import com.infraviored.glimpse.ui.photoBlur
@@ -133,7 +136,15 @@ fun ViewerScreen() {
     }
 
     ImmersiveBars(visible = chrome)
-    BackHandler { app.back() }
+    // Once: the viewer stays on screen while it fades out, and a second back (or a swipe)
+    // then would close the screen below it too
+    var closing by remember { mutableStateOf(false) }
+    fun close() {
+        if (closing) return
+        closing = true
+        app.back()
+    }
+    BackHandler(enabled = !closing) { close() }
     ActionSheets(actions) {}
     // Free the list once this viewer is gone – unless a new one was opened meanwhile (a quick
     // tap during the exit animation), whose request must stay
@@ -148,7 +159,7 @@ fun ViewerScreen() {
                 orientation = Orientation.Vertical,
                 state = rememberDraggableState { delta -> scope.launch { dismiss.snapTo(dismiss.value + delta) } },
                 onDragStopped = {
-                    if (abs(dismiss.value) > threshold) app.back() else dismiss.animateTo(0f)
+                    if (abs(dismiss.value) > threshold) close() else dismiss.animateTo(0f)
                 },
             ),
     ) {
@@ -179,14 +190,28 @@ fun ViewerScreen() {
             TopBar(current, onBack = app.back)
         }
         AnimatedVisibility(chrome && dismiss.value == 0f, enter = fadeIn(), exit = fadeOut(), modifier = Modifier.align(Alignment.BottomCenter)) {
+            val sensitive = app.isSensitive(current)
+            val folder = app.api.pathOf(current).substringBeforeLast('/', "").ifEmpty { "/" }
             BottomBar(
-                listOf(
+                folder = folder,
+                onFolder = { app.folder(folder) },
+                actions =
+                listOfNotNull(
                     BarAction(Icons.Outlined.Share, stringResource(R.string.action_share)) { actions.share(listOf(current)) },
                     BarAction(Icons.Outlined.FavoriteBorder, stringResource(R.string.action_favorite)) { actions.favorite(listOf(current)) },
                     BarAction(Icons.Outlined.AutoAwesomeMosaic, stringResource(R.string.action_similar_short), enabled = current.id != null) {
                         current.id?.let { app.search(similar = it, label = current.taken?.let { t -> longDate(t) } ?: current.name) }
                     },
                     BarAction(Icons.Outlined.Info, stringResource(R.string.action_info)) { info = true },
+                    // Only with sensitive pictures turned on: a toggle, lit while the picture counts as
+                    // sensitive (a longer label for the other state did not fit six actions)
+                    if (app.sensitive != null) {
+                        BarAction(com.infraviored.glimpse.ui.SensitiveIcon, stringResource(R.string.sensitive_mark), on = sensitive) {
+                            actions.markSensitive(listOf(current), !sensitive)
+                        }
+                    } else {
+                        null
+                    },
                     BarAction(Icons.Outlined.Delete, stringResource(R.string.action_delete)) { actions.confirmDelete = listOf(current) },
                 ),
             )
@@ -257,29 +282,63 @@ private fun TopBar(item: Item, onBack: () -> Unit) {
     }
 }
 
-private class BarAction(val icon: ImageVector, val label: String, val enabled: Boolean = true, val onClick: () -> Unit)
+private class BarAction(val icon: ImageVector, val label: String, val enabled: Boolean = true, val on: Boolean = false, val onClick: () -> Unit)
 
 @Composable
-private fun BottomBar(actions: List<BarAction>) {
-    Row(
+private fun BottomBar(folder: String, onFolder: () -> Unit, actions: List<BarAction>) {
+    Column(
         Modifier
             .fillMaxWidth()
             .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.7f))))
             .navigationBarsPadding()
             .padding(top = 28.dp, bottom = 8.dp),
+    ) {
+    // Where the picture lives, quiet, above the actions; a tap opens the folder
+    Row(
+        Modifier
+            .padding(horizontal = 12.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(onClick = onFolder)
+            .padding(horizontal = 6.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(Icons.Outlined.Folder, null, tint = Color.White.copy(alpha = 0.7f), modifier = Modifier.size(14.dp))
+        Spacer(Modifier.width(6.dp))
+        Text(
+            folder,
+            style = MaterialTheme.typography.labelSmall,
+            color = Color.White.copy(alpha = 0.7f),
+            maxLines = 1,
+            overflow = TextOverflow.StartEllipsis,
+        )
+    }
+    Spacer(Modifier.height(6.dp))
+    Row(
+        Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
         actions.forEach { a ->
             Column(
-                Modifier.clip(RoundedCornerShape(16.dp)).clickable(enabled = a.enabled, onClick = a.onClick)
-                    .graphicsLayer { alpha = if (a.enabled) 1f else 0.4f }.padding(horizontal = 10.dp, vertical = 6.dp),
+                Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(16.dp))
+                    .clickable(enabled = a.enabled, onClick = a.onClick)
+                    .graphicsLayer { alpha = if (a.enabled) 1f else 0.4f }
+                    .padding(horizontal = if (actions.size > 5) 2.dp else 4.dp, vertical = 6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Icon(a.icon, null, tint = Color.White)
+                Icon(a.icon, null, tint = if (a.on) glimpse.accent else Color.White)
                 Spacer(Modifier.height(4.dp))
-                Text(a.label, style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.85f))
+                Text(
+                    a.label,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Color.White.copy(alpha = 0.85f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
             }
         }
+    }
     }
 }
 
@@ -294,6 +353,8 @@ private fun InfoSheet(item: Item, actions: PhotoActions, onDismiss: () -> Unit) 
     }
     val path = app.api.pathOf(item)
     val folder = path.substringBeforeLast('/', "").ifEmpty { "/" }
+    var ignoring by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
         Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp).verticalScroll(androidx.compose.foundation.rememberScrollState())) {
             item.taken?.let { taken ->
@@ -341,7 +402,46 @@ private fun InfoSheet(item: Item, actions: PhotoActions, onDismiss: () -> Unit) 
             SheetRow(Icons.Outlined.FileCopy, stringResource(R.string.action_copy), null) { onDismiss(); actions.pickFolder(listOf(item), copy = true) }
             SheetRow(Icons.Outlined.PhotoAlbum, stringResource(R.string.action_album), null) { onDismiss(); actions.albumFor = listOf(item) }
             SheetRow(Icons.Outlined.Sell, stringResource(R.string.action_tag), null) { onDismiss(); actions.tagFor = listOf(item) }
+            // Admins (or when that is not known: the server answers 403 for others); never for the root folder
+            if (app.isAdmin != false && folder != "/") {
+                SheetRow(com.infraviored.glimpse.ui.FolderOffOutline, stringResource(R.string.ignore_folder), null) { ignoring = true }
+            }
         }
+    }
+    if (ignoring) {
+        val done = stringResource(R.string.ignore_folder_done, folder)
+        val forbidden = stringResource(R.string.ignore_folder_forbidden)
+        val failed = stringResource(R.string.action_failed, "%s")
+        AlertDialog(
+            onDismissRequest = { ignoring = false },
+            title = { Text(stringResource(R.string.ignore_folder_title, folder)) },
+            text = { Text(stringResource(R.string.ignore_folder_text)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    ignoring = false
+                    scope.launch {
+                        try {
+                            app.api.excludeFolder(item.fileId)
+                            app.notices.show(done)
+                            onDismiss()
+                        } catch (e: com.infraviored.glimpse.data.ApiException) {
+                            val msg = e.message
+                            if (e.code == 403) {
+                                app.isAdmin = false
+                                app.notices.show(forbidden)
+                            } else if (e.code == 400 && msg != null) {
+                                app.notices.show(msg)
+                            } else {
+                                app.notices.show(failed.replace("%s", msg ?: "HTTP ${e.code}"))
+                            }
+                        } catch (e: Exception) {
+                            app.notices.show(failed.replace("%s", e.message ?: e.javaClass.simpleName))
+                        }
+                    }
+                }) { Text(stringResource(R.string.ignore_folder_confirm), color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = { TextButton(onClick = { ignoring = false }) { Text(stringResource(R.string.cancel)) } },
+        )
     }
 }
 

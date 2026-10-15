@@ -114,10 +114,17 @@ fun Home() {
         )
     }
 
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
     var unlock by remember { mutableStateOf(false) }
-    androidx.compose.runtime.LaunchedEffect(Unit) { app.loadPrivate() }
-    if (account) AccountSheet(onDismiss = { account = false }, onUnlock = { account = false; unlock = true })
+    var sensitiveSheet by remember { mutableStateOf(false) }
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        app.loadPrivate()
+        app.loadSensitive()
+        if (app.isAdmin == null) app.isAdmin = app.api.isAdmin()
+    }
+    if (account) AccountSheet(onDismiss = { account = false }, onUnlock = { account = false; unlock = true }, onSensitive = { account = false; sensitiveSheet = true })
     if (unlock) UnlockSheet(onDismiss = { unlock = false })
+    if (sensitiveSheet) SensitiveSheet(onDismiss = { sensitiveSheet = false }, scope = scope)
 }
 
 /** What can be done with the chosen people: favorite, hide, merge. */
@@ -151,7 +158,7 @@ private fun currentTimelineItems(): List<com.infraviored.glimpse.data.Item> {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AccountSheet(onDismiss: () -> Unit, onUnlock: () -> Unit) {
+private fun AccountSheet(onDismiss: () -> Unit, onUnlock: () -> Unit, onSensitive: () -> Unit) {
     val app = LocalApp.current
     val uri = LocalUriHandler.current
     val scope = androidx.compose.runtime.rememberCoroutineScope()
@@ -182,6 +189,15 @@ private fun AccountSheet(onDismiss: () -> Unit, onUnlock: () -> Unit) {
                 ) {
                     if (!p.unlocked && p.askPassword) onUnlock() else app.togglePrivate(scope) { app.notices.show(failed.replace("%s", it)) }
                 }
+            }
+            if (app.sensitiveAvailable) {
+                val mode = app.sensitive?.mode
+                AccountRow(
+                    sensitiveModeIcon(app.sensitive?.mode),
+                    stringResource(R.string.sensitive_title),
+                    if (mode == null) stringResource(R.string.sensitive_off) else sensitiveModes().firstOrNull { it.first == mode }?.second,
+                    onSensitive,
+                )
             }
             AccountRow(Icons.Outlined.ContentCopy, stringResource(R.string.duplicates_title), stringResource(R.string.duplicates_subtitle)) {
                 onDismiss()

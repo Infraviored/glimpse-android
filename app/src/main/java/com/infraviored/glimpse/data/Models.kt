@@ -1,7 +1,22 @@
 package com.infraviored.glimpse.data
 
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.buildClassSerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.JsonEncoder
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.boolean
+import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.put
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
@@ -20,6 +35,8 @@ data class Item(
     val at: Double? = null,
     /** That still, shown instead of the video's own thumbnail */
     val thumbId: String? = null,
+    /** Counted as sensitive (only sent when the user turned sensitive pictures on) */
+    val sensitive: Boolean = false,
 ) {
     val isVideo: Boolean get() = type == "VIDEO" || mime.startsWith("video/")
 
@@ -53,6 +70,8 @@ data class Person(
     val favorite: Boolean = false,
     @SerialName("private") val isPrivate: Boolean = false,
     val count: Int = 0,
+    /** In search results: the person was named in the text, these are the other words */
+    val rest: String? = null,
 )
 
 @Serializable
@@ -118,6 +137,96 @@ data class Transfer(val done: Int = 0, val failed: List<Failed> = emptyList(), v
 
 @Serializable
 data class Done(val done: Int = 0, val failed: List<Failed> = emptyList())
+
+@Serializable
+data class SensitiveStatus(
+    /** The admin allows it */
+    val available: Boolean = false,
+    /** ... and the user turned it on */
+    val enabled: Boolean = false,
+    /** The user's terms, each with how many pictures it brings in */
+    val terms: List<SensitiveTerm> = emptyList(),
+    /** How many pictures count now, terms, marks and their neighbours together */
+    val flagged: Int = 0,
+    val marked: Int = 0,
+    val unmarked: Int = 0,
+    /** What the last training changed: pictures added to and taken out of the filter */
+    val change: SensitiveChange? = null,
+    /** What the filter learns from: pictures the user hid and brought back */
+    val learned: SensitiveLearned = SensitiveLearned(),
+    /** The filter has learned (enough pictures hidden) */
+    val model: Boolean = false,
+    /** How many hidden pictures the filter needs before it learns */
+    val minPositive: Int = 20,
+    val error: String? = null,
+)
+
+@Serializable
+data class SensitiveChange(val added: Int = 0, val removed: Int = 0)
+
+@Serializable
+data class SensitiveLearned(val positives: Int = 0, val negatives: Int = 0)
+
+/** Glimpse's own status; [full] only for admins. */
+@Serializable
+data class GlimpseStatus(val full: Boolean = false)
+
+/** After "Ignore this folder": the pattern now in the excluded folders. */
+@Serializable
+data class ExcludedFolder(val pattern: String = "")
+
+/** A search that counts as sensitive down to the picture the user picked ("Sensitive up to here"). */
+@Serializable
+data class SensitiveTerm(
+    val q: String,
+    val count: Int = 0,
+    /** Made with another search model: set it again */
+    val stale: Boolean = false,
+)
+
+/** The user's settings for sensitive pictures, from their server-side preferences. */
+@Serializable
+data class SensitivePrefs(
+    @SerialName("sensitive_enabled") val enabled: Boolean = false,
+    @SerialName("sensitive_mode") val mode: String = "all",
+    @SerialName("sensitive_badge") val badge: Boolean = true,
+)
+
+/** After marking: how each file stands now, and the marks before (for undo). */
+@Serializable(with = SensitiveMarksSerializer::class)
+data class SensitiveMarks(
+    val previous: Map<String, Boolean?> = emptyMap(),
+    val sensitive: Map<String, Boolean> = emptyMap(),
+)
+
+object SensitiveMarksSerializer : KSerializer<SensitiveMarks> {
+    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("com.infraviored.glimpse.data.SensitiveMarks")
+
+    override fun serialize(encoder: Encoder, value: SensitiveMarks) {
+        val json = encoder as? JsonEncoder ?: throw SerializationException("Only JSON supported")
+        val obj = buildJsonObject {
+            put("previous", buildJsonObject {
+                value.previous.forEach { (k, v) -> put(k, v) }
+            })
+            put("sensitive", buildJsonObject {
+                value.sensitive.forEach { (k, v) -> put(k, v) }
+            })
+        }
+        json.encodeJsonElement(obj)
+    }
+
+    override fun deserialize(decoder: Decoder): SensitiveMarks {
+        val json = decoder as? JsonDecoder ?: throw SerializationException("Only JSON supported")
+        val root = json.decodeJsonElement() as? JsonObject ?: return SensitiveMarks()
+        val previous = (root["previous"] as? JsonObject)?.mapValues { (_, v) ->
+            if (v is JsonNull) null else v.jsonPrimitive.booleanOrNull
+        }.orEmpty()
+        val sensitive = (root["sensitive"] as? JsonObject)?.mapValues { (_, v) ->
+            v.jsonPrimitive.boolean
+        }.orEmpty()
+        return SensitiveMarks(previous = previous, sensitive = sensitive)
+    }
+}
 
 @Serializable
 data class PrivateState(

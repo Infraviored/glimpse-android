@@ -282,4 +282,89 @@
     <!-- Similar -->
     <string name="action_similar_short">Similar</string>
     <string name="similar_one">Choose one picture</string>
+    <string name="sensitive_title">Sensitive pictures</string>
+    <string name="sensitive_all">All pictures</string>
+    <string name="sensitive_hide">Without sensitive pictures</string>
+    <string name="sensitive_only">Only sensitive pictures</string>
+    <string name="sensitive_hide_short">Without sensitive</string>
+    <string name="sensitive_only_short">Only sensitive</string>
+    <string name="sensitive_mark">Sensitive</string>
+    <string name="action_sensitive">Mark as sensitive</string>
+    <string name="action_not_sensitive">Mark as not sensitive</string>
+    <plurals name="marked_sensitive">
+        <item quantity="one">%1$d picture marked as sensitive</item>
+        <item quantity="other">%1$d pictures marked as sensitive</item>
+    </plurals>
+    <plurals name="marked_not_sensitive">
+        <item quantity="one">%1$d picture marked as not sensitive</item>
+        <item quantity="other">%1$d pictures marked as not sensitive</item>
+    </plurals>
+    <string name="sensitive_enable">Mark sensitive pictures</string>
+    <string name="sensitive_off">Off</string>
+    <string name="sensitive_explain">You decide what counts as sensitive: search for it, select the last result that still counts and choose “Sensitive up to here”. Only you see your terms and marks.</string>
+    <string name="sensitive_term_quoted">“%1$s”</string>
+    <string name="sensitive_terms">Your terms</string>
+    <string name="sensitive_no_terms">No terms yet. Search for what you consider sensitive, select the last picture that still counts and choose “Sensitive up to here”.</string>
+    <string name="sensitive_term_stale">made with another search model, set it again</string>
+    <string name="sensitive_remove_term">Remove “%1$s”</string>
+    <string name="sensitive_up_to_here">Sensitive up to here</string>
+    <string name="sensitive_up_to_here_one">Select one picture in the results</string>
+    <string name="sensitive_marks_moved">Pictures like your marks: %1$d added, %2$d taken out</string>
+    <string name="sensitive_marks_hint">Mark single pictures in the viewer or with a selection. Your mark always counts for the picture, and the pictures most like it follow it.</string>
+    <string name="sensitive_failed">Last attempt failed: %1$s</string>
+    <plurals name="sensitive_term_count">
+        <item quantity="one">%1$d picture</item>
+        <item quantity="other">%1$d pictures</item>
+    </plurals>
+    <plurals name="sensitive_term_set">
+        <item quantity="one">“%2$s”: %1$d picture counts as sensitive</item>
+        <item quantity="other">“%2$s”: %1$d pictures count as sensitive</item>
+    </plurals>
+    <string name="sensitive_badge">Mark them on the tiles</string>
+    <plurals name="sensitive_count">
+        <item quantity="one">%1$d picture counts as sensitive</item>
+        <item quantity="other">%1$d pictures count as sensitive</item>
+    </plurals>
+    <string name="trainer_title">Train the sensitive filter</string>
+    <string name="trainer_subtitle">Hide what it misses, bring back what it hides too much</string>
+    <string name="trainer_visible">Visible</string>
+    <string name="trainer_hidden">Hidden</string>
+    <string name="trainer_order_harmless">Most harmless first</string>
+    <string name="trainer_order_sensitive">Most sensitive-looking first</string>
+    <string name="trainer_order_closest">Closest to “%1$s” first</string>
+    <plurals name="trainer_hides">
+        <item quantity="one">The filter hides %1$d picture.</item>
+        <item quantity="other">The filter hides %1$d pictures.</item>
+    </plurals>
+    <string name="trainer_learns">It learns from %1$d pictures you hid and %2$d you brought back.</string>
+    <string name="trainer_learning">Learning …</string>
+    <string name="trainer_learned">Learned: %1$d more hidden, %2$d fewer.</string>
+    <string name="trainer_sort_again">Sort again</string>
+    <string name="trainer_hide">Hide</string>
+    <string name="trainer_bring_back">Bring back</string>
+    <string name="trainer_select_all">Select all</string>
+    <string name="trainer_select_hint">Tap to enlarge; long-press selects</string>
+    <string name="trainer_search_hint">What should be hidden?</string>
+    <string name="trainer_search">Search</string>
+    <string name="trainer_clear_term">Clear term</string>
+    <string name="trainer_hint_visible">What the filter lets through, the most sensitive-looking first. Select what it should hide. To look at a new topic, search for it.</string>
+    <string name="trainer_hint_visible_start">Type something the filter should hide, for example “nude breasts”. English words usually work better. Select the matching pictures and hide them.</string>
+    <string name="trainer_hint_hidden">What the filter hides that you did not mark yourself, the most harmless first. Select what should stay visible and bring it back.</string>
+    <plurals name="trainer_hint_hidden_start">
+        <item quantity="one">The filter learns once you hid %1$d picture; %2$d to go. Start on “Visible” with a term.</item>
+        <item quantity="other">The filter learns once you hid %1$d pictures; %2$d to go. Start on “Visible” with a term.</item>
+    </plurals>
+    <string name="trainer_empty_hidden">The filter hides nothing but what you marked yourself</string>
+    <string name="trainer_empty_term">Nothing more for this term</string>
+    <string name="trainer_empty_visible">Nothing more that looks sensitive</string>
+    <string name="sensitive_settings">Settings …</string>
+    <string name="sensitive_state_shown">Sensitive pictures: shown</string>
+    <string name="sensitive_state_hidden">Sensitive pictures: hidden</string>
+    <string name="sensitive_state_only">Sensitive pictures: only those</string>
+    <string name="ignore_folder">Ignore this folder …</string>
+    <string name="ignore_folder_title">Ignore “%1$s”?</string>
+    <string name="ignore_folder_text">Glimpse and Immich stop indexing this folder and everything in it, for everyone. Its pictures disappear after the next library scan. You can take it back under Settings → What gets indexed.</string>
+    <string name="ignore_folder_confirm">Ignore folder</string>
+    <string name="ignore_folder_done">“%1$s” is ignored from now on</string>
+    <string name="ignore_folder_forbidden">Only admins can ignore folders</string>
 </resources>

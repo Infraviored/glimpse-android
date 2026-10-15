@@ -137,8 +137,8 @@ class Api(val account: Account) {
      * Back in time from [before] (newest first), or forward from [after] to today (oldest first).
      * With [person]: only the pictures that person is in; page 1 then lists that person's years.
      */
-    suspend fun timeline(page: Int, before: String?, after: String? = null, person: String? = null): Page =
-        decode(get(appUrl("/api/timeline") + query("page" to page, "before" to before, "after" to after, "person" to person)))
+    suspend fun timeline(page: Int, before: String?, after: String? = null, person: String? = null, seen: Int = 0): Page =
+        decode(get(appUrl("/api/timeline") + query("page" to page, "before" to before, "after" to after, "person" to person, "seen" to seen)))
 
     suspend fun memories(date: String): List<Memory> = decode(get(appUrl("/api/memories") + query("date" to date)))
 
@@ -149,8 +149,9 @@ class Api(val account: Account) {
         type: String = "",
         similar: String = "",
         tag: String = "",
+        seen: Int = 0,
     ): Page = decode(
-        get(appUrl("/api/search") + query("q" to q, "page" to page, "person" to person, "type" to type, "similar" to similar, "tag" to tag)),
+        get(appUrl("/api/search") + query("q" to q, "page" to page, "person" to person, "type" to type, "similar" to similar, "tag" to tag, "seen" to seen)),
     )
 
     suspend fun people(): People = decode(get(appUrl("/api/people")))
@@ -282,6 +283,46 @@ class Api(val account: Account) {
     suspend fun setPrivate(fileIds: List<Long>, on: Boolean) {
         post(appUrl("/api/private/files"), Requests.privateFiles(fileIds, on))
     }
+
+    // ---- sensitive pictures ------------------------------------------------------------------
+
+    suspend fun sensitiveStatus(): SensitiveStatus = decode(get(appUrl("/api/sensitive")))
+
+    suspend fun sensitivePrefs(): SensitivePrefs = decode(get(appUrl("/api/prefs")))
+
+    /** Save some of the user's sensitive settings (keys as on the server: sensitive_mode, ...). */
+    suspend fun saveSensitive(changes: Map<String, Any>): SensitivePrefs =
+        decode(send("PUT", appUrl("/api/prefs"), Requests.prefs(changes)))
+
+    suspend fun markSensitive(marks: Map<String, Boolean?>): SensitiveMarks =
+        decode(post(appUrl("/api/sensitive/marks"), Requests.sensitiveMarks(marks)))
+
+    /** "Sensitive up to here": [q] counts down to the picture [assetId] (for a video found through a still, the still's). */
+    suspend fun setSensitiveTerm(q: String, assetId: String): SensitiveStatus =
+        decode(post(appUrl("/api/sensitive/terms"), Requests.sensitiveTerm(q, assetId)))
+
+    suspend fun removeSensitiveTerm(q: String): SensitiveStatus =
+        decode(post(appUrl("/api/sensitive/terms/remove"), Requests.sensitiveTerm(q, null)))
+
+    /**
+     * One page of training the filter: [side] "hidden" (what it hides, most harmless first) or
+     * "visible" (what it lets through, most sensitive-looking first, or sorted by [q]).
+     * [page] is the previous answer's nextPage, 0 for the first.
+     */
+    suspend fun sensitiveReview(side: String, q: String, page: Int): Page =
+        decode(get(appUrl("/api/sensitive/review") + query("side" to side, "q" to q, "page" to page)))
+
+    /** The filter learns from the marks (one to five seconds). */
+    suspend fun rebuildSensitive(): SensitiveStatus = decode(post(appUrl("/api/sensitive/rebuild"), buildJsonObject { }))
+
+    // ---- admin -------------------------------------------------------------------------------
+
+    /** Whether the user is a Glimpse admin (the status is full only for them); null if unknown. */
+    suspend fun isAdmin(): Boolean? = runCatching { decode<GlimpseStatus>(get(appUrl("/api/status"))).full }.getOrNull()
+
+    /** Admins: the folder of [fileId] is no longer indexed, for everyone. */
+    suspend fun excludeFolder(fileId: Long): ExcludedFolder =
+        decode(post(appUrl("/api/admin/exclude-folder"), buildJsonObject { put("fileId", fileId) }))
 
     // ---- map, duplicates ---------------------------------------------------------------------
 

@@ -52,14 +52,19 @@ Nextcloud decides what you may see.
 - **Map.** Your geotagged pictures as pins on a map in the app's colours; tap a pin for its
   pictures. The map tiles come through your Nextcloud.
 - **Folders.** Your Nextcloud folders as galleries.
-- **Viewer.** Zoom into photos and play videos. Below the picture: share, favorite, similar,
-  info and delete; the info sheet shows the date, who is in the photo and its folder, and offers
+- **Viewer.** Zoom into photos and play videos. The picture's folder sits above the actions
+  (tap to open it). Below the picture: share, favorite, similar, info and delete; the info sheet shows the date, who is in the photo and its folder, and offers
   download, move, copy, album and tag.
 - **Do things with many at once.** Select pictures (long-press), then share, favorite, download,
   move or copy them to a folder (with undo), add them to an album, tag them, or delete them
   (they go to the Nextcloud trash bin).
 - **Private area.** Mark pictures private; they only show after you unlock with your Nextcloud
   password, and lock again with one tap.
+- **Sensitive pictures** (when your server allows it and you turned it on in Glimpse's settings
+  on the web): recognised pictures carry a small mark; the eye at the top shows all, hides them
+  or shows only them, and you mark a picture as sensitive or not with one tap in the viewer.
+  "Train the sensitive filter" shows what the filter lets through and what it hides, side by
+  side; hide or bring back a selection and it learns from that in the background.
 - **Duplicates.** Groups of near-identical pictures, with Immich's pick of what to keep; delete
   the rest in one go or mark a group as not duplicates.
 - **Light and dark**, following the system setting, in Glimpse's design. English and German.

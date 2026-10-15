@@ -73,6 +73,8 @@ import com.infraviored.glimpse.ui.Section
 import com.infraviored.glimpse.ui.components.LensMark
 import com.infraviored.glimpse.ui.components.PhotoGrid
 import com.infraviored.glimpse.ui.components.Selection
+import com.infraviored.glimpse.ui.rememberPhotoActions
+import com.infraviored.glimpse.ui.components.DockAction
 import com.infraviored.glimpse.ui.components.SelectionScaffold
 import com.infraviored.glimpse.ui.loadInto
 import com.infraviored.glimpse.ui.theme.glimpse
@@ -100,8 +102,8 @@ class SearchVm(private val api: Api, private val context: Context, q: String, pe
         private set
     private val initialPerson = personId
 
-    val paged = Paged(viewModelScope) { page ->
-        api.search(q = submitted, page = page, person = person?.id.orEmpty(), type = kind.value, similar = similar, tag = tag?.id?.toString().orEmpty())
+    val paged = Paged(viewModelScope) { page, seen ->
+        api.search(q = submitted, page = page, person = person?.id.orEmpty(), type = kind.value, similar = similar, tag = tag?.id?.toString().orEmpty(), seen = seen)
     }
 
     val active: Boolean get() = submitted.isNotBlank() || person != null || tag != null || similar.isNotEmpty()
@@ -159,7 +161,23 @@ fun SearchScreen(q: String, personId: String, similar: String, label: String) {
 
     LaunchedEffect(Unit) { if (!vm.active) focus.requestFocus() }
 
-    SelectionScaffold(selection, items) { bottom ->
+    // The words the results are ranked by (a person the server recognised in them taken out)
+    val term = if (similar.isEmpty()) (vm.paged.lastPage?.person?.rest ?: vm.submitted).trim() else ""
+    val actions = rememberPhotoActions()
+    val single = items.singleOrNull { it.fileId in selection.ids }?.takeIf { selection.ids.size == 1 }
+    val extra = if (app.sensitive != null && term.isNotEmpty()) {
+        listOf(
+            DockAction(
+                com.infraviored.glimpse.ui.SensitiveIcon,
+                stringResource(R.string.sensitive_up_to_here),
+                subtitle = if (single == null) stringResource(R.string.sensitive_up_to_here_one) else null,
+                enabled = single != null,
+            ) { single?.let { actions.sensitiveUpToHere(term, it, items) { selection.clear() } } },
+        )
+    } else {
+        emptyList()
+    }
+    SelectionScaffold(selection, items, extra) { bottom ->
         Column(Modifier.fillMaxSize().statusBarsPadding().imePadding()) {
             // The field
             Row(

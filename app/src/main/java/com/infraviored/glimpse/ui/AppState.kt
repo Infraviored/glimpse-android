@@ -61,7 +61,10 @@ class AppState(
     /** The private area as last heard from the server; null until asked. */
     var privateArea by mutableStateOf<com.infraviored.glimpse.data.PrivateState?>(null)
 
-    /** Goes up when the private area is locked or unlocked: everything visible changes. */
+    /**
+     * Goes up when the private area is locked or unlocked, or the sensitive mode changes:
+     * everything visible changes.
+     */
     var privateVersion by mutableIntStateOf(0)
         private set
 
@@ -83,6 +86,28 @@ class AppState(
         version++
     }
 
+    /** Sensitive pictures: the admin allows them (the user can turn them on). */
+    var sensitiveAvailable by mutableStateOf(false)
+
+    /** Sensitive pictures: null while off (not allowed by the admin, or not turned on by the user). */
+    var sensitive by mutableStateOf<com.infraviored.glimpse.data.SensitivePrefs?>(null)
+
+    /** Marked by hand in this session, so tiles change before the lists load again. */
+    var sensitiveMarks by mutableStateOf<Map<Long, Boolean>>(emptyMap())
+
+    fun isSensitive(item: Item): Boolean = sensitiveMarks[item.fileId] ?: item.sensitive
+
+    /** Sensitive settings changed what may be shown: everything loads again. */
+    fun sensitiveModeChanged(prefs: com.infraviored.glimpse.data.SensitivePrefs) {
+        sensitive = prefs.takeIf { it.enabled }
+        sensitiveMarks = emptyMap()
+        privateVersion++
+        version++
+    }
+
+    /** Whether the user is a Glimpse admin; null while unknown (admin actions then show and may get a 403). */
+    var isAdmin by mutableStateOf<Boolean?>(null)
+
     /** Short messages at the bottom, with Undo where there is one. */
     val notices = Notices()
 
@@ -99,6 +124,8 @@ class AppState(
     fun folder(path: String) = navigate(Routes.folder(path))
 
     fun duplicates() = navigate(Routes.DUPLICATES)
+
+    fun trainSensitive() = navigate(Routes.SENSITIVE)
 }
 
 object Routes {
@@ -108,6 +135,7 @@ object Routes {
     const val PERSON = "person/{id}"
     const val FOLDER = "folder?path={path}"
     const val DUPLICATES = "duplicates"
+    const val SENSITIVE = "sensitive"
 
     private fun e(s: String) = android.net.Uri.encode(s)
     fun search(q: String, person: String, similar: String, label: String) =
