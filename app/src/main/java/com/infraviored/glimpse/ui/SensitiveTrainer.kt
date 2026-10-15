@@ -260,7 +260,7 @@ class TrainerVm(private val api: Api) : ViewModel() {
 
     override fun onCleared() {
         // Marked just before leaving: still learn from it
-        if (timer?.isActive == true) {
+        if (timer != null || training || trainAgain) {
             timer?.cancel()
             CoroutineScope(SupervisorJob() + Dispatchers.IO).launch { runCatching { api.rebuildSensitive() } }
         }
