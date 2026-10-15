@@ -153,7 +153,7 @@ class TrainerVm(private val api: Api) : ViewModel() {
         } else if (loading || done) {
             return
         }
-        val term = if (side == "visible") query.trim() else ""
+        val term = if (side == "visible") (if (fresh) query.trim() else searched) else ""
         loading = true
         error = null
         job = viewModelScope.launch {
