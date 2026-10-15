@@ -402,8 +402,8 @@ private fun InfoSheet(item: Item, actions: PhotoActions, onDismiss: () -> Unit) 
             SheetRow(Icons.Outlined.FileCopy, stringResource(R.string.action_copy), null) { onDismiss(); actions.pickFolder(listOf(item), copy = true) }
             SheetRow(Icons.Outlined.PhotoAlbum, stringResource(R.string.action_album), null) { onDismiss(); actions.albumFor = listOf(item) }
             SheetRow(Icons.Outlined.Sell, stringResource(R.string.action_tag), null) { onDismiss(); actions.tagFor = listOf(item) }
-            // Admins (or when that is not known: the server answers 403 for others)
-            if (app.isAdmin != false) {
+            // Admins (or when that is not known: the server answers 403 for others); never for the root folder
+            if (app.isAdmin != false && folder != "/") {
                 SheetRow(com.infraviored.glimpse.ui.FolderOffOutline, stringResource(R.string.ignore_folder), null) { ignoring = true }
             }
         }
@@ -425,11 +425,14 @@ private fun InfoSheet(item: Item, actions: PhotoActions, onDismiss: () -> Unit) 
                             app.notices.show(done)
                             onDismiss()
                         } catch (e: com.infraviored.glimpse.data.ApiException) {
+                            val msg = e.message
                             if (e.code == 403) {
                                 app.isAdmin = false
                                 app.notices.show(forbidden)
+                            } else if (e.code == 400 && msg != null) {
+                                app.notices.show(msg)
                             } else {
-                                app.notices.show(failed.replace("%s", e.message ?: "HTTP ${e.code}"))
+                                app.notices.show(failed.replace("%s", msg ?: "HTTP ${e.code}"))
                             }
                         } catch (e: Exception) {
                             app.notices.show(failed.replace("%s", e.message ?: e.javaClass.simpleName))
