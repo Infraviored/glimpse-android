@@ -194,6 +194,7 @@ class TrainerVm(private val api: Api) : ViewModel() {
                 val res = api.markSensitive(chosen.associate { it.fileId.toString() to on })
                 val gone = chosen.mapTo(HashSet()) { it.fileId }
                 items = items.filterNot { it.fileId in gone }
+                next = maxOf(0, next - chosen.size)
                 marked = true
                 onMarked(res)
                 scheduleTrain()
