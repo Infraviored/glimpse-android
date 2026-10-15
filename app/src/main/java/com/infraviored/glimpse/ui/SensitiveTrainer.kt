@@ -41,11 +41,9 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -124,6 +122,8 @@ class TrainerVm(private val api: Api) : ViewModel() {
     /** Something was marked here: the other lists load again on leaving. */
     var marked = false
         private set
+
+    var onLeave: (() -> Unit)? = null
 
     private var next = 0
     private var job: Job? = null
@@ -259,6 +259,7 @@ class TrainerVm(private val api: Api) : ViewModel() {
     }
 
     override fun onCleared() {
+        if (marked) onLeave?.invoke()
         // Marked just before leaving: still learn from it
         if (timer != null || training || trainAgain) {
             timer?.cancel()
@@ -284,12 +285,7 @@ fun SensitiveTrainer() {
     val minPositive = status?.minPositive ?: 20
 
     // Leaving after marking: every other list loads again with the new filter
-    val latestVm by rememberUpdatedState(vm)
-    DisposableEffect(Unit) {
-        onDispose {
-            if (latestVm.marked) app.sensitive?.let { app.sensitiveModeChanged(it) }
-        }
-    }
+    vm.onLeave = { app.sensitive?.let { app.sensitiveModeChanged(it) } }
     BackHandler(enabled = selection.active) { selection.clear() }
 
     fun act() {
