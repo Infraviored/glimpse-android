@@ -1,6 +1,7 @@
 package com.infraviored.glimpse.data
 
 import android.net.Uri
+import android.util.Log
 import com.infraviored.glimpse.Account
 import com.infraviored.glimpse.Nextcloud
 import kotlinx.coroutines.Dispatchers
@@ -153,6 +154,21 @@ class Api(val account: Account) {
     ): Page = decode(
         get(appUrl("/api/search") + query("q" to q, "page" to page, "person" to person, "type" to type, "similar" to similar, "tag" to tag, "seen" to seen)),
     )
+
+    /**
+     * Lets Immich load its search model before the first search (it unloads after idle time,
+     * and the first search then waited for the load). Best effort: older servers have no such
+     * route, and nothing waits on the answer.
+     */
+    suspend fun warmUp() {
+        try {
+            post(appUrl("/api/warmup"), buildJsonObject {})
+        } catch (e: ApiException) {
+            Log.d("Glimpse", "warm-up: ${e.message}")
+        } catch (e: java.io.IOException) {
+            Log.d("Glimpse", "warm-up: ${e.message}")
+        }
+    }
 
     suspend fun people(): People = decode(get(appUrl("/api/people")))
 

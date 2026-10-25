@@ -160,6 +160,7 @@ fun SearchScreen(q: String, personId: String, similar: String, label: String) {
     val sections = remember(items) { if (items.isEmpty()) emptyList() else listOf(Section("results", "", items)) }
 
     LaunchedEffect(Unit) { if (!vm.active) focus.requestFocus() }
+    LaunchedEffect(Unit) { app.api.warmUp() }
 
     // The words the results are ranked by (a person the server recognised in them taken out)
     val term = if (similar.isEmpty()) (vm.paged.lastPage?.person?.rest ?: vm.submitted).trim() else ""
