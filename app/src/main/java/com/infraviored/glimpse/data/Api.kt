@@ -165,9 +165,7 @@ class Api(val account: Account) {
     suspend fun warmUp() {
         try {
             post(appUrl("/api/warmup"), buildJsonObject {}, silentAuth = true)
-        } catch (e: ApiException) {
-            Log.d("Glimpse", "warm-up: ${e.message}")
-        } catch (e: java.io.IOException) {
+        } catch (e: IOException) {
             Log.d("Glimpse", "warm-up: ${e.message}")
         }
     }
