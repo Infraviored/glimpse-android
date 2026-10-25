@@ -27,5 +27,5 @@ fun errorText(e: Throwable): String {
         is SSLException -> R.string.error_secure
         else -> null
     }
-    return if (id != null && res != null) res.getString(id) else errorText(e)
+    return if (id != null && res != null) res.getString(id) else e.message ?: e.javaClass.simpleName
 }
