@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import com.infraviored.glimpse.data.errorText
 import com.infraviored.glimpse.ui.theme.GlimpseTheme
 import com.infraviored.glimpse.ui.theme.Palette
 import com.infraviored.glimpse.ui.theme.glimpse
@@ -211,7 +212,7 @@ class LoginActivity : ComponentActivity() {
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                stop(getString(R.string.error_unexpected, e.message ?: e.javaClass.simpleName))
+                stop(getString(R.string.error_unexpected, errorText(e)))
             }
         }
     }

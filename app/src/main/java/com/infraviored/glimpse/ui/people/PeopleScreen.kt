@@ -62,6 +62,7 @@ import coil3.compose.AsyncImage
 import com.infraviored.glimpse.R
 import com.infraviored.glimpse.data.Api
 import com.infraviored.glimpse.data.Person
+import com.infraviored.glimpse.data.errorText
 import com.infraviored.glimpse.ui.count
 import com.infraviored.glimpse.ui.photoBlur
 import com.infraviored.glimpse.ui.LocalApp
@@ -122,7 +123,7 @@ class PeopleVm(private val api: Api) : ViewModel() {
                 throw e
             } catch (e: Exception) {
                 busy = false
-                onError(e.message ?: e.javaClass.simpleName)
+                onError(errorText(e))
                 return@launch
             }
             busy = false
@@ -139,7 +140,7 @@ class PeopleVm(private val api: Api) : ViewModel() {
                 } catch (e: kotlinx.coroutines.CancellationException) {
                     throw e
                 } catch (e: Exception) {
-                    onError(e.message ?: e.javaClass.simpleName)
+                    onError(errorText(e))
                 }
             }
         }

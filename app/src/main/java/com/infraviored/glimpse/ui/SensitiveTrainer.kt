@@ -61,6 +61,7 @@ import com.infraviored.glimpse.data.Api
 import com.infraviored.glimpse.data.Item
 import com.infraviored.glimpse.data.SensitiveMarks
 import com.infraviored.glimpse.data.SensitiveStatus
+import com.infraviored.glimpse.data.errorText
 import com.infraviored.glimpse.ui.components.PhotoGrid
 import com.infraviored.glimpse.ui.components.PillField
 import com.infraviored.glimpse.ui.components.Selection
@@ -171,7 +172,7 @@ class TrainerVm(private val api: Api) : ViewModel() {
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                error = e.message ?: e.javaClass.simpleName
+                error = errorText(e)
             } finally {
                 loading = false
             }
@@ -203,7 +204,7 @@ class TrainerVm(private val api: Api) : ViewModel() {
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                onError(e.message ?: e.javaClass.simpleName)
+                onError(errorText(e))
             } finally {
                 busy = false
             }
@@ -220,7 +221,7 @@ class TrainerVm(private val api: Api) : ViewModel() {
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                onError(e.message ?: e.javaClass.simpleName)
+                onError(errorText(e))
             }
         }
     }
@@ -248,7 +249,7 @@ class TrainerVm(private val api: Api) : ViewModel() {
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            error = e.message ?: e.javaClass.simpleName
+            error = errorText(e)
         } finally {
             training = false
         }

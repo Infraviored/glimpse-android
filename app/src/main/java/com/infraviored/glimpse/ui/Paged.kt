@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.infraviored.glimpse.data.Item
 import com.infraviored.glimpse.data.Page
+import com.infraviored.glimpse.data.errorText
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -66,7 +67,7 @@ class Paged(
                 throw e
             } catch (e: Exception) {
                 Log.w(TAG, "page $page failed after ${System.currentTimeMillis() - started} ms", e)
-                error = e.message ?: e.javaClass.simpleName
+                error = errorText(e)
             } finally {
                 loading = false
             }
@@ -105,6 +106,6 @@ fun <T> CoroutineScope.loadInto(onError: (String) -> Unit, block: suspend () -> 
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
-        onError(e.message ?: e.javaClass.simpleName)
+        onError(errorText(e))
     }
 }

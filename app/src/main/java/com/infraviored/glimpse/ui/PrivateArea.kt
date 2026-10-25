@@ -16,6 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.infraviored.glimpse.R
 import com.infraviored.glimpse.data.ApiException
+import com.infraviored.glimpse.data.errorText
 import com.infraviored.glimpse.ui.components.GlimpseSheet
 import com.infraviored.glimpse.ui.components.PillField
 import com.infraviored.glimpse.ui.components.SheetButtons
@@ -40,7 +41,7 @@ fun AppState.togglePrivate(scope: CoroutineScope, failed: (String) -> Unit) {
             if (state.unlocked) api.lockPrivate() else api.unlockPrivate(null)
             privacyChanged(api.privateState())
         } catch (e: Exception) {
-            failed(e.message ?: e.javaClass.simpleName)
+            failed(errorText(e))
         }
     }
 }
@@ -70,7 +71,7 @@ fun UnlockSheet(onDismiss: () -> Unit) {
                     else -> e.message
                 }
             } catch (e: Exception) {
-                error = e.message ?: e.javaClass.simpleName
+                error = errorText(e)
             } finally {
                 busy = false
                 password = ""

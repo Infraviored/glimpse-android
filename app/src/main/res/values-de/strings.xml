@@ -358,4 +358,7 @@
     <string name="ignore_folder_confirm">Ordner ignorieren</string>
     <string name="ignore_folder_done">„%1$s“ wird ab jetzt ignoriert</string>
     <string name="ignore_folder_forbidden">Nur Admins können Ordner ignorieren</string>
+    <string name="error_no_connection">Keine Verbindung zum Server. Prüf deine Internetverbindung.</string>
+    <string name="error_timeout">Der Server antwortet zu langsam. Versuch es noch mal.</string>
+    <string name="error_secure">Keine sichere Verbindung zum Server.</string>
 </resources>
