@@ -11,6 +11,7 @@ import coil3.memory.MemoryCache
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import coil3.request.crossfade
 import com.infraviored.glimpse.data.Api
+import com.infraviored.glimpse.data.Errors
 import okhttp3.OkHttpClient
 
 /** Development aids, only ever set in debug builds. */
@@ -63,6 +64,7 @@ class GlimpseApplication : Application(), SingletonImageLoader.Factory {
 
     override fun onCreate() {
         super.onCreate()
+        Errors.context = this
         if (BuildConfig.DEBUG) Debug.blurPhotos = getSharedPreferences("debug", MODE_PRIVATE).getBoolean("blur", false)
     }
 

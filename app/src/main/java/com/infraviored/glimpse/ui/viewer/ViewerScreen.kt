@@ -79,6 +79,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.infraviored.glimpse.R
+import com.infraviored.glimpse.data.errorText
 import com.infraviored.glimpse.ui.theme.glimpse
 import com.infraviored.glimpse.data.Faces
 import com.infraviored.glimpse.data.Item
@@ -435,7 +436,7 @@ private fun InfoSheet(item: Item, actions: PhotoActions, onDismiss: () -> Unit) 
                                 app.notices.show(failed.replace("%s", msg ?: "HTTP ${e.code}"))
                             }
                         } catch (e: Exception) {
-                            app.notices.show(failed.replace("%s", e.message ?: e.javaClass.simpleName))
+                            app.notices.show(failed.replace("%s", errorText(e)))
                         }
                     }
                 }) { Text(stringResource(R.string.ignore_folder_confirm), color = MaterialTheme.colorScheme.error) }

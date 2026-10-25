@@ -23,6 +23,7 @@ import androidx.core.content.FileProvider
 import com.infraviored.glimpse.R
 import com.infraviored.glimpse.data.Api
 import com.infraviored.glimpse.data.Item
+import com.infraviored.glimpse.data.errorText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -85,7 +86,7 @@ class PhotoActions(
                 }
                 app.changed()
             } catch (e: Exception) {
-                app.notices.show(context.getString(R.string.action_failed, e.message ?: e.javaClass.simpleName))
+                app.notices.show(context.getString(R.string.action_failed, errorText(e)))
             } finally {
                 busy = false
             }
@@ -104,7 +105,7 @@ class PhotoActions(
                 app.notices.show(text)
                 app.changed()
             } catch (e: Exception) {
-                app.notices.show(context.getString(R.string.action_failed, e.message ?: e.javaClass.simpleName))
+                app.notices.show(context.getString(R.string.action_failed, errorText(e)))
             }
         }
     }
@@ -129,7 +130,7 @@ class PhotoActions(
                     }
                 }
             } catch (e: Exception) {
-                app.notices.show(context.getString(R.string.action_failed, e.message ?: e.javaClass.simpleName))
+                app.notices.show(context.getString(R.string.action_failed, errorText(e)))
             }
         }
     }
@@ -149,7 +150,7 @@ class PhotoActions(
                 val count = status.terms.firstOrNull { it.q.equals(q, ignoreCase = true) }?.count ?: (upTo + 1)
                 app.notices.show(context.resources.getQuantityString(R.plurals.sensitive_term_set, count, count, q))
             } catch (e: Exception) {
-                app.notices.show(context.getString(R.string.action_failed, e.message ?: e.javaClass.simpleName))
+                app.notices.show(context.getString(R.string.action_failed, errorText(e)))
             }
         }
     }
@@ -174,7 +175,7 @@ class PhotoActions(
             } catch (e: com.infraviored.glimpse.data.ApiException) {
                 app.notices.show(if (e.code == 403) context.getString(R.string.private_unlock_first) else context.getString(R.string.action_failed, e.message))
             } catch (e: Exception) {
-                app.notices.show(context.getString(R.string.action_failed, e.message ?: e.javaClass.simpleName))
+                app.notices.show(context.getString(R.string.action_failed, errorText(e)))
             }
         }
     }
@@ -190,7 +191,7 @@ class PhotoActions(
                 onDone()
                 app.notices.show(context.resources.getQuantityString(R.plurals.added_to_album, added, added, album))
             } catch (e: Exception) {
-                app.notices.show(context.getString(R.string.action_failed, e.message ?: e.javaClass.simpleName))
+                app.notices.show(context.getString(R.string.action_failed, errorText(e)))
             } finally {
                 busy = false
             }
@@ -207,7 +208,7 @@ class PhotoActions(
                 onDone()
                 app.notices.show(context.resources.getQuantityString(R.plurals.tagged, result.done, result.done))
             } catch (e: Exception) {
-                app.notices.show(context.getString(R.string.action_failed, e.message ?: e.javaClass.simpleName))
+                app.notices.show(context.getString(R.string.action_failed, errorText(e)))
             } finally {
                 busy = false
             }
@@ -245,7 +246,7 @@ class PhotoActions(
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 context.startActivity(Intent.createChooser(intent, null).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             } catch (e: Exception) {
-                toast(context.getString(R.string.action_failed, e.message ?: e.javaClass.simpleName))
+                toast(context.getString(R.string.action_failed, errorText(e)))
             } finally {
                 busy = false
             }
@@ -262,7 +263,7 @@ class PhotoActions(
                 withContext(Dispatchers.IO) { items.forEach { save(it) } }
                 toast(context.resources.getQuantityString(R.plurals.download_done, items.size, items.size))
             } catch (e: Exception) {
-                toast(context.getString(R.string.action_failed, e.message ?: e.javaClass.simpleName))
+                toast(context.getString(R.string.action_failed, errorText(e)))
             } finally {
                 busy = false
             }
@@ -276,7 +277,7 @@ class PhotoActions(
                 api.favorite(items.map { it.fileId }, on)
                 toast(context.resources.getQuantityString(if (on) R.plurals.favorited else R.plurals.unfavorited, items.size, items.size))
             } catch (e: Exception) {
-                toast(context.getString(R.string.action_failed, e.message ?: e.javaClass.simpleName))
+                toast(context.getString(R.string.action_failed, errorText(e)))
             }
         }
     }
@@ -289,7 +290,7 @@ class PhotoActions(
                 toast(context.resources.getQuantityString(R.plurals.deleted, items.size, items.size))
                 onDone()
             } catch (e: Exception) {
-                toast(context.getString(R.string.action_failed, e.message ?: e.javaClass.simpleName))
+                toast(context.getString(R.string.action_failed, errorText(e)))
             }
         }
     }

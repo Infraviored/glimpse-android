@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import com.infraviored.glimpse.R
 import com.infraviored.glimpse.data.SensitivePrefs
 import com.infraviored.glimpse.data.SensitiveStatus
+import com.infraviored.glimpse.data.errorText
 import com.infraviored.glimpse.ui.components.GlimpseSheet
 import com.infraviored.glimpse.ui.components.SheetTitle
 import com.infraviored.glimpse.ui.theme.glimpse
@@ -104,7 +105,7 @@ fun SensitiveSheet(onDismiss: () -> Unit, scope: CoroutineScope = rememberCorout
                 val saved = app.api.saveSensitive(changes)
                 if (reload) app.sensitiveModeChanged(saved) else app.sensitive = saved.takeIf { it.enabled }
             } catch (e: Exception) {
-                app.notices.show(failed.replace("%s", e.message ?: e.javaClass.simpleName))
+                app.notices.show(failed.replace("%s", errorText(e)))
             } finally {
                 busy = false
             }
@@ -178,7 +179,7 @@ fun SensitiveSheet(onDismiss: () -> Unit, scope: CoroutineScope = rememberCorout
                                 status = app.api.removeSensitiveTerm(term.q)
                                 app.sensitiveModeChanged(prefs)
                             } catch (e: Exception) {
-                                app.notices.show(failed.replace("%s", e.message ?: e.javaClass.simpleName))
+                                app.notices.show(failed.replace("%s", errorText(e)))
                             } finally {
                                 busy = false
                             }

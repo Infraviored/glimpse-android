@@ -43,6 +43,7 @@ import com.infraviored.glimpse.data.FolderRef
 import com.infraviored.glimpse.data.Item
 import com.infraviored.glimpse.data.Paths
 import com.infraviored.glimpse.data.Tag
+import com.infraviored.glimpse.data.errorText
 import com.infraviored.glimpse.ui.components.GlimpseSheet
 import com.infraviored.glimpse.ui.components.PillField
 import com.infraviored.glimpse.ui.components.PrimaryButton
@@ -75,7 +76,7 @@ private fun FolderPickerSheet(actions: PhotoActions, items: List<Item>, copy: Bo
         try {
             folders = app.api.folder(path).folders
         } catch (e: Exception) {
-            error = e.message ?: e.javaClass.simpleName
+            error = errorText(e)
         }
     }
     GlimpseSheet(onDismiss = { actions.transferFor = null }) {
@@ -136,7 +137,7 @@ private fun AlbumSheet(actions: PhotoActions, items: List<Item>, onDone: () -> U
         try {
             albums = app.api.albums()
         } catch (e: Exception) {
-            error = e.message ?: e.javaClass.simpleName
+            error = errorText(e)
         }
     }
     GlimpseSheet(onDismiss = { actions.albumFor = null }) {
@@ -186,7 +187,7 @@ private fun TagSheet(actions: PhotoActions, items: List<Item>, onDone: () -> Uni
         try {
             tags = app.api.assignableTags()
         } catch (e: Exception) {
-            error = e.message ?: e.javaClass.simpleName
+            error = errorText(e)
         }
     }
     fun addTyped() {

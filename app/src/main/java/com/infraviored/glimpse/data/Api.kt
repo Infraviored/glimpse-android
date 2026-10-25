@@ -1,6 +1,7 @@
 package com.infraviored.glimpse.data
 
 import android.net.Uri
+import android.util.Log
 import com.infraviored.glimpse.Account
 import com.infraviored.glimpse.Nextcloud
 import kotlinx.coroutines.Dispatchers
@@ -66,14 +67,16 @@ class Api(val account: Account) {
             val request = chain.request()
             if (!isOwn(request.url)) return chain.proceed(request)
             if (_authLost.value) throw ApiException(401, "Not logged in")
+            val silentAuth = request.header("X-Silent-Auth") != null
             val response = chain.proceed(
                 request.newBuilder()
+                    .removeHeader("X-Silent-Auth")
                     .header("Authorization", account.basicAuth)
                     .header("OCS-APIRequest", "true")
                     .header("User-Agent", Nextcloud.userAgent)
                     .build(),
             )
-            if (response.code == 401) _authLost.value = true
+            if (response.code == 401 && !silentAuth) _authLost.value = true
             return response
         }
     }
@@ -153,6 +156,19 @@ class Api(val account: Account) {
     ): Page = decode(
         get(appUrl("/api/search") + query("q" to q, "page" to page, "person" to person, "type" to type, "similar" to similar, "tag" to tag, "seen" to seen)),
     )
+
+    /**
+     * Lets Immich load its search model before the first search (it unloads after idle time,
+     * and the first search then waited for the load). Best effort: older servers have no such
+     * route, and nothing waits on the answer.
+     */
+    suspend fun warmUp() {
+        try {
+            post(appUrl("/api/warmup"), buildJsonObject {}, silentAuth = true)
+        } catch (e: IOException) {
+            Log.d("Glimpse", "warm-up: ${e.message}")
+        }
+    }
 
     suspend fun people(): People = decode(get(appUrl("/api/people")))
 
@@ -351,13 +367,15 @@ class Api(val account: Account) {
 
     private suspend fun get(url: String): String = call(Request.Builder().url(url).header("Accept", "application/json").build())
 
-    private suspend fun post(url: String, body: JsonObject): String = send("POST", url, body)
+    private suspend fun post(url: String, body: JsonObject, silentAuth: Boolean = false): String =
+        send("POST", url, body, silentAuth)
 
-    private suspend fun send(method: String, url: String, body: JsonObject): String =
-        call(
-            Request.Builder().url(url).header("Accept", "application/json")
-                .method(method, body.toString().toRequestBody("application/json".toMediaType())).build(),
-        )
+    private suspend fun send(method: String, url: String, body: JsonObject, silentAuth: Boolean = false): String {
+        val builder = Request.Builder().url(url).header("Accept", "application/json")
+            .method(method, body.toString().toRequestBody("application/json".toMediaType()))
+        if (silentAuth) builder.header("X-Silent-Auth", "true")
+        return call(builder.build())
+    }
 
     private suspend fun call(request: Request): String = withContext(Dispatchers.IO) {
         http.newCall(request).execute().use { response ->

@@ -21,9 +21,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -108,6 +110,12 @@ private fun App(api: Api, onLogout: (String?) -> Unit) {
     }
     val authLost by api.authLost.collectAsState()
     LaunchedEffect(authLost) { if (authLost) onLogout(sessionGone) }
+    // Opened or back from the background: likely a search follows, so Immich loads its model now
+    val warmScope = rememberCoroutineScope()
+    LifecycleResumeEffect(api) {
+        val job = warmScope.launch { api.warmUp() }
+        onPauseOrDispose { job.cancel() }
+    }
 
     CompositionLocalProvider(LocalApp provides app) {
         SharedTransitionLayout(Modifier.fillMaxSize().background(glimpse.background)) {
