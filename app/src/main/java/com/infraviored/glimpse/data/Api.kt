@@ -67,14 +67,16 @@ class Api(val account: Account) {
             val request = chain.request()
             if (!isOwn(request.url)) return chain.proceed(request)
             if (_authLost.value) throw ApiException(401, "Not logged in")
+            val silentAuth = request.header("X-Silent-Auth") != null
             val response = chain.proceed(
                 request.newBuilder()
+                    .removeHeader("X-Silent-Auth")
                     .header("Authorization", account.basicAuth)
                     .header("OCS-APIRequest", "true")
                     .header("User-Agent", Nextcloud.userAgent)
                     .build(),
             )
-            if (response.code == 401) _authLost.value = true
+            if (response.code == 401 && !silentAuth) _authLost.value = true
             return response
         }
     }
@@ -162,7 +164,7 @@ class Api(val account: Account) {
      */
     suspend fun warmUp() {
         try {
-            post(appUrl("/api/warmup"), buildJsonObject {})
+            post(appUrl("/api/warmup"), buildJsonObject {}, silentAuth = true)
         } catch (e: ApiException) {
             Log.d("Glimpse", "warm-up: ${e.message}")
         } catch (e: java.io.IOException) {
@@ -367,13 +369,15 @@ class Api(val account: Account) {
 
     private suspend fun get(url: String): String = call(Request.Builder().url(url).header("Accept", "application/json").build())
 
-    private suspend fun post(url: String, body: JsonObject): String = send("POST", url, body)
+    private suspend fun post(url: String, body: JsonObject, silentAuth: Boolean = false): String =
+        send("POST", url, body, silentAuth)
 
-    private suspend fun send(method: String, url: String, body: JsonObject): String =
-        call(
-            Request.Builder().url(url).header("Accept", "application/json")
-                .method(method, body.toString().toRequestBody("application/json".toMediaType())).build(),
-        )
+    private suspend fun send(method: String, url: String, body: JsonObject, silentAuth: Boolean = false): String {
+        val builder = Request.Builder().url(url).header("Accept", "application/json")
+            .method(method, body.toString().toRequestBody("application/json".toMediaType()))
+        if (silentAuth) builder.header("X-Silent-Auth", "true")
+        return call(builder.build())
+    }
 
     private suspend fun call(request: Request): String = withContext(Dispatchers.IO) {
         http.newCall(request).execute().use { response ->
