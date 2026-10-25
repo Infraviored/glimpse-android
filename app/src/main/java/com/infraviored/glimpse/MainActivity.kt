@@ -113,8 +113,8 @@ private fun App(api: Api, onLogout: (String?) -> Unit) {
     // Opened or back from the background: likely a search follows, so Immich loads its model now
     val warmScope = rememberCoroutineScope()
     LifecycleResumeEffect(api) {
-        warmScope.launch { api.warmUp() }
-        onPauseOrDispose {}
+        val job = warmScope.launch { api.warmUp() }
+        onPauseOrDispose { job.cancel() }
     }
 
     CompositionLocalProvider(LocalApp provides app) {
