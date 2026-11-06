@@ -1,5 +1,7 @@
 package com.infraviored.glimpse.ui
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -39,6 +41,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -52,6 +55,7 @@ import com.infraviored.glimpse.ui.components.SheetTitle
 import com.infraviored.glimpse.ui.theme.glimpse
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -240,31 +244,39 @@ fun sensitiveModeIcon(mode: String?): ImageVector = when (mode) {
 }
 
 /**
- * What a tap on the shield switches to. It only ever moves towards fewer sensitive pictures,
- * so someone looking at the screen never gets "only sensitive" by accident.
- */
-fun nextSensitiveMode(mode: String): String = if (mode == "only") "all" else "hide"
-
-/**
- * Next to the title of a page: sensitive pictures can show here. A tap steps the mode down; at
- * "without sensitive" it is gone, and the account menu is the way back. It waits for the server,
- * so a tap that fails leaves it standing, and scrolling it away must not cancel the change.
+ * Next to the title of a page: sensitive pictures can show here. A tap turns them off; the safe
+ * shield then says it worked and fades out. The account menu is the way back. It waits for the
+ * server, so a tap that fails leaves it standing, and scrolling it away must not cancel the change.
  */
 @Composable
 fun SensitiveShield(modifier: Modifier = Modifier) {
     val app = LocalApp.current
-    val mode = app.sensitive?.mode
-    if (mode == null || mode == "hide") return
+    val exposed = app.sensitive?.mode.let { it == "all" || it == "only" }
+    var shown by remember { mutableStateOf(exposed) }
+    var fading by remember { mutableStateOf(false) }
+    val alpha by animateFloatAsState(if (fading) 0f else 1f, tween(SHIELD_FADE_MS), label = "shield")
+    LaunchedEffect(exposed) {
+        fading = false
+        if (exposed) {
+            shown = true
+        } else if (shown) {
+            delay(SHIELD_SAFE_MS)
+            fading = true
+            delay(SHIELD_FADE_MS.toLong())
+            shown = false
+        }
+    }
+    if (!shown) return
     val scope = rememberCoroutineScope()
     val failed = stringResource(R.string.action_failed, "%s")
     var busy by remember { mutableStateOf(false) }
     Box(
-        modifier.size(36.dp).clip(CircleShape).clickable(enabled = !busy) {
+        modifier.size(36.dp).alpha(alpha).clip(CircleShape).clickable(enabled = exposed && !busy) {
             busy = true
             scope.launch {
                 withContext(NonCancellable) {
                     try {
-                        app.sensitiveModeChanged(app.api.saveSensitive(mapOf("sensitive_mode" to nextSensitiveMode(mode))))
+                        app.sensitiveModeChanged(app.api.saveSensitive(mapOf("sensitive_mode" to "hide")))
                     } catch (e: Exception) {
                         app.notices.show(failed.replace("%s", errorText(e)))
                     } finally {
@@ -276,13 +288,16 @@ fun SensitiveShield(modifier: Modifier = Modifier) {
         contentAlignment = Alignment.Center,
     ) {
         Icon(
-            sensitiveModeIcon(mode),
-            stringResource(if (mode == "only") R.string.sensitive_only else R.string.sensitive_all),
-            tint = glimpse.muted,
+            if (exposed) ShieldOffOutline else ShieldCheckOutline,
+            stringResource(if (exposed) R.string.sensitive_hide else R.string.sensitive_hide_short),
+            tint = if (exposed) glimpse.muted else glimpse.accentText,
             modifier = Modifier.size(18.dp),
         )
     }
 }
+
+private const val SHIELD_SAFE_MS = 1200L
+private const val SHIELD_FADE_MS = 400
 
 /** A sensitive picture is one the filter hides. */
 val SensitiveIcon: ImageVector get() = Icons.Outlined.VisibilityOff
