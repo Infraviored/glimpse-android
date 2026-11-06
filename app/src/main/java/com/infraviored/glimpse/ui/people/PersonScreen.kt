@@ -240,26 +240,29 @@ private fun PersonHeader(vm: PersonVm) {
                     },
                 )
             } else {
-                Row(
-                    Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable(enabled = vm.canManage && person != null) { editing = true },
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        name.ifBlank { stringResource(if (vm.canManage) R.string.person_add_name else R.string.unnamed) },
-                        style = MaterialTheme.typography.displayMedium,
-                        color = if (name.isBlank()) glimpse.muted else glimpse.text,
-                        maxLines = 2,
-                        modifier = Modifier.weight(1f, fill = false),
-                    )
-                    if (vm.canManage && person != null) {
-                        Spacer(Modifier.width(8.dp))
-                        Icon(Icons.Outlined.Edit, stringResource(R.string.person_rename), tint = glimpse.muted, modifier = Modifier.size(20.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        Modifier
+                            .weight(1f, fill = false)
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable(enabled = vm.canManage && person != null) { editing = true },
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            name.ifBlank { stringResource(if (vm.canManage) R.string.person_add_name else R.string.unnamed) },
+                            style = MaterialTheme.typography.displayMedium,
+                            color = if (name.isBlank()) glimpse.muted else glimpse.text,
+                            maxLines = 2,
+                            modifier = Modifier.weight(1f, fill = false),
+                        )
+                        if (vm.canManage && person != null) {
+                            Spacer(Modifier.width(8.dp))
+                            Icon(Icons.Outlined.Edit, stringResource(R.string.person_rename), tint = glimpse.muted, modifier = Modifier.size(20.dp))
+                        }
                     }
+                    SensitiveShield()
                 }
             }
-            SensitiveShield()
             person?.let {
                 Text(pluralStringResource(R.plurals.pictures, it.count, count(it.count)), color = glimpse.muted, style = MaterialTheme.typography.bodyMedium)
             }
