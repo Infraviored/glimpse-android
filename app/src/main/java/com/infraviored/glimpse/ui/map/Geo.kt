@@ -147,14 +147,19 @@ object Clusters {
 
     /**
      * Where most pictures are: the densest 1° cell and what lies within ~1° of it. Fitting
-     * every marker would show the whole world after a single holiday abroad.
+     * every marker would show the whole world after a single holiday abroad. Without such a
+     * place (no cell holds two) nothing is dropped: one arbitrary picture would hide the others.
      */
     fun home(markers: List<Marker>): List<Marker> {
         if (markers.isEmpty()) return markers
-        val best = markers.groupingBy { floor(it.lat).toInt() to floor(it.lon).toInt() }.eachCount().maxBy { it.value }.key
-        val lat = best.first + 0.5
-        val lon = best.second + 0.5
-        return markers.filter { kotlin.math.abs(it.lat - lat) <= 1.0 && kotlin.math.abs(it.lon - lon) <= 1.0 }
+        val best = markers.groupingBy { floor(it.lat).toInt() to floor(it.lon).toInt() }.eachCount().maxBy { it.value }
+        if (best.value < 2) return markers
+        val lat = best.key.first + 0.5
+        val lon = best.key.second + 0.5
+        return markers.filter {
+            val d = kotlin.math.abs(it.lon - lon)
+            kotlin.math.abs(it.lat - lat) <= 1.0 && minOf(d, 360.0 - d) <= 1.0
+        }
     }
 
     /** Markers inside the view, newest first. */

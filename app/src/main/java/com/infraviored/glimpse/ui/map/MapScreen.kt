@@ -123,7 +123,7 @@ fun MapScreen(bottomPadding: Dp) {
         val h = constraints.maxHeight
         LaunchedEffect(vm.markers, w, h) {
             if (vm.view == null && vm.markers != null && w > 0) {
-                vm.view = Viewport.fit(Clusters.home(vm.markers!!), w, h, padPx = with(density) { 48.dp.roundToPx() })
+                vm.view = Viewport.fit(Clusters.home(markers), w, h, padPx = with(density) { 48.dp.roundToPx() })
             }
         }
         val view = vm.view ?: Viewport(Mercator.x(11.5), Mercator.y(48.1), 4.0)
