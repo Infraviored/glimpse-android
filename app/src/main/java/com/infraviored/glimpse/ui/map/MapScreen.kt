@@ -37,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -73,7 +74,9 @@ import com.infraviored.glimpse.ui.longDate
 import com.infraviored.glimpse.ui.photoBlur
 import com.infraviored.glimpse.ui.theme.Palette
 import com.infraviored.glimpse.ui.theme.glimpse
+import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
+import kotlin.random.Random
 
 class MapVm(private val api: Api, /** see TimelineVm.loadedForVersion */ var loadedForVersion: Int = 0) : ViewModel() {
     var markers by mutableStateOf<List<Marker>?>(null)
@@ -120,7 +123,7 @@ fun MapScreen(bottomPadding: Dp) {
         val h = constraints.maxHeight
         LaunchedEffect(vm.markers, w, h) {
             if (vm.view == null && vm.markers != null && w > 0) {
-                vm.view = Viewport.fit(Clusters.home(vm.markers!!), w, h, padPx = with(density) { 48.dp.roundToPx() })
+                vm.view = Viewport.fit(Clusters.home(markers), w, h, padPx = with(density) { 48.dp.roundToPx() })
             }
         }
         val view = vm.view ?: Viewport(Mercator.x(11.5), Mercator.y(48.1), 4.0)
@@ -198,14 +201,18 @@ fun MapScreen(bottomPadding: Dp) {
     }
 }
 
+/** 2, 4, 8, 16 and 32 seconds: past the server's one-minute rate limit. */
+private const val TILE_RETRIES = 5
+
 /** The tiles at the zoom they are fetched in, scaled to the fractional zoom shown. */
 @Composable
 private fun Tiles(view: Viewport, w: Int, h: Int, tint: ColorFilter) {
     if (w == 0 || h == 0) return
     val api = LocalApp.current.api
     val density = LocalDensity.current
-    val tiles = view.tiles(w, h)
-    val z = view.tileZoom()
+    val shift = Viewport.tileShift(density.density)
+    val tiles = view.tiles(w, h, shift)
+    val z = view.tileZoom(shift)
     val n = 1 shl z
     val sizePx = Mercator.worldPx(view.zoom) / n
     val sizeDp = with(density) { (sizePx + 1).toFloat().toDp() }
@@ -213,15 +220,28 @@ private fun Tiles(view: Viewport, w: Int, h: Int, tint: ColorFilter) {
         key(t.z, t.x, t.y) {
             val x = view.toScreenX(t.x.toDouble() / n, w)
             val y = view.toScreenY(t.y.toDouble() / n, h)
-            AsyncImage(
-                model = api.tileUrl(t.z, t.x, t.y),
-                contentDescription = null,
-                contentScale = ContentScale.FillBounds,
-                colorFilter = tint,
-                modifier = Modifier
-                    .absoluteOffset { IntOffset(x.roundToInt(), y.roundToInt()) }
-                    .requiredSize(sizeDp),
-            )
+            // A refused or lost tile would stay a hole: ask again, later each time (the rate limit counts a minute)
+            var attempt by remember { mutableIntStateOf(0) }
+            var failed by remember { mutableStateOf(false) }
+            LaunchedEffect(failed) {
+                if (failed && attempt < TILE_RETRIES) {
+                    delay((2000L shl attempt) + Random.nextLong(1000))
+                    attempt++
+                    failed = false
+                }
+            }
+            key(attempt) {
+                AsyncImage(
+                    model = api.tileUrl(t.z, t.x, t.y),
+                    contentDescription = null,
+                    contentScale = ContentScale.FillBounds,
+                    colorFilter = tint,
+                    onError = { failed = true },
+                    modifier = Modifier
+                        .absoluteOffset { IntOffset(x.roundToInt(), y.roundToInt()) }
+                        .requiredSize(sizeDp),
+                )
+            }
         }
     }
 }

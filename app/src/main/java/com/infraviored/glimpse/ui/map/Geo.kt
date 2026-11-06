@@ -58,8 +58,8 @@ data class Viewport(val cx: Double, val cy: Double, val zoom: Double) {
     fun clamped(): Viewport = copy(cx = cx.coerceIn(0.0, 1.0), cy = cy.coerceIn(0.0, 1.0), zoom = zoom.coerceIn(MIN_ZOOM, MAX_ZOOM))
 
     /** Tiles covering a [w]×[h] view, at the integer zoom the tiles are fetched in. */
-    fun tiles(w: Int, h: Int): List<Tile> {
-        val z = tileZoom()
+    fun tiles(w: Int, h: Int, shift: Double = 0.0): List<Tile> {
+        val z = tileZoom(shift)
         val n = 1 shl z
         val x0 = floor(toWorldX(0.0, w) * n).toInt().coerceAtLeast(0)
         val x1 = floor(toWorldX(w.toDouble(), w) * n).toInt().coerceAtMost(n - 1)
@@ -70,13 +70,19 @@ data class Viewport(val cx: Double, val cy: Double, val zoom: Double) {
         return out
     }
 
-    /** The proxy serves tiles up to 18; beyond that they are scaled up. */
-    fun tileZoom(): Int = floor(zoom + 0.25).toInt().coerceIn(0, MAX_TILE_ZOOM)
+    /**
+     * The proxy serves tiles up to 18; beyond that they are scaled up. [shift] levels lower
+     * means tiles twice as large per level: readable on a sharp screen, and a quarter as many.
+     */
+    fun tileZoom(shift: Double = 0.0): Int = floor(zoom + 0.25 - shift).toInt().coerceIn(0, MAX_TILE_ZOOM)
 
     companion object {
         const val MIN_ZOOM = 2.0
         const val MAX_ZOOM = 19.0
         const val MAX_TILE_ZOOM = 18
+
+        /** Tile levels to drop for a screen of this density: a tile of 256 px on 1x, 512 px from 2x up. */
+        fun tileShift(density: Float): Double = ln(density.toDouble().coerceIn(1.0, 2.0)) / ln(2.0)
 
         /** The view that shows [markers]' box in a [w]×[h] view, at most at [maxZoom]. */
         fun fit(markers: List<Marker>, w: Int, h: Int, padPx: Int = 48, maxZoom: Double = 12.0): Viewport {
@@ -140,15 +146,20 @@ object Clusters {
     }
 
     /**
-     * Where most pictures are: the densest 1° cell and what lies within ~2.5° of it. Fitting
-     * every marker would show the whole world after a single holiday abroad.
+     * Where most pictures are: the densest 1° cell and what lies within ~1° of it. Fitting
+     * every marker would show the whole world after a single holiday abroad. Without such a
+     * place (no cell holds two) nothing is dropped: one arbitrary picture would hide the others.
      */
     fun home(markers: List<Marker>): List<Marker> {
         if (markers.isEmpty()) return markers
-        val best = markers.groupingBy { floor(it.lat).toInt() to floor(it.lon).toInt() }.eachCount().maxBy { it.value }.key
-        val lat = best.first + 0.5
-        val lon = best.second + 0.5
-        return markers.filter { kotlin.math.abs(it.lat - lat) <= 2.5 && kotlin.math.abs(it.lon - lon) <= 2.5 }
+        val best = markers.groupingBy { floor(it.lat).toInt() to floor(it.lon).toInt() }.eachCount().maxBy { it.value }
+        if (best.value < 2) return markers
+        val lat = best.key.first + 0.5
+        val lon = best.key.second + 0.5
+        return markers.filter {
+            val d = kotlin.math.abs(it.lon - lon)
+            kotlin.math.abs(it.lat - lat) <= 1.0 && minOf(d, 360.0 - d) <= 1.0
+        }
     }
 
     /** Markers inside the view, newest first. */

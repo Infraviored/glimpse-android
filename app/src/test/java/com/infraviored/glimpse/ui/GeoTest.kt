@@ -104,4 +104,35 @@ class ClusterSpacingTest {
             }
         }
     }
+
+    @Test
+    fun aSharpScreenFetchesLargerAndFewerTiles() {
+        val v = Viewport(Mercator.x(11.5), Mercator.y(48.1), 10.0)
+        assertEquals(0.0, Viewport.tileShift(1f), 1e-9)
+        assertEquals(1.0, Viewport.tileShift(3f), 1e-9)
+        assertEquals(9, v.tileZoom(Viewport.tileShift(3f)))
+        val w = 1080; val h = 2340
+        assertTrue(v.tiles(w, h, 1.0).size * 2 < v.tiles(w, h).size)
+    }
+
+    @Test
+    fun homeStaysNearTheDensestPlace() {
+        fun at(id: String, lat: Double, lon: Double) = Marker(id, 1, lat, lon, false, 0, "")
+        val list = listOf(at("a", 48.1, 11.5), at("b", 48.2, 11.6), at("near", 48.9, 12.2), at("far", 46.8, 9.8))
+        assertEquals(setOf("a", "b", "near"), Clusters.home(list).map { it.assetId }.toSet())
+    }
+
+    private fun m(id: String, lat: Double, lon: Double) = Marker(id, 1, lat, lon, false, 0, "")
+
+    @Test
+    fun scatteredPicturesAreAllKept() {
+        val list = listOf(m("london", 51.5, -0.1), m("paris", 48.8, 2.3), m("berlin", 52.5, 13.4))
+        assertEquals(3, Clusters.home(list).size)
+    }
+
+    @Test
+    fun homeReachesAcrossTheDateLine() {
+        val list = listOf(m("a", -17.5, 179.6), m("b", -17.6, 179.7), m("over", -17.5, -179.9), m("far", -17.5, -170.0))
+        assertEquals(setOf("a", "b", "over"), Clusters.home(list).map { it.assetId }.toSet())
+    }
 }
