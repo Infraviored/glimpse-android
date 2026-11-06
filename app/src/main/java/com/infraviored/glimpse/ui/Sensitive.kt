@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.School
-import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -299,5 +298,6 @@ fun SensitiveShield(modifier: Modifier = Modifier) {
 private const val SHIELD_SAFE_MS = 1200L
 private const val SHIELD_FADE_MS = 400
 
-/** A sensitive picture is one the filter hides. */
-val SensitiveIcon: ImageVector get() = Icons.Outlined.VisibilityOff
+/** The shields again: a sensitive picture, and one that is not. */
+val SensitiveIcon: ImageVector get() = ShieldAlertOutline
+val NotSensitiveIcon: ImageVector get() = ShieldCheckOutline
