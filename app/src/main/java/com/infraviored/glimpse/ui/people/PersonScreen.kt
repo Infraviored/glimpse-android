@@ -66,6 +66,7 @@ import com.infraviored.glimpse.data.FaceTarget
 import com.infraviored.glimpse.data.Item
 import com.infraviored.glimpse.data.Person
 import com.infraviored.glimpse.ui.LocalApp
+import com.infraviored.glimpse.ui.SensitiveShield
 import com.infraviored.glimpse.ui.components.DockAction
 import com.infraviored.glimpse.ui.components.Selection
 import com.infraviored.glimpse.ui.components.SelectionScaffold
@@ -258,6 +259,7 @@ private fun PersonHeader(vm: PersonVm) {
                     }
                 }
             }
+            SensitiveShield()
             person?.let {
                 Text(pluralStringResource(R.plurals.pictures, it.count, count(it.count)), color = glimpse.muted, style = MaterialTheme.typography.bodyMedium)
             }

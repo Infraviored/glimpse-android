@@ -66,6 +66,7 @@ import com.infraviored.glimpse.R
 import com.infraviored.glimpse.data.Api
 import com.infraviored.glimpse.data.Person
 import com.infraviored.glimpse.data.Tag
+import com.infraviored.glimpse.ui.SensitiveShield
 import com.infraviored.glimpse.ui.photoBlur
 import com.infraviored.glimpse.ui.LocalApp
 import com.infraviored.glimpse.ui.Paged
@@ -189,7 +190,8 @@ fun SearchScreen(q: String, personId: String, similar: String, label: String) {
             ) {
                 IconButton(onClick = app.back) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, stringResource(R.string.back), tint = glimpse.text) }
                 if (similar.isNotEmpty()) {
-                    Text(stringResource(R.string.search_similar_to, label), style = MaterialTheme.typography.headlineSmall, color = glimpse.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(stringResource(R.string.search_similar_to, label), style = MaterialTheme.typography.headlineSmall, color = glimpse.text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                    SensitiveShield()
                 } else {
                     Row(
                         Modifier
@@ -224,6 +226,7 @@ fun SearchScreen(q: String, personId: String, similar: String, label: String) {
                                 modifier = Modifier.size(22.dp).clip(CircleShape).clickable { vm.query = ""; focus.requestFocus() },
                             )
                         }
+                        SensitiveShield()
                     }
                 }
             }

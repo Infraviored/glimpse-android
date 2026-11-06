@@ -1,20 +1,22 @@
 package com.infraviored.glimpse.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.School
-import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -49,7 +51,9 @@ import com.infraviored.glimpse.ui.components.GlimpseSheet
 import com.infraviored.glimpse.ui.components.SheetTitle
 import com.infraviored.glimpse.ui.theme.glimpse
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Sensitive pictures (the server's SensitiveContent): optional, the admin allows it and the user
@@ -217,8 +221,10 @@ private fun SwitchRow(label: String, checked: Boolean, enabled: Boolean, onChang
     }
 }
 
-/** Material Design Icons' eye-check-outline: only sensitive pictures. */
-val EyeCheckOutline: ImageVector by lazy { svgIcon("EyeCheckOutline", "M23.5,17L18.5,22L15,18.5L16.5,17L18.5,19L22,15.5L23.5,17M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9M12,4.5C17,4.5 21.27,7.61 23,12C22.75,12.65 22.44,13.26 22.08,13.85C21.5,13.5 20.86,13.25 20.18,13.12L20.82,12C19.17,8.64 15.76,6.5 12,6.5C8.24,6.5 4.83,8.64 3.18,12C4.83,15.36 8.24,17.5 12,17.5L13.21,17.43C13.07,17.93 13,18.46 13,19V19.46L12,19.5C7,19.5 2.73,16.39 1,12C2.73,7.61 7,4.5 12,4.5Z") }
+/** Material Design Icons' shields: what the sensitive filter lets through. */
+private val ShieldOffOutline: ImageVector by lazy { svgIcon("ShieldOffOutline", "M1,4.27L3,6.27V11C3,16.55 6.84,21.74 12,23C13.87,22.54 15.57,21.56 16.97,20.24L19.23,22.5L20.5,21.22L2.28,3L1,4.27M12,21C8.25,20 5,15.54 5,11.22V8.27L15.59,18.86C14.53,19.89 13.3,20.65 12,21M21,5V11C21,13.28 20.35,15.5 19.23,17.4L17.77,15.95C18.54,14.5 19,12.84 19,11.22V6.3L12,3.18L7.16,5.34L5.65,3.82L12,1L21,5Z") }
+private val ShieldAlertOutline: ImageVector by lazy { svgIcon("ShieldAlertOutline", "M21,11C21,16.55 17.16,21.74 12,23C6.84,21.74 3,16.55 3,11V5L12,1L21,5V11M12,21C15.75,20 19,15.54 19,11.22V6.3L12,3.18L5,6.3V11.22C5,15.54 8.25,20 12,21M11,7H13V13H11V7M11,15H13V17H11V15Z") }
+private val ShieldCheckOutline: ImageVector by lazy { svgIcon("ShieldCheckOutline", "M21,11C21,16.55 17.16,21.74 12,23C6.84,21.74 3,16.55 3,11V5L12,1L21,5V11M12,21C15.75,20 19,15.54 19,11.22V6.3L12,3.18L5,6.3V11.22C5,15.54 8.25,20 12,21M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9") }
 
 /** Material Design Icons' folder-off-outline: ignore a folder. */
 val FolderOffOutline: ImageVector by lazy { svgIcon("FolderOffOutline", "M2.39 1.73L1.11 3L2.64 4.53C2.25 4.9 2 5.42 2 6V18C2 19.11 2.9 20 4 20H18.11L20.84 22.73L22.11 21.46L2.39 1.73M4 18V8H6.11L16.11 18H4M11.2 8L7.2 4H10L12 6H20C21.1 6 22 6.89 22 8V18C22 18.24 21.96 18.47 21.88 18.68L20 16.8V8H11.2Z") }
@@ -226,11 +232,56 @@ val FolderOffOutline: ImageVector by lazy { svgIcon("FolderOffOutline", "M2.39 1
 private fun svgIcon(name: String, d: String): ImageVector =
     ImageVector.Builder(name, 24.dp, 24.dp, 24f, 24f).addPath(addPathNodes(d), fill = SolidColor(Color.Black)).build()
 
-/** The eye says what is shown: all (eye), without sensitive (eye off), only sensitive (eye check). */
+/** The shield says what is shown: all (off), without sensitive (check), only sensitive (alert). */
 fun sensitiveModeIcon(mode: String?): ImageVector = when (mode) {
-    "hide" -> Icons.Outlined.VisibilityOff
-    "only" -> EyeCheckOutline
-    else -> Icons.Outlined.Visibility
+    "hide" -> ShieldCheckOutline
+    "only" -> ShieldAlertOutline
+    else -> ShieldOffOutline
+}
+
+/**
+ * What a tap on the shield switches to. It only ever moves towards fewer sensitive pictures,
+ * so someone looking at the screen never gets "only sensitive" by accident.
+ */
+fun nextSensitiveMode(mode: String): String = if (mode == "only") "all" else "hide"
+
+/**
+ * Next to the title of a page: sensitive pictures can show here. A tap steps the mode down; at
+ * "without sensitive" it is gone, and the account menu is the way back. It waits for the server,
+ * so a tap that fails leaves it standing, and scrolling it away must not cancel the change.
+ */
+@Composable
+fun SensitiveShield(modifier: Modifier = Modifier) {
+    val app = LocalApp.current
+    val mode = app.sensitive?.mode
+    if (mode == null || mode == "hide") return
+    val scope = rememberCoroutineScope()
+    val failed = stringResource(R.string.action_failed, "%s")
+    var busy by remember { mutableStateOf(false) }
+    Box(
+        modifier.size(36.dp).clip(CircleShape).clickable(enabled = !busy) {
+            busy = true
+            scope.launch {
+                withContext(NonCancellable) {
+                    try {
+                        app.sensitiveModeChanged(app.api.saveSensitive(mapOf("sensitive_mode" to nextSensitiveMode(mode))))
+                    } catch (e: Exception) {
+                        app.notices.show(failed.replace("%s", errorText(e)))
+                    } finally {
+                        busy = false
+                    }
+                }
+            }
+        },
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            sensitiveModeIcon(mode),
+            stringResource(if (mode == "only") R.string.sensitive_only else R.string.sensitive_all),
+            tint = glimpse.muted,
+            modifier = Modifier.size(18.dp),
+        )
+    }
 }
 
 /** A sensitive picture is one the filter hides. */

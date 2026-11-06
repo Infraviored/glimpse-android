@@ -45,6 +45,7 @@ import com.infraviored.glimpse.data.Api
 import com.infraviored.glimpse.data.Folder
 import com.infraviored.glimpse.ui.LocalApp
 import com.infraviored.glimpse.ui.Section
+import com.infraviored.glimpse.ui.SensitiveShield
 import com.infraviored.glimpse.ui.components.PhotoGrid
 import com.infraviored.glimpse.ui.components.Selection
 import com.infraviored.glimpse.ui.components.SelectionScaffold
@@ -103,14 +104,20 @@ fun FolderScreen(path: String, asTab: Boolean = false, bottomPadding: Dp = 0.dp)
                             Icon(Icons.AutoMirrored.Outlined.ArrowBack, stringResource(R.string.back), tint = glimpse.text)
                         }
                     }
-                    Text(
-                        title,
-                        style = MaterialTheme.typography.displaySmall,
-                        color = glimpse.text,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = if (asTab) 8.dp else 0.dp, bottom = 4.dp),
-                    )
+                    Row(
+                        Modifier.padding(start = 16.dp, end = 16.dp, top = if (asTab) 8.dp else 0.dp, bottom = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            title,
+                            style = MaterialTheme.typography.displaySmall,
+                            color = glimpse.text,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false),
+                        )
+                        SensitiveShield()
+                    }
                     if (!asTab) {
                         Text(path, style = MaterialTheme.typography.bodySmall, color = glimpse.muted, modifier = Modifier.padding(horizontal = 16.dp))
                     }
