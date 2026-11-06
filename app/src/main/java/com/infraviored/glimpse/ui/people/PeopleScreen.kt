@@ -63,6 +63,7 @@ import com.infraviored.glimpse.R
 import com.infraviored.glimpse.data.Api
 import com.infraviored.glimpse.data.Person
 import com.infraviored.glimpse.data.errorText
+import com.infraviored.glimpse.ui.SensitiveShield
 import com.infraviored.glimpse.ui.count
 import com.infraviored.glimpse.ui.photoBlur
 import com.infraviored.glimpse.ui.LocalApp
@@ -189,7 +190,10 @@ fun PeopleScreen(bottomPadding: Dp) {
     ) {
         item(span = { GridItemSpan(maxLineSpan) }, key = "head") {
             Column(Modifier.statusBarsPadding().padding(start = 4.dp, top = 8.dp)) {
-                Text(stringResource(R.string.tab_people), style = MaterialTheme.typography.displaySmall, color = glimpse.text)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(R.string.tab_people), style = MaterialTheme.typography.displaySmall, color = glimpse.text)
+                    SensitiveShield()
+                }
                 Spacer(Modifier.height(14.dp))
                 FilterField(filter, { filter = it })
                 if (hiddenCount > 0) {

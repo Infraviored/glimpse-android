@@ -65,6 +65,7 @@ import com.infraviored.glimpse.R
 import com.infraviored.glimpse.data.Api
 import com.infraviored.glimpse.data.Marker
 import com.infraviored.glimpse.ui.LocalApp
+import com.infraviored.glimpse.ui.SensitiveShield
 import com.infraviored.glimpse.ui.components.GlimpseSheet
 import com.infraviored.glimpse.ui.components.SheetTitle
 import com.infraviored.glimpse.ui.components.Thumbnail
@@ -156,14 +157,16 @@ fun MapScreen(bottomPadding: Dp) {
         }
 
         // Title over a fade, like the other tabs
-        Box(
+        Row(
             Modifier
                 .fillMaxWidth()
                 .background(Brush.verticalGradient(listOf(glimpse.background, glimpse.background.copy(alpha = 0.85f), Color.Transparent)))
                 .statusBarsPadding()
                 .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 28.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(stringResource(R.string.tab_map), style = MaterialTheme.typography.displaySmall, color = glimpse.text)
+            SensitiveShield()
         }
 
         val inView = remember(markers, view, w, h) { if (w > 0) Clusters.inView(markers, view, w, h) else emptyList() }

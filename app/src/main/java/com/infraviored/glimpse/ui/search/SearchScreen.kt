@@ -66,6 +66,7 @@ import com.infraviored.glimpse.R
 import com.infraviored.glimpse.data.Api
 import com.infraviored.glimpse.data.Person
 import com.infraviored.glimpse.data.Tag
+import com.infraviored.glimpse.ui.SensitiveShield
 import com.infraviored.glimpse.ui.photoBlur
 import com.infraviored.glimpse.ui.LocalApp
 import com.infraviored.glimpse.ui.Paged
@@ -86,7 +87,14 @@ enum class Kind(val value: String, val label: Int) {
     Videos("VIDEO", R.string.kind_videos),
 }
 
-class SearchVm(private val api: Api, private val context: Context, q: String, personId: String, val similar: String) : ViewModel() {
+class SearchVm(
+    private val api: Api,
+    private val context: Context,
+    q: String,
+    personId: String,
+    val similar: String,
+    var loadedForVersion: Int = 0,
+) : ViewModel() {
     var query by mutableStateOf(q)
     /** The query the results are for (typing alone does not search). */
     var submitted by mutableStateOf(q)
@@ -151,11 +159,20 @@ class SearchVm(private val api: Api, private val context: Context, q: String, pe
 fun SearchScreen(q: String, personId: String, similar: String, label: String) {
     val app = LocalApp.current
     val context = LocalContext.current
-    val vm: SearchVm = viewModel(key = "search-$q-$personId-$similar") { SearchVm(app.api, context.applicationContext, q, personId, similar) }
+    val vm: SearchVm = viewModel(key = "search-$q-$personId-$similar") {
+        SearchVm(app.api, context.applicationContext, q, personId, similar, loadedForVersion = app.privateVersion)
+    }
     val focus = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
     val selection = remember { Selection() }
     val gridState = rememberLazyGridState()
+    val privateVersion = app.privateVersion
+    LaunchedEffect(privateVersion) {
+        if (privateVersion != vm.loadedForVersion) {
+            vm.loadedForVersion = privateVersion
+            vm.run()
+        }
+    }
     val items = vm.paged.items.filterNot { it.fileId in app.deleted }
     val sections = remember(items) { if (items.isEmpty()) emptyList() else listOf(Section("results", "", items)) }
 
@@ -189,7 +206,8 @@ fun SearchScreen(q: String, personId: String, similar: String, label: String) {
             ) {
                 IconButton(onClick = app.back) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, stringResource(R.string.back), tint = glimpse.text) }
                 if (similar.isNotEmpty()) {
-                    Text(stringResource(R.string.search_similar_to, label), style = MaterialTheme.typography.headlineSmall, color = glimpse.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(stringResource(R.string.search_similar_to, label), style = MaterialTheme.typography.headlineSmall, color = glimpse.text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                    SensitiveShield()
                 } else {
                     Row(
                         Modifier
@@ -224,6 +242,7 @@ fun SearchScreen(q: String, personId: String, similar: String, label: String) {
                                 modifier = Modifier.size(22.dp).clip(CircleShape).clickable { vm.query = ""; focus.requestFocus() },
                             )
                         }
+                        SensitiveShield()
                     }
                 }
             }

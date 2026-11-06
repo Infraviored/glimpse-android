@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -46,6 +47,7 @@ import com.infraviored.glimpse.data.Item
 import com.infraviored.glimpse.data.Memory
 import com.infraviored.glimpse.ui.LocalApp
 import com.infraviored.glimpse.ui.Paged
+import com.infraviored.glimpse.ui.SensitiveShield
 import com.infraviored.glimpse.ui.components.Selection
 import com.infraviored.glimpse.ui.loadInto
 import com.infraviored.glimpse.ui.photoBlur
@@ -179,7 +181,9 @@ private fun TopLine(onAccount: () -> Unit) {
         Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text("Glimpse", style = MaterialTheme.typography.displaySmall, color = glimpse.text, modifier = Modifier.weight(1f))
+        Text("Glimpse", style = MaterialTheme.typography.displaySmall, color = glimpse.text)
+        SensitiveShield()
+        Spacer(Modifier.weight(1f))
         AsyncImage(
             model = "${app.api.account.server}/index.php/avatar/${android.net.Uri.encode(app.api.userId)}/96",
             contentDescription = stringResource(R.string.account),
