@@ -87,7 +87,14 @@ enum class Kind(val value: String, val label: Int) {
     Videos("VIDEO", R.string.kind_videos),
 }
 
-class SearchVm(private val api: Api, private val context: Context, q: String, personId: String, val similar: String) : ViewModel() {
+class SearchVm(
+    private val api: Api,
+    private val context: Context,
+    q: String,
+    personId: String,
+    val similar: String,
+    var loadedForVersion: Int = 0,
+) : ViewModel() {
     var query by mutableStateOf(q)
     /** The query the results are for (typing alone does not search). */
     var submitted by mutableStateOf(q)
@@ -152,11 +159,20 @@ class SearchVm(private val api: Api, private val context: Context, q: String, pe
 fun SearchScreen(q: String, personId: String, similar: String, label: String) {
     val app = LocalApp.current
     val context = LocalContext.current
-    val vm: SearchVm = viewModel(key = "search-$q-$personId-$similar") { SearchVm(app.api, context.applicationContext, q, personId, similar) }
+    val vm: SearchVm = viewModel(key = "search-$q-$personId-$similar") {
+        SearchVm(app.api, context.applicationContext, q, personId, similar, loadedForVersion = app.privateVersion)
+    }
     val focus = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
     val selection = remember { Selection() }
     val gridState = rememberLazyGridState()
+    val privateVersion = app.privateVersion
+    LaunchedEffect(privateVersion) {
+        if (privateVersion != vm.loadedForVersion) {
+            vm.loadedForVersion = privateVersion
+            vm.run()
+        }
+    }
     val items = vm.paged.items.filterNot { it.fileId in app.deleted }
     val sections = remember(items) { if (items.isEmpty()) emptyList() else listOf(Section("results", "", items)) }
 
