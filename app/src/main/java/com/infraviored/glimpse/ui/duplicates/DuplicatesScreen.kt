@@ -32,6 +32,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -56,6 +57,7 @@ import com.infraviored.glimpse.data.Api
 import com.infraviored.glimpse.data.DuplicateGroup
 import com.infraviored.glimpse.data.DuplicateItem
 import com.infraviored.glimpse.ui.LocalApp
+import com.infraviored.glimpse.ui.SensitiveShield
 import com.infraviored.glimpse.ui.components.GlimpseSheet
 import com.infraviored.glimpse.ui.components.PrimaryButton
 import com.infraviored.glimpse.ui.components.QuietButton
@@ -68,7 +70,7 @@ import com.infraviored.glimpse.ui.photoBlur
 import com.infraviored.glimpse.ui.theme.Palette
 import com.infraviored.glimpse.ui.theme.glimpse
 
-class DuplicatesVm(private val api: Api) : ViewModel() {
+class DuplicatesVm(private val api: Api, var loadedForVersion: Int = 0) : ViewModel() {
     var groups by mutableStateOf<List<DuplicateGroup>?>(null)
         private set
     var error by mutableStateOf<String?>(null)
@@ -132,10 +134,17 @@ private const val PAGE = 20
 fun DuplicatesScreen() {
     val app = LocalApp.current
     val context = LocalContext.current
-    val vm: DuplicatesVm = viewModel { DuplicatesVm(app.api) }
+    val vm: DuplicatesVm = viewModel { DuplicatesVm(app.api, loadedForVersion = app.privateVersion) }
     var limit by rememberSaveable { mutableIntStateOf(PAGE) }
     var confirm by rememberSaveable { mutableStateOf<String?>(null) }
     var confirmDismiss by rememberSaveable { mutableStateOf<String?>(null) }
+    val privateVersion = app.privateVersion
+    LaunchedEffect(privateVersion) {
+        if (privateVersion != vm.loadedForVersion) {
+            vm.loadedForVersion = privateVersion
+            vm.load()
+        }
+    }
     val rawGroups = vm.groups
     val groups = rawGroups?.map { g ->
         g.copy(items = g.items.filterNot { it.fileId in app.deleted })
@@ -152,12 +161,20 @@ fun DuplicatesScreen() {
                     IconButton(onClick = app.back, modifier = Modifier.padding(4.dp)) {
                         Icon(Icons.AutoMirrored.Outlined.ArrowBack, stringResource(R.string.back), tint = glimpse.text)
                     }
-                    Text(
-                        stringResource(R.string.duplicates_title),
-                        style = MaterialTheme.typography.displaySmall,
-                        color = glimpse.text,
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                    )
+                    Row(
+                        Modifier.padding(start = 16.dp, end = 16.dp, bottom = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            stringResource(R.string.duplicates_title),
+                            style = MaterialTheme.typography.displaySmall,
+                            color = glimpse.text,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false),
+                        )
+                        SensitiveShield()
+                    }
                     Spacer(Modifier.height(8.dp))
                     when {
                         vm.error != null -> Column(Modifier.padding(16.dp)) {
