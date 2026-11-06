@@ -104,4 +104,21 @@ class ClusterSpacingTest {
             }
         }
     }
+
+    @Test
+    fun aSharpScreenFetchesLargerAndFewerTiles() {
+        val v = Viewport(Mercator.x(11.5), Mercator.y(48.1), 10.0)
+        assertEquals(0.0, Viewport.tileShift(1f), 1e-9)
+        assertEquals(1.0, Viewport.tileShift(3f), 1e-9)
+        assertEquals(9, v.tileZoom(Viewport.tileShift(3f)))
+        val w = 1080; val h = 2340
+        assertTrue(v.tiles(w, h, 1.0).size * 2 < v.tiles(w, h).size)
+    }
+
+    @Test
+    fun homeStaysNearTheDensestPlace() {
+        fun at(id: String, lat: Double, lon: Double) = Marker(id, 1, lat, lon, false, 0, "")
+        val list = listOf(at("a", 48.1, 11.5), at("b", 48.2, 11.6), at("near", 48.9, 12.2), at("far", 46.8, 9.8))
+        assertEquals(setOf("a", "b", "near"), Clusters.home(list).map { it.assetId }.toSet())
+    }
 }
