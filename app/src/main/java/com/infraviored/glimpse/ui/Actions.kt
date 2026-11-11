@@ -180,6 +180,34 @@ class PhotoActions(
         }
     }
 
+    /** Hide the folder containing this picture. */
+    fun hideFolder(item: Item, onDone: () -> Unit = {}) {
+        scope.launch {
+            try {
+                val res = api.hideFolder(item.fileId)
+                val folderName = com.infraviored.glimpse.data.Paths.name(res.folder).ifEmpty { res.folder }
+                val text = context.getString(R.string.folder_hidden, folderName)
+                val previous = res.folders.filter { it != res.folder }
+                app.hiddenFoldersChanged()
+                onDone()
+                app.notices.show(text, context.getString(R.string.undo)) {
+                    scope.launch {
+                        try {
+                            api.setHiddenFolders(previous)
+                            app.hiddenFoldersChanged()
+                        } catch (e: Exception) {
+                            val msg = (e as? com.infraviored.glimpse.data.ApiException)?.message ?: errorText(e)
+                            app.notices.show(context.getString(R.string.action_failed, msg))
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                val msg = (e as? com.infraviored.glimpse.data.ApiException)?.message ?: errorText(e)
+                app.notices.show(context.getString(R.string.action_failed, msg))
+            }
+        }
+    }
+
     fun addToAlbum(items: List<Item>, album: String, create: Boolean, onDone: () -> Unit = {}) {
         if (items.isEmpty() || busy) return
         busy = true

@@ -81,4 +81,25 @@ class ModelsTest {
         assertEquals(false, p.unlocked)
         assertEquals(true, p.askPassword)
     }
+
+    @Test
+    fun hiddenFoldersAnswer() {
+        val res = json.decodeFromString<HiddenFolders>("""{"folders":["/Photos/Ads","/Photos/Spam"]}""")
+        assertEquals(listOf("/Photos/Ads", "/Photos/Spam"), res.folders)
+    }
+
+    @Test
+    fun hideFolderResultAnswer() {
+        val res = json.decodeFromString<HiddenFolderResult>("""{"folder":"/Photos/Ads","folders":["/Photos/Ads"]}""")
+        assertEquals("/Photos/Ads", res.folder)
+        assertEquals(listOf("/Photos/Ads"), res.folders)
+    }
+
+    @Test
+    fun folderHiddenProperty() {
+        val f1 = json.decodeFromString<Folder>("""{"path":"/Photos/Ads","folders":[],"items":[],"hidden":true}""")
+        assertEquals(true, f1.hidden)
+        val f2 = json.decodeFromString<Folder>("""{"path":"/Photos","folders":[],"items":[]}""")
+        assertEquals(false, f2.hidden)
+    }
 }

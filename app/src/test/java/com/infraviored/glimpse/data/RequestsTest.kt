@@ -84,6 +84,16 @@ class RequestsTest {
     fun privateFiles() {
         assertEquals("""{"fileIds":[5,6],"on":false}""", Requests.privateFiles(listOf(5, 6), false).toString())
     }
+
+    @Test
+    fun hideFolderRequest() {
+        assertEquals("""{"fileId":123}""", Requests.hideFolder(123L).toString())
+    }
+
+    @Test
+    fun setHiddenFoldersRequest() {
+        assertEquals("""{"folders":["/Photos/Ads","/Photos/Spam"]}""", Requests.setHiddenFolders(listOf("/Photos/Ads", "/Photos/Spam")).toString())
+    }
 }
 
 class PathsTest {

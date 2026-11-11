@@ -366,4 +366,12 @@
     <string name="error_no_connection">No connection to the server. Check your internet connection.</string>
     <string name="error_timeout">The server is taking too long to answer. Try again.</string>
     <string name="error_secure">No secure connection to the server.</string>
+    <string name="show_only_this_folder">Show only this folder</string>
+    <string name="hide_this_folder">Hide this folder</string>
+    <string name="folder_hidden">“%1$s” hidden</string>
+    <string name="hidden_folders_title">Hidden folders</string>
+    <string name="hidden_folder_show_again">Show again</string>
+    <string name="hidden_folder_notice">This folder is hidden from your timeline and search</string>
+    <string name="hidden_folders_empty">Hide a folder from a picture\'s menu.</string>
+    <string name="hidden_folder_remove">Remove</string>
 </resources>

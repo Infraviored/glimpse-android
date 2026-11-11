@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Folder
+import androidx.compose.material.icons.outlined.FolderOff
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -42,6 +43,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.infraviored.glimpse.R
 import com.infraviored.glimpse.data.Api
+import kotlinx.coroutines.launch
 import com.infraviored.glimpse.data.Folder
 import com.infraviored.glimpse.ui.LocalApp
 import com.infraviored.glimpse.ui.Section
@@ -72,6 +74,8 @@ class FolderVm(private val api: Api, val path: String) : ViewModel() {
 @Composable
 fun FolderScreen(path: String, asTab: Boolean = false, bottomPadding: Dp = 0.dp) {
     val app = LocalApp.current
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    val context = androidx.compose.ui.platform.LocalContext.current
     val vm: FolderVm = viewModel(key = "folder-$path") { FolderVm(app.api, path) }
     val folder = vm.folder
     val items = folder?.items.orEmpty().filterNot { it.fileId in app.deleted }
@@ -126,6 +130,44 @@ fun FolderScreen(path: String, asTab: Boolean = false, bottomPadding: Dp = 0.dp)
                             Icon(Icons.Outlined.Lock, null, tint = glimpse.muted, modifier = Modifier.size(18.dp))
                             Spacer(Modifier.width(8.dp))
                             Text(stringResource(R.string.folder_private), color = glimpse.muted, style = MaterialTheme.typography.bodyMedium)
+                        }
+                    }
+                    if (folder?.hidden == true) {
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 6.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(glimpse.raised)
+                                .padding(start = 12.dp, end = 6.dp, top = 4.dp, bottom = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Icon(Icons.Outlined.FolderOff, null, tint = glimpse.muted, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(10.dp))
+                            Text(
+                                stringResource(R.string.hidden_folder_notice),
+                                color = glimpse.muted,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.weight(1f),
+                            )
+                            TextButton(
+                                onClick = {
+                                    scope.launch {
+                                        try {
+                                            val current = app.api.hiddenFolders().folders
+                                            val updated = current.filterNot { it == path || path.startsWith("$it/") }
+                                            app.api.setHiddenFolders(updated)
+                                            app.hiddenFoldersChanged()
+                                        } catch (e: Exception) {
+                                            val msg = (e as? com.infraviored.glimpse.data.ApiException)?.message ?: com.infraviored.glimpse.data.errorText(e)
+                                            app.notices.show(context.getString(R.string.action_failed, msg))
+                                        }
+                                    }
+                                },
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                            ) {
+                                Text(stringResource(R.string.hidden_folder_show_again), style = MaterialTheme.typography.labelMedium)
+                            }
                         }
                     }
                     Spacer(Modifier.size(8.dp))

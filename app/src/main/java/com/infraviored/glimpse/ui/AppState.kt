@@ -105,6 +105,12 @@ class AppState(
         version++
     }
 
+    /** Hidden folders changed: everything loads again. */
+    fun hiddenFoldersChanged() {
+        privateVersion++
+        version++
+    }
+
     /** Whether the user is a Glimpse admin; null while unknown (admin actions then show and may get a 403). */
     var isAdmin by mutableStateOf<Boolean?>(null)
 

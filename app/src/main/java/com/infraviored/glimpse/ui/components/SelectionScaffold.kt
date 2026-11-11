@@ -27,6 +27,8 @@ import com.infraviored.glimpse.data.Item
 import androidx.compose.material.icons.automirrored.outlined.DriveFileMove
 import androidx.compose.material.icons.outlined.AutoAwesomeMosaic
 import androidx.compose.material.icons.outlined.FileCopy
+import androidx.compose.material.icons.outlined.FolderOff
+import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.HeartBroken
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.LockOpen
@@ -54,6 +56,7 @@ fun selectionMore(actions: PhotoActions, selection: Selection, items: List<Item>
     val app = com.infraviored.glimpse.ui.LocalApp.current
     val unlocked = app.privateArea?.unlocked == true
     val single = items.singleOrNull { it.fileId in selection.ids }?.takeIf { selection.ids.size == 1 && it.id != null }
+    val singleItem = items.singleOrNull { it.fileId in selection.ids }?.takeIf { selection.ids.size == 1 }
     return listOf(
         DockAction(
             Icons.Outlined.AutoAwesomeMosaic,
@@ -69,6 +72,30 @@ fun selectionMore(actions: PhotoActions, selection: Selection, items: List<Item>
         DockAction(Icons.Outlined.Download, stringResource(R.string.action_download)) { actions.download(chosen()); selection.clear() },
         DockAction(Icons.AutoMirrored.Outlined.DriveFileMove, stringResource(R.string.action_move)) { actions.pickFolder(chosen(), copy = false) },
         DockAction(Icons.Outlined.FileCopy, stringResource(R.string.action_copy)) { actions.pickFolder(chosen(), copy = true) },
+        DockAction(
+            Icons.Outlined.FolderOpen,
+            stringResource(R.string.show_only_this_folder),
+            subtitle = if (singleItem == null) stringResource(R.string.similar_one) else null,
+            enabled = singleItem != null,
+        ) {
+            singleItem?.let { item ->
+                selection.clear()
+                val path = app.api.pathOf(item)
+                val folder = path.substringBeforeLast('/', "").ifEmpty { "/" }
+                app.folder(folder)
+            }
+        },
+        DockAction(
+            Icons.Outlined.FolderOff,
+            stringResource(R.string.hide_this_folder),
+            subtitle = if (singleItem == null) stringResource(R.string.similar_one) else null,
+            enabled = singleItem != null && app.api.pathOf(singleItem).substringBeforeLast('/', "").isNotEmpty(),
+        ) {
+            singleItem?.let { item ->
+                selection.clear()
+                actions.hideFolder(item)
+            }
+        },
         DockAction(Icons.Outlined.PhotoAlbum, stringResource(R.string.action_album)) { actions.albumFor = chosen() },
         DockAction(Icons.Outlined.Sell, stringResource(R.string.action_tag)) { actions.tagFor = chosen() },
         DockAction(Icons.Outlined.HeartBroken, stringResource(R.string.action_unfavorite)) { actions.favorite(chosen(), on = false); selection.clear() },
