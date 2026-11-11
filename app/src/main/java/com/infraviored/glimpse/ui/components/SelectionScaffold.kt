@@ -57,6 +57,7 @@ fun selectionMore(actions: PhotoActions, selection: Selection, items: List<Item>
     val unlocked = app.privateArea?.unlocked == true
     val single = items.singleOrNull { it.fileId in selection.ids }?.takeIf { selection.ids.size == 1 && it.id != null }
     val singleItem = items.singleOrNull { it.fileId in selection.ids }?.takeIf { selection.ids.size == 1 }
+    val isRoot = singleItem != null && app.api.pathOf(singleItem).substringBeforeLast('/', "").isEmpty()
     return listOf(
         DockAction(
             Icons.Outlined.AutoAwesomeMosaic,
@@ -88,8 +89,12 @@ fun selectionMore(actions: PhotoActions, selection: Selection, items: List<Item>
         DockAction(
             Icons.Outlined.FolderOff,
             stringResource(R.string.hide_this_folder),
-            subtitle = if (singleItem == null) stringResource(R.string.similar_one) else null,
-            enabled = singleItem != null && app.api.pathOf(singleItem).substringBeforeLast('/', "").isNotEmpty(),
+            subtitle = when {
+                singleItem == null -> stringResource(R.string.similar_one)
+                isRoot -> stringResource(R.string.hide_folder_root)
+                else -> null
+            },
+            enabled = singleItem != null && !isRoot,
         ) {
             singleItem?.let { item ->
                 selection.clear()

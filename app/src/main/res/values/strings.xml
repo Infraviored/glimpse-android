@@ -374,4 +374,5 @@
     <string name="hidden_folder_notice">This folder is hidden from your timeline and search</string>
     <string name="hidden_folders_empty">Hide a folder from a picture\'s menu.</string>
     <string name="hidden_folder_remove">Remove</string>
+    <string name="hide_folder_root">The main folder cannot be hidden</string>
 </resources>

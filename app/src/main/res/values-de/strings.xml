@@ -369,4 +369,5 @@
     <string name="hidden_folder_notice">Dieser Ordner ist in Timeline und Suche ausgeblendet</string>
     <string name="hidden_folders_empty">Blende einen Ordner über das Menü eines Bildes aus.</string>
     <string name="hidden_folder_remove">Ausblenden aufheben</string>
+    <string name="hide_folder_root">Den Hauptordner kannst du nicht ausblenden</string>
 </resources>
