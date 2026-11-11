@@ -43,7 +43,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.infraviored.glimpse.R
 import com.infraviored.glimpse.data.Api
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import com.infraviored.glimpse.data.Folder
 import com.infraviored.glimpse.ui.LocalApp
 import com.infraviored.glimpse.ui.Section
@@ -150,17 +152,25 @@ fun FolderScreen(path: String, asTab: Boolean = false, bottomPadding: Dp = 0.dp)
                                 style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier.weight(1f),
                             )
+                            var busy by remember(path) { mutableStateOf(false) }
                             TextButton(
+                                enabled = !busy,
                                 onClick = {
+                                    if (busy) return@TextButton
+                                    busy = true
                                     scope.launch {
                                         try {
-                                            val current = app.api.hiddenFolders().folders
-                                            val updated = current.filterNot { it == path || path.startsWith("$it/") }
-                                            app.api.setHiddenFolders(updated)
+                                            withContext(NonCancellable) {
+                                                val current = app.api.hiddenFolders().folders
+                                                val updated = current.filterNot { it == path || path.startsWith("$it/") }
+                                                app.api.setHiddenFolders(updated)
+                                            }
                                             app.hiddenFoldersChanged()
                                         } catch (e: Exception) {
                                             val msg = (e as? com.infraviored.glimpse.data.ApiException)?.message ?: com.infraviored.glimpse.data.errorText(e)
                                             app.notices.show(context.getString(R.string.action_failed, msg))
+                                        } finally {
+                                            busy = false
                                         }
                                     }
                                 },

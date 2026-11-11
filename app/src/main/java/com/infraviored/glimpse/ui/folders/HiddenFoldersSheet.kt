@@ -41,7 +41,9 @@ import com.infraviored.glimpse.ui.components.GlimpseSheet
 import com.infraviored.glimpse.ui.components.SheetTitle
 import com.infraviored.glimpse.ui.theme.glimpse
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun HiddenFoldersSheet(onDismiss: () -> Unit, scope: CoroutineScope = rememberCoroutineScope()) {
@@ -110,7 +112,9 @@ fun HiddenFoldersSheet(onDismiss: () -> Unit, scope: CoroutineScope = rememberCo
                                 scope.launch {
                                     try {
                                         val updated = list.filter { it != folder }
-                                        val res = app.api.setHiddenFolders(updated)
+                                        val res = withContext(NonCancellable) {
+                                            app.api.setHiddenFolders(updated)
+                                        }
                                         folders = res.folders
                                         app.hiddenFoldersChanged()
                                     } catch (e: Exception) {
