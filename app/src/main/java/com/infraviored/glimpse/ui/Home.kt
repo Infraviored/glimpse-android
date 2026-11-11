@@ -52,6 +52,7 @@ import com.infraviored.glimpse.R
 import androidx.compose.material.icons.automirrored.outlined.CallMerge
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.FolderOff
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.LockOpen
 import androidx.compose.material.icons.outlined.StarBorder
@@ -65,6 +66,7 @@ import com.infraviored.glimpse.ui.components.Selection
 import com.infraviored.glimpse.ui.components.Tab
 import com.infraviored.glimpse.ui.components.selectionActions
 import com.infraviored.glimpse.ui.folders.FolderScreen
+import com.infraviored.glimpse.ui.folders.HiddenFoldersSheet
 import com.infraviored.glimpse.ui.people.PeopleScreen
 import com.infraviored.glimpse.ui.theme.glimpse
 import com.infraviored.glimpse.ui.timeline.TimelineScreen
@@ -117,14 +119,21 @@ fun Home() {
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     var unlock by remember { mutableStateOf(false) }
     var sensitiveSheet by remember { mutableStateOf(false) }
+    var hiddenFoldersSheet by remember { mutableStateOf(false) }
     androidx.compose.runtime.LaunchedEffect(Unit) {
         app.loadPrivate()
         app.loadSensitive()
         if (app.isAdmin == null) app.isAdmin = app.api.isAdmin()
     }
-    if (account) AccountSheet(onDismiss = { account = false }, onUnlock = { account = false; unlock = true }, onSensitive = { account = false; sensitiveSheet = true })
+    if (account) AccountSheet(
+        onDismiss = { account = false },
+        onUnlock = { account = false; unlock = true },
+        onSensitive = { account = false; sensitiveSheet = true },
+        onHiddenFolders = { account = false; hiddenFoldersSheet = true },
+    )
     if (unlock) UnlockSheet(onDismiss = { unlock = false })
     if (sensitiveSheet) SensitiveSheet(onDismiss = { sensitiveSheet = false }, scope = scope)
+    if (hiddenFoldersSheet) HiddenFoldersSheet(onDismiss = { hiddenFoldersSheet = false }, scope = scope)
 }
 
 /** What can be done with the chosen people: favorite, hide, merge. */
@@ -158,7 +167,7 @@ private fun currentTimelineItems(): List<com.infraviored.glimpse.data.Item> {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AccountSheet(onDismiss: () -> Unit, onUnlock: () -> Unit, onSensitive: () -> Unit) {
+private fun AccountSheet(onDismiss: () -> Unit, onUnlock: () -> Unit, onSensitive: () -> Unit, onHiddenFolders: () -> Unit) {
     val app = LocalApp.current
     val uri = LocalUriHandler.current
     val scope = androidx.compose.runtime.rememberCoroutineScope()
@@ -199,6 +208,7 @@ private fun AccountSheet(onDismiss: () -> Unit, onUnlock: () -> Unit, onSensitiv
                     onSensitive,
                 )
             }
+            AccountRow(Icons.Outlined.FolderOff, stringResource(R.string.hidden_folders_title), null, onHiddenFolders)
             AccountRow(Icons.Outlined.ContentCopy, stringResource(R.string.duplicates_title), stringResource(R.string.duplicates_subtitle)) {
                 onDismiss()
                 app.duplicates()

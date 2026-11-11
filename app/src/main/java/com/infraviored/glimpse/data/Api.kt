@@ -331,6 +331,16 @@ class Api(val account: Account) {
     /** The filter learns from the marks (one to five seconds). */
     suspend fun rebuildSensitive(): SensitiveStatus = decode(post(appUrl("/api/sensitive/rebuild"), buildJsonObject { }))
 
+    // ---- hidden folders ----------------------------------------------------------------------
+
+    suspend fun hiddenFolders(): HiddenFolders = decode(get(appUrl("/api/hidden-folders")))
+
+    suspend fun hideFolder(fileId: Long): HiddenFolderResult =
+        decode(post(appUrl("/api/hidden-folders"), Requests.hideFolder(fileId)))
+
+    suspend fun setHiddenFolders(folders: List<String>): HiddenFolders =
+        decode(put(appUrl("/api/hidden-folders"), Requests.setHiddenFolders(folders)))
+
     // ---- admin -------------------------------------------------------------------------------
 
     /** Whether the user is a Glimpse admin (the status is full only for them); null if unknown. */
@@ -370,6 +380,9 @@ class Api(val account: Account) {
     private suspend fun post(url: String, body: JsonObject, silentAuth: Boolean = false): String =
         send("POST", url, body, silentAuth)
 
+    private suspend fun put(url: String, body: JsonObject, silentAuth: Boolean = false): String =
+        send("PUT", url, body, silentAuth)
+
     private suspend fun send(method: String, url: String, body: JsonObject, silentAuth: Boolean = false): String {
         val builder = Request.Builder().url(url).header("Accept", "application/json")
             .method(method, body.toString().toRequestBody("application/json".toMediaType()))
@@ -382,7 +395,8 @@ class Api(val account: Account) {
             val body = response.body?.string().orEmpty()
             if (!response.isSuccessful) {
                 val message = try {
-                    json.parseToJsonElement(body).jsonObject["error"]?.jsonPrimitive?.content
+                    val obj = json.parseToJsonElement(body).jsonObject
+                    obj["error"]?.jsonPrimitive?.content ?: obj["message"]?.jsonPrimitive?.content
                 } catch (e: Exception) {
                     null
                 }

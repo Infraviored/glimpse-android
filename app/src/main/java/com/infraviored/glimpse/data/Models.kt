@@ -93,6 +93,18 @@ data class Folder(
     val items: List<Item> = emptyList(),
     val truncated: Boolean = false,
     @SerialName("private") val isPrivate: Boolean = false,
+    val hidden: Boolean = false,
+)
+
+@Serializable
+data class HiddenFolders(
+    val folders: List<String> = emptyList(),
+)
+
+@Serializable
+data class HiddenFolderResult(
+    val folder: String = "",
+    val folders: List<String> = emptyList(),
 )
 
 /** A face Immich found, as a box relative to the picture (0..1). */

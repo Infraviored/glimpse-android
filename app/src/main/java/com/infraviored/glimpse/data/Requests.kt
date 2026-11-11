@@ -95,4 +95,12 @@ object Requests {
         putJsonArray("fileIds") { fileIds.distinct().forEach { add(JsonPrimitive(it)) } }
         put("on", on)
     }
+
+    fun hideFolder(fileId: Long): JsonObject = buildJsonObject {
+        put("fileId", fileId)
+    }
+
+    fun setHiddenFolders(folders: List<String>): JsonObject = buildJsonObject {
+        putJsonArray("folders") { folders.forEach { add(JsonPrimitive(it)) } }
+    }
 }

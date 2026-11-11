@@ -39,6 +39,8 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Folder
+import androidx.compose.material.icons.outlined.FolderOff
+import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.AlertDialog
@@ -219,7 +221,7 @@ fun ViewerScreen() {
         }
     }
 
-    if (info) InfoSheet(current, actions, onDismiss = { info = false })
+    if (info) InfoSheet(current, actions, onDismiss = { info = false }, onCloseViewer = { close() })
 }
 
 @Composable
@@ -346,7 +348,7 @@ private fun BottomBar(folder: String, onFolder: () -> Unit, actions: List<BarAct
 /** When and where it was taken, who is in it, and what to do from here. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun InfoSheet(item: Item, actions: PhotoActions, onDismiss: () -> Unit) {
+private fun InfoSheet(item: Item, actions: PhotoActions, onDismiss: () -> Unit, onCloseViewer: () -> Unit = {}) {
     val app = LocalApp.current
     var faces by remember(item.fileId) { mutableStateOf<Faces?>(null) }
     LaunchedEffect(item.fileId) {
@@ -391,7 +393,13 @@ private fun InfoSheet(item: Item, actions: PhotoActions, onDismiss: () -> Unit) 
                 }
                 Spacer(Modifier.height(16.dp))
             }
-            SheetRow(Icons.Outlined.Folder, path.substringAfterLast('/'), folder) { onDismiss(); app.folder(folder) }
+            SheetRow(Icons.Outlined.FolderOpen, stringResource(R.string.show_only_this_folder), folder) { onDismiss(); app.folder(folder) }
+            if (folder != "/") {
+                SheetRow(Icons.Outlined.FolderOff, stringResource(R.string.hide_this_folder), null) {
+                    onDismiss()
+                    actions.hideFolder(item) { onCloseViewer() }
+                }
+            }
             if (item.id != null) {
                 SheetRow(Icons.Outlined.AutoAwesomeMosaic, stringResource(R.string.action_similar), null) {
                     onDismiss()

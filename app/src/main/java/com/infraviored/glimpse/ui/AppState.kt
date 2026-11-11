@@ -11,6 +11,9 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import com.infraviored.glimpse.data.Api
 import com.infraviored.glimpse.data.Item
 import com.infraviored.glimpse.ui.components.Notices
@@ -38,6 +41,7 @@ class AppState(
     val navigate: (String) -> Unit,
     val back: () -> Unit,
     val logout: () -> Unit,
+    val scope: CoroutineScope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob()),
 ) {
     var viewer by mutableStateOf<ViewerRequest?>(null)
 
@@ -101,6 +105,12 @@ class AppState(
     fun sensitiveModeChanged(prefs: com.infraviored.glimpse.data.SensitivePrefs) {
         sensitive = prefs.takeIf { it.enabled }
         sensitiveMarks = emptyMap()
+        privateVersion++
+        version++
+    }
+
+    /** Hidden folders changed: everything loads again. */
+    fun hiddenFoldersChanged() {
         privateVersion++
         version++
     }

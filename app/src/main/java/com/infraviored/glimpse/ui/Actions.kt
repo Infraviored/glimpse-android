@@ -26,6 +26,7 @@ import com.infraviored.glimpse.data.Item
 import com.infraviored.glimpse.data.errorText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.Request
@@ -176,6 +177,38 @@ class PhotoActions(
                 app.notices.show(if (e.code == 403) context.getString(R.string.private_unlock_first) else context.getString(R.string.action_failed, e.message))
             } catch (e: Exception) {
                 app.notices.show(context.getString(R.string.action_failed, errorText(e)))
+            }
+        }
+    }
+
+    /** Hide the folder containing this picture. */
+    fun hideFolder(item: Item, onDone: () -> Unit = {}) {
+        app.scope.launch {
+            try {
+                val res = withContext(NonCancellable) {
+                    api.hideFolder(item.fileId)
+                }
+                val folderName = com.infraviored.glimpse.data.Paths.name(res.folder).ifEmpty { res.folder }
+                val text = context.getString(R.string.folder_hidden, folderName)
+                val previous = res.folders.filter { it != res.folder }
+                app.hiddenFoldersChanged()
+                onDone()
+                app.notices.show(text, context.getString(R.string.undo)) {
+                    app.scope.launch {
+                        try {
+                            withContext(NonCancellable) {
+                                api.setHiddenFolders(previous)
+                            }
+                            app.hiddenFoldersChanged()
+                        } catch (e: Exception) {
+                            val msg = (e as? com.infraviored.glimpse.data.ApiException)?.message ?: errorText(e)
+                            app.notices.show(context.getString(R.string.action_failed, msg))
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                val msg = (e as? com.infraviored.glimpse.data.ApiException)?.message ?: errorText(e)
+                app.notices.show(context.getString(R.string.action_failed, msg))
             }
         }
     }
