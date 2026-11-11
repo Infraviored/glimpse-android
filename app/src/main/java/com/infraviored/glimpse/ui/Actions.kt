@@ -26,6 +26,7 @@ import com.infraviored.glimpse.data.Item
 import com.infraviored.glimpse.data.errorText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.Request
@@ -182,18 +183,22 @@ class PhotoActions(
 
     /** Hide the folder containing this picture. */
     fun hideFolder(item: Item, onDone: () -> Unit = {}) {
-        scope.launch {
+        app.scope.launch {
             try {
-                val res = api.hideFolder(item.fileId)
+                val res = withContext(NonCancellable) {
+                    api.hideFolder(item.fileId)
+                }
                 val folderName = com.infraviored.glimpse.data.Paths.name(res.folder).ifEmpty { res.folder }
                 val text = context.getString(R.string.folder_hidden, folderName)
                 val previous = res.folders.filter { it != res.folder }
                 app.hiddenFoldersChanged()
                 onDone()
                 app.notices.show(text, context.getString(R.string.undo)) {
-                    scope.launch {
+                    app.scope.launch {
                         try {
-                            api.setHiddenFolders(previous)
+                            withContext(NonCancellable) {
+                                api.setHiddenFolders(previous)
+                            }
                             app.hiddenFoldersChanged()
                         } catch (e: Exception) {
                             val msg = (e as? com.infraviored.glimpse.data.ApiException)?.message ?: errorText(e)

@@ -91,6 +91,7 @@ class MainActivity : ComponentActivity() {
 private fun App(api: Api, onLogout: (String?) -> Unit) {
     val nav = rememberNavController()
     val sessionGone = stringResource(R.string.error_session)
+    val appScope = rememberCoroutineScope()
     val app = remember(api) {
         AppState(
             api = api,
@@ -106,6 +107,7 @@ private fun App(api: Api, onLogout: (String?) -> Unit) {
                 if (nav.previousBackStackEntry != null) nav.popBackStack()
             },
             logout = { onLogout(null) },
+            scope = appScope,
         )
     }
     val authLost by api.authLost.collectAsState()
